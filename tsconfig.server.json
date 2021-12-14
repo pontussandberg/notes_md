@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "include": ["server"]
+}
+
+// "extends": "./tsconfig.json": Gets all options from tsconfig.json
+// "compilerOptions.module": "commonjs": Use commonjs as the module pattern in order to make both express and next work together.
+// "compilerOptions.outDir": "dist": This option is used for production. It will compile all .ts files in the server directory to .js and send to the dist directory.
+// "compilerOptions.noEmit": true: This option is used for production. Next.js basically uses babel to compile Typescript so TS compiler won’t output .js . We will override this value to tell TS compiler compile and output our server files.
+// "include": ["server"]: This option is also used for production. It lets the TS Compiler know only compiling .ts files in the server/ directory.
