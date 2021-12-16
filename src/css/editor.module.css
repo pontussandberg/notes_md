@@ -1,29 +1,73 @@
+/* *** */
+
 .editorContainer {
   position: relative;
   overflow: hidden;
-  min-height: 500px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--editor-bg);
 }
 .editor {
   /* padding-top & padding-bottom & line-height are set in options.json */
+  position: relative;
+  z-index: 10;
   flex-grow: 1;
   height: 100%;
-  background: #f2f2f2;
+  background: rgba(0,0,0,0);
+  color: #fff;
   resize: none;
   outline: none;
   border: none;
   width: 100%;
   font-size: 16px;
-  padding-left: 32px;
-  padding-right: 32px;
+  padding-left: 50px;
+  padding-right: 50px;
+  letter-spacing: .8px;
+
+  /*** For no wrap ***/
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}
+.editorFrame {
+  visibility: hidden;
+  height: 0 !important;
+  position: absolute;
+  background: rgba(0,0,0,0);
+  color: rgba(0,0,0,0);
+  top: 0;
+  left: 0;
+}
+.currentLineCover {
+  width: 100%;
+  left: 0;
+  position: absolute;
+  background: var(--primary-bg);
 }
 
-.rowEnumerationContainer {
+/* *** */
+
+.lineEnumerationContainer {
   position: absolute;
   top: 0;
-  left: 5px;
+  left: 6px;
+  z-index: 10;
+  background: rgba(0,0,0,0);
 }
-.rowEnumeration {
+.lineEnumeration {
   position: absolute;
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--editor-light);
+}
+.lineEnumerationCover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 100%;
+  background: var(--editor-bg);
+  border-right: 1px solid var(--editor-lighter);
+  z-index: 1;
 }

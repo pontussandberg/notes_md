@@ -1,12 +1,18 @@
-import '../css/global.css'
+import Head from 'next/head'
 import { AppProps } from '../types'
-
+import '../css/global.css'
+import '../css/vars.css'
 
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
-    <Component {...pageProps} />
+    <>
+      <Head>
+        <title>MarkDown Notes</title>
+      </Head>
+      <Component {...pageProps} />
+    </>
   )
 }
 
