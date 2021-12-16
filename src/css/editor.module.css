@@ -1,0 +1,29 @@
+.editorContainer {
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+.editor {
+  /* padding-top & padding-bottom & line-height are set in options.json */
+  flex-grow: 1;
+  height: 100%;
+  background: #f2f2f2;
+  resize: none;
+  outline: none;
+  border: none;
+  width: 100%;
+  font-size: 16px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.rowEnumerationContainer {
+  position: absolute;
+  top: 0;
+  left: 5px;
+}
+.rowEnumeration {
+  position: absolute;
+}
