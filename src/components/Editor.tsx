@@ -5,10 +5,12 @@ import {
   ChangeEvent,
   ReactElement,
 } from 'react'
+import uniqid from 'uniqid'
+import showdown from 'showdown'
+
 import styles from '../css/editor.module.css'
 import options from '../options.json'
-import uniqid from 'uniqid'
-
+import GlassButton from './Buttons/GlassButton'
 const { editorLineHeight, editorPaddingTop, editorPaddingBottom } = options
 
 const Editor = () => {
@@ -20,8 +22,8 @@ const Editor = () => {
   const [ currentLine, setCurrentLine ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
   const [ lineEnumerationEl, setLineEnumerationEl ] = useState<null | ReactElement[]>(null)
-  const [ lineNumCheckIntervalRunning, setLineNumCheckIntervalRunning ] = useState(false)
-  const [ lineNumInterval, setLineNumInterval ] = useState<null | ReturnType<typeof setInterval>>(null)
+  const [ mdHtml, setMdHtml ] = useState('')
+  const [ showMdViewer, setShowMdViewer ] = useState(false)
 
 
   /**
@@ -29,30 +31,25 @@ const Editor = () => {
    */
   useEffect(() => {
     updateLineEnumerationEl()
+    setEditorContent(localStorage.getItem('note') || '')
+  }, [])
 
+  /**
+   * Event listeners
+   */
+  useEffect(() => {
     editorRef?.current?.addEventListener('scroll', positionLineEnumerationContainer)
-    window.addEventListener('mousedown', checkCurrentLine)
+    window.addEventListener('mousedown', updateCurrentLine)
     window.addEventListener('resize', updateLineEnumerationEl)
-    window.addEventListener('keydown', ({ key }) => isVerticalMoveKey(key) && setLineNumCheckIntervalRunning(true))
-    window.addEventListener('keyup', ({ key }) => isVerticalMoveKey(key) && setLineNumCheckIntervalRunning(false))
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
       editorRef?.current?.removeEventListener('scroll', positionLineEnumerationContainer)
+      window.removeEventListener('mousedown', updateCurrentLine)
+      window.removeEventListener('resize', updateLineEnumerationEl)
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
-
-  /**
-   * lineNumCheckIntervalRunning updates for toggle interval
-   */
-  useEffect(() => {
-    if (lineNumCheckIntervalRunning) {
-      const interval = setInterval(checkCurrentLine, 5)
-      setLineNumInterval(interval)
-    } else {
-      // @ts-ignore
-      clearInterval(lineNumInterval)
-    }
-  }, [lineNumCheckIntervalRunning])
+  }, [showMdViewer])
 
   /**
    * currentLine updates
@@ -62,11 +59,50 @@ const Editor = () => {
   }, [currentLine])
 
   /**
-   * Check if keyevent is down or up key
+   * editorContent updates
    */
-  const isVerticalMoveKey = (key: string) => {
+  useEffect(() => {
+    reRenderEditor()
+
+    localStorage.setItem('note', editorContent)
+  }, [editorContent])
+
+  /**
+   * showMdViewer updates
+   */
+  useEffect(() => {
+    reRenderEditor()
+  }, [showMdViewer])
+
+  const reRenderEditor = () => {
+    updateMdHtml()
+    updateLineEnumerationEl()
+    updateCurrentLine()
+  }
+
+  /**
+   * Handler for key down event
+   */
+  const handleKeyDown = ({ key }: KeyboardEvent) => {
     const keyLower = key.toLowerCase()
-    if (keyLower === 'arrowup' || keyLower === 'arrowdown') {
+
+    if (isArrowKey(keyLower)) {
+      updateCurrentLine()
+    } else if (keyLower === 'escape') {
+      toggleMdViewer()
+    }
+  }
+
+  /**
+   * Check if keyevent is a move key
+   */
+  const isArrowKey = (keyLower: string) => {
+    if (
+      keyLower === 'arrowup'
+      || keyLower === 'arrowdown'
+      || keyLower === 'arrowleft'
+      || keyLower === 'arrowright'
+    ) {
       return true
     }
   }
@@ -74,7 +110,7 @@ const Editor = () => {
   /**
    * Update current line in state
    */
-  const checkCurrentLine = () => {
+  const updateCurrentLine = () => {
     requestAnimationFrame(() => {
       const { current: el } = editorRef
 
@@ -90,10 +126,16 @@ const Editor = () => {
    */
   const handleEditorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
-    localStorage.setItem('note', value)
     setEditorContent(value)
-    updateLineEnumerationEl()
-    checkCurrentLine()
+  }
+
+  /**
+   * Setting state with editor content compiled to markdown html
+   */
+  const updateMdHtml = () => {
+    const converter = new showdown.Converter()
+    const html = converter.makeHtml(editorContent)
+    setMdHtml(html)
   }
 
   /**
@@ -166,38 +208,50 @@ const Editor = () => {
   }
 
   /**
-   *
+   * Top position for current line highlight(cover)
    */
   const getCurrentLineCoverTopPostion = () => {
-    return (currentLine - 1) * options.editorLineHeight + options.editorPaddingTop
+    return (currentLine - 1) * options.editorLineHeight + options.editorPaddingTop - 1.5
+  }
+
+  /**
+   * Styles for editor that are set in options.json
+   */
+  const getEditorStyles = () => {
+    return {
+      lineHeight: `${options.editorLineHeight}px !important`,
+      paddingTop: `${options.editorPaddingTop}px !important`,
+      paddingBottom: `${options.editorPaddingBottom}px !important`,
+    }
+  }
+
+  /**
+   * Toggle between editor view & markdown view
+   */
+  const toggleMdViewer = () => {
+    setShowMdViewer(!showMdViewer)
   }
 
   return (
     <div className={styles.editorContainer}>
       {/* Editor */}
       <textarea
-        ref={editorRef}
-        value={editorContent}
-        onChange={handleEditorChange}
-        className={styles.editor}
-        style={{
-          lineHeight: `${options.editorLineHeight}px !important`,
-          paddingTop: `${options.editorPaddingTop}px !important`,
-          paddingBottom: `${options.editorPaddingBottom}px !important`,
-        }}
+      disabled={showMdViewer}
+      style={getEditorStyles()}
+      ref={editorRef}
+      value={editorContent}
+      onChange={handleEditorChange}
+      className={styles.editor}
       ></textarea>
 
       {/* Editor duplicate with height 0 to calculate stuff */}
       <textarea
-        ref={editorFrameRef}
-        readOnly
-        style={{
-          lineHeight: `${options.editorLineHeight}px !important`,
-          paddingTop: `${options.editorPaddingTop}px !important`,
-          paddingBottom: `${options.editorPaddingBottom}px !important`,
-        }}
-        value={editorContent}
-        className={`${styles.editor} ${styles.editorFrame}`}
+      readOnly
+      disabled={showMdViewer}
+      style={getEditorStyles()}
+      ref={editorFrameRef}
+      value={editorContent}
+      className={`${styles.editor} ${styles.editorFrame}`}
       ></textarea>
 
       {/* Line enumerations */}
@@ -215,8 +269,28 @@ const Editor = () => {
         style={{
           display: `${currentLine > 0 ? 'block' : 'none' }`,
           top: `${getCurrentLineCoverTopPostion()}px`,
-          height: `${options.editorLineHeight + 1}px`,
+          height: `${options.editorLineHeight + 2}px`,
         }}
+      ></div>
+
+      {/* Editor / Markdown viewer toggle */}
+      <GlassButton
+        onClick={ toggleMdViewer }
+        title={ showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)' }
+        style={{
+          position: 'absolute',
+          top: '15px',
+          right: '15px',
+          zIndex: 30,
+        }}
+      />
+
+      {/* Markdown viewer */}
+      <div
+        onClick={toggleMdViewer}
+        className={styles.mdViewer}
+        dangerouslySetInnerHTML={{ __html: mdHtml }}
+        style={{ display: showMdViewer ? 'block' : 'none' }}
       ></div>
     </div>
   )
