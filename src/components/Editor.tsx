@@ -11,6 +11,7 @@ import showdown from 'showdown'
 import styles from '../css/editor.module.css'
 import options from '../options.json'
 import GlassButton from './Buttons/GlassButton'
+import { TActiveKeys } from '../types'
 const { editorLineHeight, editorPaddingTop, editorPaddingBottom } = options
 
 const Editor = () => {
@@ -24,6 +25,7 @@ const Editor = () => {
   const [ lineEnumerationEl, setLineEnumerationEl ] = useState<null | ReactElement[]>(null)
   const [ mdHtml, setMdHtml ] = useState('')
   const [ showMdViewer, setShowMdViewer ] = useState(false)
+  const [ activeKeys, setActiveKeys ] = useState<TActiveKeys>({})
 
 
   /**
@@ -42,49 +44,65 @@ const Editor = () => {
     window.addEventListener('mousedown', updateCurrentLine)
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
 
     return () => {
       editorRef?.current?.removeEventListener('scroll', positionLineEnumerationContainer)
       window.removeEventListener('mousedown', updateCurrentLine)
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [showMdViewer])
+  }, [showMdViewer, activeKeys])
 
-  /**
-   * currentLine updates
-   */
   useEffect(() => {
     updateLineEnumerationEl()
-  }, [currentLine])
+  }, [currentLine, editorContent, showMdViewer])
 
-  /**
-   * editorContent updates
-   */
   useEffect(() => {
-    reRenderEditor()
-
-    localStorage.setItem('note', editorContent)
-  }, [editorContent])
-
-  /**
-   * showMdViewer updates
-   */
-  useEffect(() => {
-    reRenderEditor()
-  }, [showMdViewer])
-
-  const reRenderEditor = () => {
-    updateMdHtml()
-    updateLineEnumerationEl()
     updateCurrentLine()
+  }, [editorContent, showMdViewer])
+
+  /**
+   * Update activeKeys in state
+   */
+  const toggleActiveKey = (keyLowerCase: string, active: boolean) => {
+    const keys = {
+      ...activeKeys,
+      [keyLowerCase]: active,
+    }
+
+    setActiveKeys(keys)
+  }
+
+  /**
+   * Handler for key up event
+   */
+  const handleKeyUp = ({ key }: globalThis.KeyboardEvent) => {
+    const keyLower = key.toLowerCase()
+    toggleActiveKey(keyLower, false)
   }
 
   /**
    * Handler for key down event
    */
-  const handleKeyDown = ({ key }: KeyboardEvent) => {
+  const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+    const { key } = event
     const keyLower = key.toLowerCase()
+    toggleActiveKey(keyLower, true)
+
+    const { meta, shift, control } = activeKeys
+
+    // Duplicate line
+    if (
+      (meta && shift && keyLower === 'arrowdown')
+      || (meta && shift && keyLower === 'arrowup')
+      || (control && shift && keyLower === 'arrowup')
+      || (control && shift && keyLower === 'arrowdown')
+    ) {
+      event.preventDefault()
+      duplicateLine()
+    }
 
     if (isArrowKey(keyLower)) {
       updateCurrentLine()
@@ -108,6 +126,23 @@ const Editor = () => {
   }
 
   /**
+   * Duplicates the current line onto the next line
+   */
+  const duplicateLine = () => {
+    const { current: el } = editorRef
+
+    if (el) {
+      const lines = el.value.split('\n')
+      const currentLineContent = lines[currentLine - 1]
+
+      lines.splice(currentLine, 0, currentLineContent).join()
+      const content = lines.join('\n')
+
+      setEditorContent(content)
+    }
+  }
+
+  /**
    * Update current line in state
    */
   const updateCurrentLine = () => {
@@ -126,15 +161,16 @@ const Editor = () => {
    */
   const handleEditorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
+    updateMdHtml(value)
     setEditorContent(value)
   }
 
   /**
    * Setting state with editor content compiled to markdown html
    */
-  const updateMdHtml = () => {
+  const updateMdHtml = (value: string) => {
     const converter = new showdown.Converter()
-    const html = converter.makeHtml(editorContent)
+    const html = converter.makeHtml(value)
     setMdHtml(html)
   }
 

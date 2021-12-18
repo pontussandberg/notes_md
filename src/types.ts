@@ -12,3 +12,7 @@ export type TGlassButtonProps = {
   style?: Object
   disabled?: boolean
 }
+
+export type TActiveKeys = {
+  [key: string]: boolean
+}
