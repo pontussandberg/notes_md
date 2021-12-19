@@ -8,19 +8,20 @@ import {
 import uniqid from 'uniqid'
 import showdown from 'showdown'
 
-import styles from '../css/editor.module.css'
-import options from '../options.json'
+import styles from '../css/editor2.module.css'
 import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
-const { editorLineHeight, editorPaddingTop, editorPaddingBottom } = options
+import { getCssVariable, getCssVariables } from '../helpers'
 
-const Editor = () => {
+const Editor2 = () => {
+  const editorContainerRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLTextAreaElement>(null)
-  const editorFrameRef = useRef<HTMLTextAreaElement>(null)
   const lineEnumerationContainerRef = useRef<HTMLDivElement>(null)
+  const editorViewerRef = useRef<HTMLDivElement>(null)
 
   const [ editorContent, setEditorContent ] = useState('')
-  const [ currentLine, setCurrentLine ] = useState(0)
+  const [ editorViewerHTML, setEditorViewerHTML ] = useState('')
+  const [ currentLineIndex, setCurrentLineIndex ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
   const [ lineEnumerationEl, setLineEnumerationEl ] = useState<null | ReactElement[]>(null)
   const [ mdHtml, setMdHtml ] = useState('')
@@ -28,27 +29,95 @@ const Editor = () => {
   const [ activeKeys, setActiveKeys ] = useState<TActiveKeys>({})
 
 
+  useEffect(() => {
+    // @ts-ignore
+    if (window.Prism) {
+      // @ts-ignore
+      window.Prism.highlightAll()
+    }
+
+    if (editorContent) {
+      localStorage.setItem('note', editorContent)
+    }
+  }, [editorContent])
+
   /**
    * Mounted
    */
   useEffect(() => {
     updateLineEnumerationEl()
     setEditorContent(localStorage.getItem('note') || '')
-  }, [])
+  }, [])
 
   /**
    * Event listeners
    */
   useEffect(() => {
-    editorRef?.current?.addEventListener('scroll', positionLineEnumerationContainer)
-    window.addEventListener('mousedown', updateCurrentLine)
+    editorViewerRef?.current?.addEventListener('click', () => {
+      if (editorRef.current) {
+        editorRef.current.focus()
+      }
+    })
+
+    editorViewerRef?.current?.addEventListener('mousedown', (event) => {
+      if (
+        !editorViewerRef.current
+        || !editorRef.current
+      ) {
+        return
+      }
+
+      const { current: editorViewerEl } = editorViewerRef
+      const { current: editorEl } = editorRef
+      const { x, y } = event
+
+
+      /* Setting current line */
+      const { editorPaddingTop, editorLineHeight } = getEditorCssVars()
+      const lines = getLines(editorContent)
+      const linesCount = lines.length
+      const { scrollTop } = editorViewerEl
+
+      let line = Math.ceil((y - editorPaddingTop + scrollTop - 3) / editorLineHeight)
+
+      if (line <= 0) {
+        line = 1
+      } else if (line >= linesCount) {
+        line = linesCount
+      }
+
+
+      /* Selcting in textarea */
+      let charIndex = Math.abs(Math.round((x - 50) / 10.5))
+      const lineIndexZero = line - 1
+
+      const currentLineLength = lines[lineIndexZero].length
+
+      if (charIndex > currentLineLength) {
+        charIndex = currentLineLength
+      }
+
+      charIndex += lineIndexZero
+
+
+      const linesClone = [...lines]
+      linesClone.length = lineIndexZero
+      const stringPreSelection = linesClone.join('')
+
+
+      const caretPositon = stringPreSelection.length + charIndex
+      editorEl.selectionStart = caretPositon
+      editorEl.selectionEnd = caretPositon
+
+
+      setCurrentLineIndex(line)
+    })
+
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      editorRef?.current?.removeEventListener('scroll', positionLineEnumerationContainer)
-      window.removeEventListener('mousedown', updateCurrentLine)
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
@@ -57,15 +126,11 @@ const Editor = () => {
 
   useEffect(() => {
     updateLineEnumerationEl()
-  }, [currentLine, editorContent, showMdViewer])
+  }, [currentLineIndex, editorContent, showMdViewer])
 
   useEffect(() => {
     updateCurrentLine()
   }, [editorContent, showMdViewer])
-
-  const getRawLines = (): string[] => {
-    return editorContent.split('/n').map(line => `${line}\n`)
-  }
 
   /**
    * Update activeKeys in state
@@ -100,9 +165,9 @@ const Editor = () => {
     // Duplicate line
     if (
       (meta && shift && keyLower === 'arrowdown')
-      || (meta && shift && keyLower === 'arrowup')
-      || (control && shift && keyLower === 'arrowup')
-      || (control && shift && keyLower === 'arrowdown')
+      || (meta && shift && keyLower === 'arrowup')
+      || (control && shift && keyLower === 'arrowup')
+      || (control && shift && keyLower === 'arrowdown')
     ) {
       event.preventDefault()
       duplicateLine()
@@ -122,6 +187,17 @@ const Editor = () => {
     const { value } = event.target
     updateMdHtml(value)
     setEditorContent(value)
+
+    // const html = getLines(value).map((line, i) => `<div id="line_${ i + 1 }">${line}&nbsp;</div>`)
+    const linesHTML: string[] = []
+    const lines = getLines(value)
+    for (const line of lines) {
+      const lineHtml = `<div><code class="language-markdown">${line}</code></div>`
+      linesHTML.push(lineHtml)
+    }
+
+    const html = linesHTML.join('')
+    setEditorViewerHTML(html)
   }
 
   /**
@@ -131,8 +207,8 @@ const Editor = () => {
     if (
       keyLower === 'arrowup'
       || keyLower === 'arrowdown'
-      || keyLower === 'arrowleft'
-      || keyLower === 'arrowright'
+      || keyLower === 'arrowleft'
+      || keyLower === 'arrowright'
     ) {
       return true
     }
@@ -146,9 +222,9 @@ const Editor = () => {
 
     if (el) {
       const lines = el.value.split('\n')
-      const currentLineContent = lines[currentLine - 1]
+      const currentLineContent = lines[currentLineIndex - 1]
 
-      lines.splice(currentLine, 0, currentLineContent).join()
+      lines.splice(currentLineIndex, 0, currentLineContent).join()
       const content = lines.join('\n')
 
       setEditorContent(content)
@@ -164,7 +240,7 @@ const Editor = () => {
 
       if (el) {
         const currLine = el.value.substr(0, el.selectionStart).split("\n").length
-        setCurrentLine(currLine)
+        setCurrentLineIndex(currLine)
       }
     })
   }
@@ -178,22 +254,15 @@ const Editor = () => {
     setMdHtml(html)
   }
 
-  /**
-   * Positioning of line enumeration relative to scroll position of editor el
-   */
-  const positionLineEnumerationContainer = (event: Event) => {
-    const { target } = event
-    const editorEl = target as HTMLTextAreaElement
-
-    if (lineEnumerationContainerRef?.current) {
-      lineEnumerationContainerRef.current.style.top = `-${editorEl.scrollTop}px`
-    }
+  const getLines = (value: string): string[] => {
+    return value.split('\n')
   }
 
   /**
    * Get the enum JSX element for an editor line
    */
   const getLineEnumEl = (index: number, isCurrentLine = false): ReactElement => {
+    const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
     const topPos = (index * editorLineHeight) + editorPaddingTop + 1
 
     return (
@@ -216,29 +285,14 @@ const Editor = () => {
    */
   const updateLineEnumerationEl = () => {
     setTimeout(() => {
-      const { current: editorFrameEl } = editorFrameRef
+      const linesCount = getLines(editorContent).length
 
-      if (!editorFrameEl) {
-        return null
-      }
-
-      const { scrollHeight } = editorFrameEl
-      const totalEditorHeight = scrollHeight - editorPaddingBottom - editorPaddingTop
-      const linesCount = Math.floor(totalEditorHeight / editorLineHeight)
-
-      // Scroll to left if new line was made
-      if (
-        linesCount > currentLinesCount
-        && currentLinesCount > 0
-        && editorRef.current
-      ) {
-        editorRef.current.scrollLeft = 0
-      }
+      // TODO - Scroll to left if new line was made
 
       // Build array lines
       let lines: ReactElement[] = []
       for (let i = 0; i < linesCount; i++) {
-        const isCurrentLine = i + 1 === currentLine
+        const isCurrentLine = i + 1 === currentLineIndex
         lines.push(getLineEnumEl(i, isCurrentLine))
       }
 
@@ -247,74 +301,73 @@ const Editor = () => {
     }, 10)
   }
 
+  const getEditorCssVars = () => {
+    const cssVars = [
+      '--editor-line-height',
+      '--editor-padding-top',
+      '--editor-padding-bottom',
+    ]
+
+    return getCssVariables(cssVars)
+  }
+
   /**
    * Top position for current line highlight(cover)
    */
   const getCurrentLineCoverTopPostion = () => {
-    return (currentLine - 1) * options.editorLineHeight + options.editorPaddingTop - 1.5
-  }
-
-  /**
-   * Styles for editor that are set in options.json
-   */
-  const getEditorStyles = () => {
-    return {
-      lineHeight: `${options.editorLineHeight}px !important`,
-      paddingTop: `${options.editorPaddingTop}px !important`,
-      paddingBottom: `${options.editorPaddingBottom}px !important`,
-    }
+    const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
+    return (currentLineIndex - 1) * editorLineHeight + editorPaddingTop
   }
 
   /**
    * Toggle between editor view & markdown view
    */
   const toggleMdViewer = () => {
-    setShowMdViewer(!showMdViewer)
+    // setShowMdViewer(!showMdViewer)
+
   }
 
   return (
-    <div className={styles.editorContainer}>
-      {/* Editor */}
-      <textarea
-      spellCheck={false}
-      disabled={showMdViewer}
-      style={getEditorStyles()}
-      ref={editorRef}
-      value={editorContent}
-      onChange={handleEditorChange}
-      className={styles.editor}
-      ></textarea>
-
-      {/* Editor duplicate with height 0 to calculate stuff */}
-      <textarea
-      readOnly
-      disabled={showMdViewer}
-      style={getEditorStyles()}
-      ref={editorFrameRef}
-      value={editorContent}
-      className={`${styles.editor} ${styles.editorFrame}`}
-      ></textarea>
-
-      {/* Line enumerations */}
+    <div
+      ref={editorContainerRef}
+      className={styles.editorContainer}
+    >
       <div
-        ref={lineEnumerationContainerRef}
-        className={styles.lineEnumerationContainer}
+        ref={editorViewerRef}
+        className={styles.editorViewer}
       >
-        { lineEnumerationEl }
-      </div>
-      <div className={styles.lineEnumerationCover}></div>
+        {/* Syntax */}
+        <div className={styles.editorViewerSyntax} dangerouslySetInnerHTML={{ __html: editorViewerHTML }}></div>
 
-      {/* Current line cover */}
-      <div
-        className={styles.currentLineCover}
+        {/* Line enumerations */}
+        <div ref={lineEnumerationContainerRef} className={styles.lineEnumerationContainer}>{ lineEnumerationEl }</div>
+        <div className={styles.lineEnumerationCover}></div>
+
+        {/* Current line cover */}
+        <div
+          className={styles.currentLineCover}
+          style={{
+            display: `${currentLineIndex > 0 ? 'block' : 'none' }`,
+            top: `${getCurrentLineCoverTopPostion()}px`,
+          }}
+        ></div>
+
+        {/* Editor2 */}
+        <textarea
+        spellCheck={false}
+        disabled={showMdViewer}
+        ref={editorRef}
+        value={editorContent}
+        onChange={handleEditorChange}
+        className={styles.editor}
         style={{
-          display: `${currentLine > 0 ? 'block' : 'none' }`,
-          top: `${getCurrentLineCoverTopPostion()}px`,
-          height: `${options.editorLineHeight + 2}px`,
+          // top: `${getCurrentLineCoverTopPostion()}px`
         }}
-      ></div>
+        ></textarea>
+      </div>
 
-      {/* Editor / Markdown viewer toggle */}
+
+      {/* Editor2 / Markdown viewer toggle */}
       <GlassButton
         onClick={ toggleMdViewer }
         title={ showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)' }
@@ -337,4 +390,4 @@ const Editor = () => {
   )
 }
 
-export default Editor
+export default Editor2

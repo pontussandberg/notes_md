@@ -13,6 +13,12 @@ export type TGlassButtonProps = {
   disabled?: boolean
 }
 
-export type TActiveKeys = {
+export type TActiveKeys = TKeyBooleanValue
+
+export type TKeyNumberValue = {
+  [key: string]: number
+}
+
+export type TKeyBooleanValue = {
   [key: string]: boolean
 }

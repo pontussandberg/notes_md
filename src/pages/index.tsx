@@ -1,8 +1,9 @@
-import Editor from "../components/Editor";
+// import Editor from "../components/Editor";
+import Editor2 from "../components/Editor2";
 
 const IndexPage = () => {
   return (
-    <Editor/>
+    <Editor2/>
   )
 }
 
