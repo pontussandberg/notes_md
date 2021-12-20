@@ -265,11 +265,14 @@ const Editor = ({ content }: { content: string }) => {
         const { selectionStart } = editorRef.current
         const currentLineIndex = currentLineNumber - 1
 
-        const contentPreCurrentLine = getLines(editorTextContent)
+        const lines = getLines(editorTextContent)
+
+        const contentPreCurrentLine = [...lines]
         contentPreCurrentLine.length = currentLineIndex
 
         const charsBeforeCurrentLine = contentPreCurrentLine.join('').length + currentLineIndex
         const x = selectionStart - charsBeforeCurrentLine
+
         setVisualCarretPos(x, currentLineIndex)
       }
     })
