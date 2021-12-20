@@ -31,11 +31,14 @@ const Editor = ({ content }: { content: string }) => {
 
 
   useEffect(() => {
+    // TODO - Refactor into updateEditorViewerHTML()
+
     // @ts-ignore
     if (window.Prism) {
       // @ts-ignore
       window.Prism.highlightAll()
     }
+    ////////
 
     if (editorContent) {
       localStorage.setItem('note', editorContent)
@@ -69,13 +72,23 @@ const Editor = ({ content }: { content: string }) => {
     }
   }, [showMdViewer, activeKeys])
 
+
+  /*****************
+   * Misc effects  *
+   *****************/
+
   useEffect(() => {
     updateLineEnumerationEl()
+    syncVisualCaretPosition()
   }, [currentLineNumber, editorContent, showMdViewer])
 
   useEffect(() => {
-    updateCurrentLine()
+    updateCurrentLineNumber()
   }, [editorContent, showMdViewer])
+
+  /*****************
+   *     </>       *
+   *****************/
 
   const handleEditorMouseUpEvent = (event: MouseEvent) => {
     if (
@@ -232,8 +245,8 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     if (isArrowKey(keyLower)) {
-      syncVisualCaretPosition(editorContent)
-      updateCurrentLine()
+      syncVisualCaretPosition()
+      updateCurrentLineNumber()
     } else if (keyLower === 'escape') {
       toggleMdViewer()
     }
@@ -242,18 +255,24 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Synching visual caret position with actual caret position
    */
-  const syncVisualCaretPosition = (editorTextContent: string) => {
-    if (editorRef.current) {
-      const { selectionStart } = editorRef.current
-      const currentLineIndex = currentLineNumber - 1
+  const syncVisualCaretPosition = (editorTextContent?: string) => {
+    setTimeout(() => {
+      if (!editorTextContent) {
+        editorTextContent = editorContent
+      }
 
-      const contentPreCurrentLine = getLines(editorTextContent)
-      contentPreCurrentLine.length = currentLineIndex
+      if (editorRef.current && currentLineNumber > 0) {
+        const { selectionStart } = editorRef.current
+        const currentLineIndex = currentLineNumber - 1
 
-      const charsBeforeCurrentLine = contentPreCurrentLine.join('').length + currentLineIndex
-      const x = selectionStart - charsBeforeCurrentLine
-      setVisualCarretPos(x, currentLineIndex)
-    }
+        const contentPreCurrentLine = getLines(editorTextContent)
+        contentPreCurrentLine.length = currentLineIndex
+
+        const charsBeforeCurrentLine = contentPreCurrentLine.join('').length + currentLineIndex
+        const x = selectionStart - charsBeforeCurrentLine
+        setVisualCarretPos(x, currentLineIndex)
+      }
+    })
   }
 
   /**
@@ -262,7 +281,6 @@ const Editor = ({ content }: { content: string }) => {
   const handleEditorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
 
-    syncVisualCaretPosition(value)
     updateMdHtml(value)
     setEditorContent(value)
     updateEditorViewerHTML(value)
@@ -319,7 +337,7 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Update current line in state
    */
-  const updateCurrentLine = () => {
+  const updateCurrentLineNumber = () => {
     requestAnimationFrame(() => {
       const { current: el } = editorRef
 
@@ -366,7 +384,6 @@ const Editor = ({ content }: { content: string }) => {
 
   /**
    * Setting state var lineEnumerationEl with line enumeration els.
-   * This is a workaround to be able to use setTimeout in this render function.
    */
   const updateLineEnumerationEl = () => {
     setTimeout(() => {
@@ -383,7 +400,7 @@ const Editor = ({ content }: { content: string }) => {
 
       setCurrentLinesCount(linesCount)
       setLineEnumerationEl(lines)
-    }, 10)
+    })
   }
 
   const getEditorCssVars = () => {
