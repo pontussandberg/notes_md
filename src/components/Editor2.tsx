@@ -13,13 +13,14 @@ import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
 import { getCssVariable, getCssVariables } from '../helpers'
 
-const Editor2 = () => {
+const Editor2 = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const lineEnumerationContainerRef = useRef<HTMLDivElement>(null)
   const editorViewerRef = useRef<HTMLDivElement>(null)
+  const singleCharRef = useRef<HTMLDivElement>(null)
 
-  const [ editorContent, setEditorContent ] = useState('')
+  const [ editorContent, setEditorContent ] = useState(content)
   const [ editorViewerHTML, setEditorViewerHTML ] = useState('')
   const [ currentLineIndex, setCurrentLineIndex ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
@@ -46,78 +47,22 @@ const Editor2 = () => {
    */
   useEffect(() => {
     updateLineEnumerationEl()
-    setEditorContent(localStorage.getItem('note') || '')
+    updateEditorViewerHTML(editorContent)
   }, [])
 
   /**
    * Event listeners
    */
   useEffect(() => {
-    editorViewerRef?.current?.addEventListener('click', () => {
-      if (editorRef.current) {
-        editorRef.current.focus()
-      }
-    })
-
-    editorViewerRef?.current?.addEventListener('mousedown', (event) => {
-      if (
-        !editorViewerRef.current
-        || !editorRef.current
-      ) {
-        return
-      }
-
-      const { current: editorViewerEl } = editorViewerRef
-      const { current: editorEl } = editorRef
-      const { x, y } = event
-
-
-      /* Setting current line */
-      const { editorPaddingTop, editorLineHeight } = getEditorCssVars()
-      const lines = getLines(editorContent)
-      const linesCount = lines.length
-      const { scrollTop } = editorViewerEl
-
-      let line = Math.ceil((y - editorPaddingTop + scrollTop - 3) / editorLineHeight)
-
-      if (line <= 0) {
-        line = 1
-      } else if (line >= linesCount) {
-        line = linesCount
-      }
-
-
-      /* Selcting in textarea */
-      let charIndex = Math.abs(Math.round((x - 50) / 10.5))
-      const lineIndexZero = line - 1
-
-      const currentLineLength = lines[lineIndexZero].length
-
-      if (charIndex > currentLineLength) {
-        charIndex = currentLineLength
-      }
-
-      charIndex += lineIndexZero
-
-
-      const linesClone = [...lines]
-      linesClone.length = lineIndexZero
-      const stringPreSelection = linesClone.join('')
-
-
-      const caretPositon = stringPreSelection.length + charIndex
-      editorEl.selectionStart = caretPositon
-      editorEl.selectionEnd = caretPositon
-
-
-      setCurrentLineIndex(line)
-    })
+    editorViewerRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
     return () => {
+      editorViewerRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
+
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
@@ -131,6 +76,94 @@ const Editor2 = () => {
   useEffect(() => {
     updateCurrentLine()
   }, [editorContent, showMdViewer])
+
+  const handleEditorMouseUpEvent = (event: MouseEvent) => {
+
+    if (
+      !editorViewerRef.current
+      || !editorRef.current
+    ) {
+      return
+    }
+
+    // Focus textarea element
+    editorRef.current.focus()
+
+    const { current: editorViewerEl } = editorViewerRef
+    const { current: editorEl } = editorRef
+    const { scrollTop } = editorViewerEl
+
+    const lines = getLines(editorContent)
+    const linesCount = lines.length
+
+    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
+    const editorCharWidth = getEditorCharWidth()
+    const { x, y } = event
+
+    const setEditorCartePos = (index: number) => {
+      editorEl.selectionStart = index
+      editorEl.selectionEnd = index
+
+      // TODO - Setting visual position(top/left) of textarea caret on top of editorViewer
+      //
+      //
+    }
+
+    /**
+     * Calculating and setting current line
+     * from mouse Y position
+     */
+    let line = Math.ceil((y - editorPaddingTop + scrollTop - 3) / editorLineHeight)
+    let isLastChar = false
+
+    if (line <= 0) {
+      line = 1
+    } else if (line >= linesCount) {
+      isLastChar = true
+      line = linesCount
+    }
+
+    /**
+     * Calculating and setting caret position
+     * in textarea from mouse X position and current line
+     */
+    const lineIndexZero = line - 1
+    const currentLineLength = lines[lineIndexZero].length
+
+    // The clicked on char index of the line, most left char on a line will return 0
+    let charIndex = Math.abs(Math.round((x - editorPaddingLeft) / editorCharWidth))
+
+    // Setting charIndex to last index of line
+    if (charIndex > currentLineLength) {
+      charIndex = currentLineLength
+    }
+
+    // Adding one for each prev line
+    charIndex += lineIndexZero
+
+    // Getting all content before the selected line
+    const linesClone = [...lines]
+    linesClone.length = lineIndexZero
+    const stringPreSelection = linesClone.join('')
+
+    // Setting caret position inside of textarea el
+    const caretIndex = stringPreSelection.length + charIndex
+    setEditorCartePos(caretIndex)
+
+    // Update state
+    setCurrentLineIndex(line)
+  }
+
+  /**
+   * Get character width of editor text
+   */
+  const getEditorCharWidth = (): number => {
+    if (singleCharRef.current) {
+      return singleCharRef.current.getBoundingClientRect().width
+    }
+
+    return 0
+  }
 
   /**
    * Update activeKeys in state
@@ -188,9 +221,12 @@ const Editor2 = () => {
     updateMdHtml(value)
     setEditorContent(value)
 
-    // const html = getLines(value).map((line, i) => `<div id="line_${ i + 1 }">${line}&nbsp;</div>`)
+    updateEditorViewerHTML(value)
+  }
+
+  const updateEditorViewerHTML = (textContent: string) => {
     const linesHTML: string[] = []
-    const lines = getLines(value)
+    const lines = getLines(textContent)
     for (const line of lines) {
       const lineHtml = `<div><code class="language-markdown">${line}</code></div>`
       linesHTML.push(lineHtml)
@@ -306,6 +342,7 @@ const Editor2 = () => {
       '--editor-line-height',
       '--editor-padding-top',
       '--editor-padding-bottom',
+      '--editor-padding-left'
     ]
 
     return getCssVariables(cssVars)
@@ -332,10 +369,14 @@ const Editor2 = () => {
       ref={editorContainerRef}
       className={styles.editorContainer}
     >
+
       <div
         ref={editorViewerRef}
         className={styles.editorViewer}
       >
+        {/* Used to get the with of each character in the editorViewer */}
+        <div ref={singleCharRef} className={styles.singleCharRef}>x</div>
+
         {/* Syntax */}
         <div className={styles.editorViewerSyntax} dangerouslySetInnerHTML={{ __html: editorViewerHTML }}></div>
 
