@@ -1,6 +1,6 @@
 // import Editor from "../components/Editor";
 import { useEffect, useState } from "react";
-import Editor2 from "../components/Editor2";
+import Editor from "../components/Editor";
 
 const IndexPage = () => {
   const [content, setContent] = useState<string | null>(null)
@@ -13,7 +13,7 @@ const IndexPage = () => {
   }, [])
 
   if (typeof content === 'string') {
-    return <Editor2 content={content}/>
+    return <Editor content={content}/>
   }
 
   return null
