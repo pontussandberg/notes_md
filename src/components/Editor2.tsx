@@ -98,9 +98,10 @@ const Editor2 = ({ content }: { content: string }) => {
 
     const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
     const editorCharWidth = getEditorCharWidth()
+
     const { x, y } = event
 
-    const setEditorCartePos = (index: number) => {
+    const setEditorCaretPos = (index: number) => {
       editorEl.selectionStart = index
       editorEl.selectionEnd = index
 
@@ -148,7 +149,7 @@ const Editor2 = ({ content }: { content: string }) => {
 
     // Setting caret position inside of textarea el
     const caretIndex = stringPreSelection.length + charIndex
-    setEditorCartePos(caretIndex)
+    setEditorCaretPos(caretIndex)
 
     // Update state
     setCurrentLineIndex(line)
