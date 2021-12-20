@@ -11,7 +11,7 @@ import showdown from 'showdown'
 import styles from '../css/editor.module.css'
 import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
-import { getCssVariable, getCssVariables } from '../helpers'
+import { getCssVariables } from '../helpers'
 
 const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
@@ -22,7 +22,7 @@ const Editor = ({ content }: { content: string }) => {
 
   const [ editorContent, setEditorContent ] = useState(content)
   const [ editorViewerHTML, setEditorViewerHTML ] = useState('')
-  const [ currentLineIndex, setCurrentLineIndex ] = useState(0)
+  const [ currentLineNumber, setCurrentLineNumber ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
   const [ lineEnumerationEl, setLineEnumerationEl ] = useState<null | ReactElement[]>(null)
   const [ mdHtml, setMdHtml ] = useState('')
@@ -71,7 +71,7 @@ const Editor = ({ content }: { content: string }) => {
 
   useEffect(() => {
     updateLineEnumerationEl()
-  }, [currentLineIndex, editorContent, showMdViewer])
+  }, [currentLineNumber, editorContent, showMdViewer])
 
   useEffect(() => {
     updateCurrentLine()
@@ -100,58 +100,83 @@ const Editor = ({ content }: { content: string }) => {
 
     const { x, y } = event
 
-    const setEditorCaretPos = (index: number) => {
-      editorEl.selectionStart = index
-      editorEl.selectionEnd = index
-
-      // TODO - Setting visual position(top/left) of textarea caret on top of editorViewer
-      //
-      //
+    // Setting caret selection position in textarea
+    const setEditorCaretPos = (
+      caretContentIndex: number,
+    ): void => {
+      editorEl.selectionStart = caretContentIndex
+      editorEl.selectionEnd = caretContentIndex
     }
 
-    /**
-     * Calculating and setting current line
-     * from mouse Y position
-     */
+    // Calculating current line by checking mouse Y position
     let line = Math.ceil((y - editorPaddingTop + scrollTop - 3) / editorLineHeight)
-    let isLastChar = false
 
+    /**
+     * Check if click was recorded outsideof lines
+     */
     if (line <= 0) {
       line = 1
+      setEditorCaretPos(0)
+      setVisualCarretPos(0, 0)
+      setCurrentLineNumber(linesCount)
+      return
     } else if (line >= linesCount) {
-      isLastChar = true
-      line = linesCount
+      const currentLineLength = lines[linesCount - 1].length
+      setEditorCaretPos(currentLineLength)
+      setVisualCarretPos(currentLineLength, linesCount)
+      setCurrentLineNumber(linesCount)
+      return
     }
 
-    /**
-     * Calculating and setting caret position
-     * in textarea from mouse X position and current line
-     */
     const lineIndexZero = line - 1
     const currentLineLength = lines[lineIndexZero].length
 
-    // The clicked on char index of the line, most left char on a line will return 0
-    let charIndex = Math.abs(Math.round((x - editorPaddingLeft) / editorCharWidth))
+    // The index on X axis - most left character on each line is index 0
+    let caretXIndex = Math.abs(Math.round((x - editorPaddingLeft) / editorCharWidth))
 
-    // Setting charIndex to last index of line
-    if (charIndex > currentLineLength) {
-      charIndex = currentLineLength
+    // Setting caretXIndex to last index of line
+    if (caretXIndex > currentLineLength) {
+      caretXIndex = currentLineLength
     }
-
-    // Adding one for each prev line
-    charIndex += lineIndexZero
 
     // Getting all content before the selected line
     const linesClone = [...lines]
     linesClone.length = lineIndexZero
     const stringPreSelection = linesClone.join('')
 
-    // Setting caret position inside of textarea el
-    const caretIndex = stringPreSelection.length + charIndex
-    setEditorCaretPos(caretIndex)
+    // Caret index position in text content
+    const caretContentIndex = stringPreSelection.length + caretXIndex + lineIndexZero
 
-    // Update state
-    setCurrentLineIndex(line)
+    // Setting caret position inside of textarea el
+    setEditorCaretPos(caretContentIndex)
+
+    // Setting visial caret position with css
+    setVisualCarretPos(caretXIndex, lineIndexZero)
+
+    // Update currentLineNumber state
+    setCurrentLineNumber(line)
+  }
+
+  /**
+   * Setting visual position(top/left) of textarea caret on top of editorViewer
+   */
+  const setVisualCarretPos = (
+    caretXIndex: number,
+    caretYIndex: number,
+  ): void => {
+    const { current: editorEl } = editorRef
+
+    if (!editorEl) {
+      return
+    }
+
+    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
+    const editorCharWidth = getEditorCharWidth()
+
+    const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
+    const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft
+    editorEl.style.top = `${caretTopPos}px`
+    editorEl.style.left = `${caretLeftPos}px`
   }
 
   /**
@@ -207,9 +232,27 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     if (isArrowKey(keyLower)) {
+      syncVisualCaretPosition(editorContent)
       updateCurrentLine()
     } else if (keyLower === 'escape') {
       toggleMdViewer()
+    }
+  }
+
+  /**
+   * Synching visual caret position with actual caret position
+   */
+  const syncVisualCaretPosition = (editorTextContent: string) => {
+    if (editorRef.current) {
+      const { selectionStart } = editorRef.current
+      const currentLineIndex = currentLineNumber - 1
+
+      const contentPreCurrentLine = getLines(editorTextContent)
+      contentPreCurrentLine.length = currentLineIndex
+
+      const charsBeforeCurrentLine = contentPreCurrentLine.join('').length + currentLineIndex
+      const x = selectionStart - charsBeforeCurrentLine
+      setVisualCarretPos(x, currentLineIndex)
     }
   }
 
@@ -218,9 +261,10 @@ const Editor = ({ content }: { content: string }) => {
    */
   const handleEditorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
+
+    syncVisualCaretPosition(value)
     updateMdHtml(value)
     setEditorContent(value)
-
     updateEditorViewerHTML(value)
   }
 
@@ -263,9 +307,9 @@ const Editor = ({ content }: { content: string }) => {
 
     if (el) {
       const lines = el.value.split('\n')
-      const currentLineContent = lines[currentLineIndex - 1]
+      const currentLineContent = lines[currentLineNumber - 1]
 
-      lines.splice(currentLineIndex, 0, currentLineContent).join()
+      lines.splice(currentLineNumber, 0, currentLineContent).join()
       const content = lines.join('\n')
 
       setEditorContent(content)
@@ -281,7 +325,7 @@ const Editor = ({ content }: { content: string }) => {
 
       if (el) {
         const currLine = el.value.substr(0, el.selectionStart).split("\n").length
-        setCurrentLineIndex(currLine)
+        setCurrentLineNumber(currLine)
       }
     })
   }
@@ -333,7 +377,7 @@ const Editor = ({ content }: { content: string }) => {
       // Build array lines
       let lines: ReactElement[] = []
       for (let i = 0; i < linesCount; i++) {
-        const isCurrentLine = i + 1 === currentLineIndex
+        const isCurrentLine = i + 1 === currentLineNumber
         lines.push(getLineEnumEl(i, isCurrentLine))
       }
 
@@ -358,7 +402,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const getCurrentLineCoverTopPostion = () => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
-    return (currentLineIndex - 1) * editorLineHeight + editorPaddingTop
+    return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop
   }
 
   /**
@@ -392,7 +436,7 @@ const Editor = ({ content }: { content: string }) => {
         <div
           className={styles.currentLineCover}
           style={{
-            display: `${currentLineIndex > 0 ? 'block' : 'none' }`,
+            display: `${currentLineNumber > 0 ? 'block' : 'none' }`,
             top: `${getCurrentLineCoverTopPostion()}px`,
           }}
         ></div>

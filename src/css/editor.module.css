@@ -18,9 +18,9 @@
   height: 50vh;
   height: var(--editor-line-height);
 
-  /* background: transparent; */
-  /* color: transparent; */
-  /* caret-color: rgba(248, 245, 51, .9); */
+  background: transparent;
+  color: transparent;
+  caret-color: rgba(248, 245, 51, .9);
   resize: none;
   outline: none;
   border: none;
