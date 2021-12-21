@@ -17,11 +17,11 @@ const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const lineEnumerationContainerRef = useRef<HTMLDivElement>(null)
-  const editorViewerRef = useRef<HTMLDivElement>(null)
+  const editorViewRef = useRef<HTMLDivElement>(null)
   const singleCharRef = useRef<HTMLDivElement>(null)
 
   const [ editorContent, setEditorContent ] = useState(content)
-  const [ editorViewerHTML, setEditorViewerHTML ] = useState('')
+  const [ editorViewLines, setEditorViewLines ] = useState('')
   const [ currentLineNumber, setCurrentLineNumber ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
   const [ lineEnumerationEl, setLineEnumerationEl ] = useState<null | ReactElement[]>(null)
@@ -31,7 +31,7 @@ const Editor = ({ content }: { content: string }) => {
 
 
   useEffect(() => {
-    // TODO - Refactor into updateEditorViewerHTML()
+    // TODO - Refactor into updateEditorViewLines()
 
     // @ts-ignore
     if (window.Prism) {
@@ -50,21 +50,21 @@ const Editor = ({ content }: { content: string }) => {
    */
   useEffect(() => {
     updateLineEnumerationEl()
-    updateEditorViewerHTML(editorContent)
+    updateEditorViewLines(editorContent)
   }, [])
 
   /**
    * Event listeners
    */
   useEffect(() => {
-    editorViewerRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
+    editorViewRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      editorViewerRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
+      editorViewRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
@@ -92,7 +92,7 @@ const Editor = ({ content }: { content: string }) => {
 
   const handleEditorMouseUpEvent = (event: MouseEvent) => {
     if (
-      !editorViewerRef.current
+      !editorViewRef.current
       || !editorRef.current
     ) {
       return
@@ -101,9 +101,8 @@ const Editor = ({ content }: { content: string }) => {
     // Focus textarea element
     editorRef.current.focus()
 
-    const { current: editorViewerEl } = editorViewerRef
+    const { scrollTop } = editorViewRef.current
     const { current: editorEl } = editorRef
-    const { scrollTop } = editorViewerEl
 
     const lines = getLines(editorContent)
     const linesCount = lines.length
@@ -113,7 +112,12 @@ const Editor = ({ content }: { content: string }) => {
 
     const { x, y } = event
 
-    // Setting caret selection position in textarea
+    /**
+     * # Setting caret selection position in textarea
+     *
+     * The full content string index position of caret
+     * @param caretContentIndex
+     */
     const setEditorCaretPos = (
       caretContentIndex: number,
     ): void => {
@@ -122,26 +126,27 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     // Calculating current line by checking mouse Y position
-    let line = Math.ceil((y - editorPaddingTop + scrollTop - 3) / editorLineHeight)
+    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
 
     /**
      * Check if click was recorded outsideof lines
      */
-    if (line <= 0) {
-      line = 1
+    if (mouseLineNumber < 1) {
       setEditorCaretPos(0)
       setVisualCarretPos(0, 0)
       setCurrentLineNumber(linesCount)
       return
-    } else if (line >= linesCount) {
+      /* *** */
+    } else if (mouseLineNumber > linesCount) {
       const currentLineLength = lines[linesCount - 1].length
-      setEditorCaretPos(currentLineLength)
+      setEditorCaretPos(editorContent.length)
       setVisualCarretPos(currentLineLength, linesCount)
       setCurrentLineNumber(linesCount)
       return
+      /* *** */
     }
 
-    const lineIndexZero = line - 1
+    const lineIndexZero = mouseLineNumber - 1
     const currentLineLength = lines[lineIndexZero].length
 
     // The index on X axis - most left character on each line is index 0
@@ -167,11 +172,11 @@ const Editor = ({ content }: { content: string }) => {
     setVisualCarretPos(caretXIndex, lineIndexZero)
 
     // Update currentLineNumber state
-    setCurrentLineNumber(line)
+    setCurrentLineNumber(mouseLineNumber)
   }
 
   /**
-   * Setting visual position(top/left) of textarea caret on top of editorViewer
+   * Setting visual position(top/left) of textarea caret on top of editorView
    */
   const setVisualCarretPos = (
     caretXIndex: number,
@@ -286,7 +291,7 @@ const Editor = ({ content }: { content: string }) => {
 
     updateMdHtml(value)
     setEditorContent(value)
-    updateEditorViewerHTML(value)
+    updateEditorViewLines(value)
   }
 
   /**
@@ -294,7 +299,7 @@ const Editor = ({ content }: { content: string }) => {
    *
    * TODO - add PrismJS to syntax highlight the markup before it's put in state
    */
-  const updateEditorViewerHTML = (textContent: string) => {
+  const updateEditorViewLines = (textContent: string) => {
     const linesHTML: string[] = []
     const lines = getLines(textContent)
     for (const line of lines) {
@@ -303,7 +308,7 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     const html = linesHTML.join('')
-    setEditorViewerHTML(html)
+    setEditorViewLines(html)
   }
 
   /**
@@ -439,14 +444,14 @@ const Editor = ({ content }: { content: string }) => {
       className={styles.container}
     >
       <div
-        ref={editorViewerRef}
-        className={styles.editorViewer}
+        ref={editorViewRef}
+        className={styles.editorView}
       >
-        {/* Used to get the with of each character in the editorViewer */}
+        {/* Used to get the width of each character in the editorView */}
         <div ref={singleCharRef} className={styles.singleCharRef}>x</div>
 
         {/* Syntax */}
-        <div className={styles.editorViewerSyntax} dangerouslySetInnerHTML={{ __html: editorViewerHTML }}></div>
+        <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
         {/* Line enumerations */}
         <div ref={lineEnumerationContainerRef} className={styles.lineEnumerationContainer}>{ lineEnumerationEl }</div>
@@ -478,8 +483,8 @@ const Editor = ({ content }: { content: string }) => {
 
       {/* Editor / Markdown viewer toggle */}
       <GlassButton
-        onClick={ toggleMdViewer }
-        title={ showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)' }
+        onClick={toggleMdViewer}
+        title={showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)'}
         style={{
           position: 'absolute',
           top: '15px',

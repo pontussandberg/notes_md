@@ -14,13 +14,13 @@
   top: 50vh;
   left: 0;
   width: 100vw;
-  width: 1px;
+  /* width: 1px; */
   height: 50vh;
-  height: var(--editor-line-height);
+  /* height: var(--editor-line-height); */
 
-  background: transparent;
+  /* background: transparent;
   color: transparent;
-  caret-color: rgba(248, 245, 51, .9);
+  caret-color: rgba(248, 245, 51, .9); */
   resize: none;
   outline: none;
   border: none;
@@ -40,7 +40,7 @@
   left: 0;
   background: var(--primary-bg);
 }
-.editorViewer {
+.editorView {
   position: relative;
   z-index: 9;
   flex-grow: 1;
@@ -66,13 +66,13 @@
   overflow-wrap: normal;
   overflow-x: scroll;
 }
-.editorViewer > .editorViewerSyntax > * {
-  height: var(--editor-line-height);
-}
-.editorViewerSyntax {
+.editorViewLines {
   position: relative;
   height: 100%;
   z-index: 10;
+}
+.editorViewLines > * {
+  height: var(--editor-line-height);
 }
 
 /* *** */
