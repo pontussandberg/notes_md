@@ -33,7 +33,7 @@
   overflow-wrap: normal;
   overflow-x: scroll;
 }
-.currentLineCover {
+.currentLineHighlight  {
   position: absolute;
   height: var(--editor-line-height);
   width: 100%;

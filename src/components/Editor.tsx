@@ -15,12 +15,12 @@ import { getCssVariables } from '../helpers'
 
 const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
-  const editorRef = useRef<HTMLTextAreaElement>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const lineEnumerationContainerRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
   const singleCharRef = useRef<HTMLDivElement>(null)
 
-  const [ editorContent, setEditorContent ] = useState(content)
+  const [ documentContent, setDocumentContent ] = useState(content)
   const [ editorViewLines, setEditorViewLines ] = useState('')
   const [ currentLineNumber, setCurrentLineNumber ] = useState(0)
   const [ currentLinesCount, setCurrentLinesCount ] = useState(0)
@@ -40,17 +40,17 @@ const Editor = ({ content }: { content: string }) => {
     }
     ////////
 
-    if (editorContent) {
-      localStorage.setItem('note', editorContent)
+    if (documentContent) {
+      localStorage.setItem('note', documentContent)
     }
-  }, [editorContent])
+  }, [documentContent])
 
   /**
    * Mounted
    */
   useEffect(() => {
     updateLineEnumerationEl()
-    updateEditorViewLines(editorContent)
+    updateEditorViewLines(documentContent)
   }, [])
 
   /**
@@ -80,11 +80,11 @@ const Editor = ({ content }: { content: string }) => {
   useEffect(() => {
     updateLineEnumerationEl()
     syncVisualCaretPosition()
-  }, [currentLineNumber, editorContent, showMdViewer])
+  }, [currentLineNumber, documentContent, showMdViewer])
 
   useEffect(() => {
     updateCurrentLineNumber()
-  }, [editorContent, showMdViewer])
+  }, [documentContent, showMdViewer])
 
   /*****************
    *     </>       *
@@ -93,18 +93,18 @@ const Editor = ({ content }: { content: string }) => {
   const handleEditorMouseUpEvent = (event: MouseEvent) => {
     if (
       !editorViewRef.current
-      || !editorRef.current
+      || !textAreaRef.current
     ) {
       return
     }
 
     // Focus textarea element
-    editorRef.current.focus()
+    textAreaRef.current.focus()
 
     const { scrollTop } = editorViewRef.current
-    const { current: editorEl } = editorRef
+    const { current: editorEl } = textAreaRef
 
-    const lines = getLines(editorContent)
+    const lines = getLines(documentContent)
     const linesCount = lines.length
 
     const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
@@ -139,7 +139,7 @@ const Editor = ({ content }: { content: string }) => {
       /* *** */
     } else if (mouseLineNumber > linesCount) {
       const currentLineLength = lines[linesCount - 1].length
-      setEditorCaretPos(editorContent.length)
+      setEditorCaretPos(documentContent.length)
       setVisualCarretPos(currentLineLength, linesCount)
       setCurrentLineNumber(linesCount)
       return
@@ -182,19 +182,19 @@ const Editor = ({ content }: { content: string }) => {
     caretXIndex: number,
     caretYIndex: number,
   ): void => {
-    const { current: editorEl } = editorRef
+    const { current: editorEl } = textAreaRef
+    return
+    // if (!editorEl) {
+    //   return
+    // }
 
-    if (!editorEl) {
-      return
-    }
+    // const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
+    // const editorCharWidth = getEditorCharWidth()
 
-    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
-    const editorCharWidth = getEditorCharWidth()
-
-    const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
-    const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft
-    editorEl.style.top = `${caretTopPos}px`
-    editorEl.style.left = `${caretLeftPos}px`
+    // const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
+    // const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft
+    // editorEl.style.top = `${caretTopPos}px`
+    // editorEl.style.left = `${caretLeftPos}px`
   }
 
   /**
@@ -263,11 +263,11 @@ const Editor = ({ content }: { content: string }) => {
   const syncVisualCaretPosition = (editorTextContent?: string) => {
     setTimeout(() => {
       if (!editorTextContent) {
-        editorTextContent = editorContent
+        editorTextContent = documentContent
       }
 
-      if (editorRef.current && currentLineNumber > 0) {
-        const { selectionStart } = editorRef.current
+      if (textAreaRef.current && currentLineNumber > 0) {
+        const { selectionStart } = textAreaRef.current
         const currentLineIndex = currentLineNumber - 1
 
         const lines = getLines(editorTextContent)
@@ -290,7 +290,7 @@ const Editor = ({ content }: { content: string }) => {
     const { value } = event.target
 
     updateMdHtml(value)
-    setEditorContent(value)
+    setDocumentContent(value)
     updateEditorViewLines(value)
   }
 
@@ -329,7 +329,7 @@ const Editor = ({ content }: { content: string }) => {
    * Duplicates the current line onto the next line
    */
   const duplicateLine = () => {
-    const { current: el } = editorRef
+    const { current: el } = textAreaRef
 
     if (el) {
       const lines = el.value.split('\n')
@@ -338,7 +338,7 @@ const Editor = ({ content }: { content: string }) => {
       lines.splice(currentLineNumber, 0, currentLineContent).join()
       const content = lines.join('\n')
 
-      setEditorContent(content)
+      setDocumentContent(content)
     }
   }
 
@@ -347,7 +347,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const updateCurrentLineNumber = () => {
     requestAnimationFrame(() => {
-      const { current: el } = editorRef
+      const { current: el } = textAreaRef
 
       if (el) {
         const currLine = el.value.substr(0, el.selectionStart).split("\n").length
@@ -395,7 +395,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const updateLineEnumerationEl = () => {
     setTimeout(() => {
-      const linesCount = getLines(editorContent).length
+      const linesCount = getLines(documentContent).length
 
       // TODO - Scroll to left if new line was made
 
@@ -425,7 +425,7 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Top position for current line highlight(cover)
    */
-  const getCurrentLineCoverTopPostion = () => {
+  const getCurrentLineHighlightTopPostion = () => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
     return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop
   }
@@ -447,22 +447,22 @@ const Editor = ({ content }: { content: string }) => {
         ref={editorViewRef}
         className={styles.editorView}
       >
-        {/* Used to get the width of each character in the editorView */}
-        <div ref={singleCharRef} className={styles.singleCharRef}>x</div>
-
-        {/* Syntax */}
+        {/* Lines */}
         <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
+
+        {/* This is used to get the width of each character in the editorView */}
+        <div ref={singleCharRef} className={styles.singleCharRef}>x</div>
 
         {/* Line enumerations */}
         <div ref={lineEnumerationContainerRef} className={styles.lineEnumerationContainer}>{ lineEnumerationEl }</div>
         <div className={styles.lineEnumerationCover}></div>
 
-        {/* Current line cover */}
+        {/* Current line highlight */}
         <div
-          className={styles.currentLineCover}
+          className={styles.currentLineHighlight}
           style={{
             display: `${currentLineNumber > 0 ? 'block' : 'none' }`,
-            top: `${getCurrentLineCoverTopPostion()}px`,
+            top: `${getCurrentLineHighlightTopPostion()}px`,
           }}
         ></div>
 
@@ -470,12 +470,12 @@ const Editor = ({ content }: { content: string }) => {
         <textarea
         spellCheck={false}
         disabled={showMdViewer}
-        ref={editorRef}
-        value={editorContent}
+        ref={textAreaRef}
+        value={documentContent}
         onChange={handleEditorChange}
         className={styles.editor}
         style={{
-          // top: `${getCurrentLineCoverTopPostion()}px`
+          // top: `${getCurrentLineHighlightTopPostion()}px`
         }}
         ></textarea>
       </div>
