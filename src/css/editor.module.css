@@ -8,20 +8,20 @@
   grid-template-columns: var(--editor-margin-width) 1fr;
   align-items: stretch;
   background: var(--editor-bg);
+  min-height: 100vh;
 }
 .input {
   position: absolute;
   z-index: 10;
   top: 50vh;
   left: 0;
-  width: 100vw;
-  width: 2px;
-  height: 50vh;
+  width: 5px;
   height: var(--editor-line-height);
 
-  background: transparent;
+  /* background: transparent;
   color: transparent;
-  caret-color: rgba(248, 245, 51, .9);
+  caret-color: rgba(248, 245, 51, .9); */
+  caret-color: red;
   resize: none;
   outline: none;
   border: none;
