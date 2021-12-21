@@ -16,7 +16,7 @@ import { getCssVariables } from '../helpers'
 const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const lineEnumerationContainerRef = useRef<HTMLDivElement>(null)
+  const editorMarginRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
   const singleCharRef = useRef<HTMLDivElement>(null)
 
@@ -57,14 +57,14 @@ const Editor = ({ content }: { content: string }) => {
    * Event listeners
    */
   useEffect(() => {
-    editorViewRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
+    editorContainerRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      editorViewRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
+      editorContainerRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
@@ -102,13 +102,18 @@ const Editor = ({ content }: { content: string }) => {
     textAreaRef.current.focus()
 
     const { scrollTop } = editorViewRef.current
-    const { current: editorEl } = textAreaRef
+    const { current: textAreaEl } = textAreaRef
 
     const lines = getLines(documentContent)
     const linesCount = lines.length
 
-    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
     const editorCharWidth = getEditorCharWidth()
+    const {
+      editorPaddingLeft,
+      editorPaddingTop,
+      editorLineHeight,
+      editorMarginWidth
+    } = getEditorCssVars()
 
     const { x, y } = event
 
@@ -121,8 +126,8 @@ const Editor = ({ content }: { content: string }) => {
     const setEditorCaretPos = (
       caretContentIndex: number,
     ): void => {
-      editorEl.selectionStart = caretContentIndex
-      editorEl.selectionEnd = caretContentIndex
+      textAreaEl.selectionStart = caretContentIndex
+      textAreaEl.selectionEnd = caretContentIndex
     }
 
     // Calculating current line by checking mouse Y position
@@ -134,7 +139,7 @@ const Editor = ({ content }: { content: string }) => {
     if (mouseLineNumber < 1) {
       setEditorCaretPos(0)
       setVisualCarretPos(0, 0)
-      setCurrentLineNumber(linesCount)
+      setCurrentLineNumber(1)
       return
       /* *** */
     } else if (mouseLineNumber > linesCount) {
@@ -150,7 +155,11 @@ const Editor = ({ content }: { content: string }) => {
     const currentLineLength = lines[lineIndexZero].length
 
     // The index on X axis - most left character on each line is index 0
-    let caretXIndex = Math.abs(Math.round((x - editorPaddingLeft) / editorCharWidth))
+    let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth) / editorCharWidth)
+
+    if (caretXIndex < 0) {
+      caretXIndex = 0
+    }
 
     // Setting caretXIndex to last index of line
     if (caretXIndex > currentLineLength) {
@@ -182,19 +191,18 @@ const Editor = ({ content }: { content: string }) => {
     caretXIndex: number,
     caretYIndex: number,
   ): void => {
-    const { current: editorEl } = textAreaRef
-    return
-    // if (!editorEl) {
-    //   return
-    // }
+    const { current: textAreaEl } = textAreaRef
+    if (!textAreaEl) {
+      return
+    }
 
-    // const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
-    // const editorCharWidth = getEditorCharWidth()
+    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
+    const editorCharWidth = getEditorCharWidth()
 
-    // const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
-    // const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft
-    // editorEl.style.top = `${caretTopPos}px`
-    // editorEl.style.left = `${caretLeftPos}px`
+    const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
+    const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft
+    textAreaEl.style.top = `${caretTopPos}px`
+    textAreaEl.style.left = `${caretLeftPos}px`
   }
 
   /**
@@ -286,7 +294,7 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Handler for editor content change
    */
-  const handleEditorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
 
     updateMdHtml(value)
@@ -372,7 +380,7 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Get the enum JSX element for an editor line
    */
-  const getLineEnumEl = (index: number, isCurrentLine = false): ReactElement => {
+  const getLineNumEl = (index: number, isCurrentLine = false): ReactElement => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
     const topPos = (index * editorLineHeight) + editorPaddingTop + 1
 
@@ -403,7 +411,7 @@ const Editor = ({ content }: { content: string }) => {
       let lines: ReactElement[] = []
       for (let i = 0; i < linesCount; i++) {
         const isCurrentLine = i + 1 === currentLineNumber
-        lines.push(getLineEnumEl(i, isCurrentLine))
+        lines.push(getLineNumEl(i, isCurrentLine))
       }
 
       setCurrentLinesCount(linesCount)
@@ -416,7 +424,8 @@ const Editor = ({ content }: { content: string }) => {
       '--editor-line-height',
       '--editor-padding-top',
       '--editor-padding-bottom',
-      '--editor-padding-left'
+      '--editor-padding-left',
+      '--editor-margin-width',
     ]
 
     return getCssVariables(cssVars)
@@ -443,6 +452,11 @@ const Editor = ({ content }: { content: string }) => {
       ref={editorContainerRef}
       className={styles.container}
     >
+      {/* Left margin ( line enumeration ) */}
+      <div ref={editorMarginRef} className={styles.editorMargin}>{ lineEnumerationEl }</div>
+
+
+      {/* Editor view */}
       <div
         ref={editorViewRef}
         className={styles.editorView}
@@ -451,11 +465,7 @@ const Editor = ({ content }: { content: string }) => {
         <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
         {/* This is used to get the width of each character in the editorView */}
-        <div ref={singleCharRef} className={styles.singleCharRef}>x</div>
-
-        {/* Line enumerations */}
-        <div ref={lineEnumerationContainerRef} className={styles.lineEnumerationContainer}>{ lineEnumerationEl }</div>
-        <div className={styles.lineEnumerationCover}></div>
+        <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>x</div>
 
         {/* Current line highlight */}
         <div
@@ -466,17 +476,14 @@ const Editor = ({ content }: { content: string }) => {
           }}
         ></div>
 
-        {/* Editor */}
+        {/* Input */}
         <textarea
         spellCheck={false}
         disabled={showMdViewer}
         ref={textAreaRef}
         value={documentContent}
-        onChange={handleEditorChange}
-        className={styles.editor}
-        style={{
-          // top: `${getCurrentLineHighlightTopPostion()}px`
-        }}
+        onChange={handleInputChange}
+        className={styles.input}
         ></textarea>
       </div>
 

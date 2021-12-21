@@ -1,9 +1,10 @@
 :root {
   /* Updated with JS */
-  --editor-line-height: 22px;
+  --editor-line-height: 18px;
   --editor-padding-top: 12px;
   --editor-padding-bottom: 12px;
-  --editor-padding-left: 50px;
+  --editor-padding-left: 16px;
+  --editor-margin-width: 50px;
   /* *** */
 
   --editor-bg: #282B3D;
