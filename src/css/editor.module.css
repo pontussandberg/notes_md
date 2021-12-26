@@ -1,5 +1,11 @@
 /* *** */
 
+.scrollYContainer {
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
 .container {
   position: relative;
   overflow-x: hidden;

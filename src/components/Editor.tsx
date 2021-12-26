@@ -14,6 +14,7 @@ import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
 
 const Editor = ({ content }: { content: string }) => {
+  const editorScrollYContainerRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const editorMarginRef = useRef<HTMLDivElement>(null)
@@ -94,14 +95,13 @@ const Editor = ({ content }: { content: string }) => {
     if (
       !editorViewRef.current
       || !textAreaRef.current
+      || !editorScrollYContainerRef.current
     ) {
       return
     }
 
-    // Focus textarea element
-    textAreaRef.current.focus()
-
-    const { scrollTop } = editorViewRef.current
+    const { scrollTop } = editorScrollYContainerRef.current
+    const { scrollLeft } = editorViewRef.current
     const { current: textAreaEl } = textAreaRef
 
     const lines = getLines(documentContent)
@@ -155,7 +155,7 @@ const Editor = ({ content }: { content: string }) => {
     const currentLineLength = lines[lineIndexZero].length
 
     // The index on X axis - most left character on each line is index 0
-    let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth) / editorCharWidth)
+    let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth + scrollLeft) / editorCharWidth)
 
     if (caretXIndex < 0) {
       caretXIndex = 0
@@ -182,6 +182,11 @@ const Editor = ({ content }: { content: string }) => {
 
     // Update currentLineNumber state
     setCurrentLineNumber(mouseLineNumber)
+
+    // Focus textarea element on next tick - after it's visual position has been updated
+    setTimeout(() => {
+      textAreaEl.focus()
+    })
   }
 
   /**
@@ -403,9 +408,16 @@ const Editor = ({ content }: { content: string }) => {
    */
   const updateLineEnumerationEl = () => {
     setTimeout(() => {
+      if (!editorViewRef.current) {
+        return
+      }
+
       const linesCount = getLines(documentContent).length
 
-      // TODO - Scroll to left if new line was made
+      // Scroll to left if new line was made
+      if (linesCount > currentLinesCount) {
+        editorViewRef.current.scrollLeft = 0
+      }
 
       // Build array lines
       let lines: ReactElement[] = []
@@ -449,42 +461,47 @@ const Editor = ({ content }: { content: string }) => {
 
   return (
     <div
-      ref={editorContainerRef}
-      className={styles.container}
+      ref={ editorScrollYContainerRef }
+      className={styles.scrollYContainer}
     >
-      {/* Left margin ( line enumeration ) */}
-      <div ref={editorMarginRef} className={styles.editorMargin}>{ lineEnumerationEl }</div>
-
-
-      {/* Editor view */}
       <div
-        ref={editorViewRef}
-        className={styles.editorView}
+        ref={editorContainerRef}
+        className={styles.container}
       >
-        {/* Lines */}
-        <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
+        {/* Left margin ( line enumeration ) */}
+        <div ref={editorMarginRef} className={styles.editorMargin}>{ lineEnumerationEl }</div>
 
-        {/* This is used to get the width of each character in the editorView */}
-        <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>x</div>
 
-        {/* Current line highlight */}
+        {/* Editor view */}
         <div
-          className={styles.currentLineHighlight}
-          style={{
-            display: `${currentLineNumber > 0 ? 'block' : 'none' }`,
-            top: `${getCurrentLineHighlightTopPostion()}px`,
-          }}
-        ></div>
+          ref={editorViewRef}
+          className={styles.editorView}
+        >
+          {/* Lines */}
+          <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
-        {/* Input */}
-        <textarea
-        spellCheck={false}
-        disabled={showMdViewer}
-        ref={textAreaRef}
-        value={documentContent}
-        onChange={handleInputChange}
-        className={styles.input}
-        ></textarea>
+          {/* This is used to get the width of each character in the editorView */}
+          <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>x</div>
+
+          {/* Current line highlight */}
+          <div
+            className={styles.currentLineHighlight}
+            style={{
+              display: `${currentLineNumber > 0 ? 'block' : 'none' }`,
+              top: `${getCurrentLineHighlightTopPostion()}px`,
+            }}
+          ></div>
+
+          {/* Input */}
+          <textarea
+          spellCheck={false}
+          disabled={showMdViewer}
+          ref={textAreaRef}
+          value={documentContent}
+          onChange={handleInputChange}
+          className={styles.input}
+          ></textarea>
+        </div>
       </div>
 
 
@@ -508,6 +525,7 @@ const Editor = ({ content }: { content: string }) => {
         style={{ display: showMdViewer ? 'block' : 'none' }}
       ></div>
     </div>
+
   )
 }
 
