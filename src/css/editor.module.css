@@ -16,18 +16,17 @@
   background: var(--editor-bg);
   min-height: 100vh;
 }
-.input {
+.textInput {
   position: absolute;
   z-index: 10;
   top: 50vh;
   left: 0;
-  width: 5px;
+  width: 2px;
   height: var(--editor-line-height);
 
-  /* background: transparent;
+  background: transparent;
   color: transparent;
-  caret-color: rgba(248, 245, 51, .9); */
-  caret-color: red;
+  caret-color: rgba(248, 245, 51, .9);
   resize: none;
   outline: none;
   border: none;

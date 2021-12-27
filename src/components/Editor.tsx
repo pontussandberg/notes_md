@@ -492,14 +492,14 @@ const Editor = ({ content }: { content: string }) => {
             }}
           ></div>
 
-          {/* Input */}
+          {/* Text input */}
           <textarea
           spellCheck={false}
           disabled={showMdViewer}
           ref={textAreaRef}
           value={documentContent}
           onChange={handleInputChange}
-          className={styles.input}
+          className={styles.textInput}
           ></textarea>
         </div>
       </div>
