@@ -20,6 +20,8 @@ const Editor = ({ content }: { content: string }) => {
   const editorMarginRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
   const singleCharRef = useRef<HTMLDivElement>(null)
+  const currentLineHighlightRef = useRef<HTMLDivElement>(null)
+  const editorLinesRef = useRef<HTMLDivElement>(null)
 
   const [ documentContent, setDocumentContent ] = useState(content)
   const [ editorViewLines, setEditorViewLines ] = useState('')
@@ -58,14 +60,18 @@ const Editor = ({ content }: { content: string }) => {
    * Event listeners
    */
   useEffect(() => {
-    editorContainerRef?.current?.addEventListener('mouseup', handleEditorMouseUpEvent)
+    editorContainerRef?.current?.addEventListener('mouseup', handleEditorClickEvent)
+    editorContainerRef?.current?.addEventListener('mousedown', handleEditorClickEvent)
+    editorViewRef?.current?.addEventListener('scroll', handleScrollX)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      editorContainerRef?.current?.removeEventListener('mouseup', handleEditorMouseUpEvent)
+      editorContainerRef?.current?.removeEventListener('mouseup', handleEditorClickEvent)
+      editorContainerRef?.current?.removeEventListener('mousedown', handleEditorClickEvent)
+      editorViewRef?.current?.removeEventListener('scroll', handleScrollX)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
@@ -91,7 +97,7 @@ const Editor = ({ content }: { content: string }) => {
    *     </>       *
    *****************/
 
-  const handleEditorMouseUpEvent = (event: MouseEvent) => {
+  const handleEditorClickEvent = (event: MouseEvent) => {
     if (
       !editorViewRef.current
       || !textAreaRef.current
@@ -134,7 +140,7 @@ const Editor = ({ content }: { content: string }) => {
     let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
 
     /**
-     * Check if click was recorded outsideof lines
+     * Check if click was recorded outside of lines
      */
     if (mouseLineNumber < 1) {
       setEditorCaretPos(0)
@@ -156,6 +162,8 @@ const Editor = ({ content }: { content: string }) => {
 
     // The index on X axis - most left character on each line is index 0
     let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth + scrollLeft) / editorCharWidth)
+    console.log(editorLinesRef.current?.children[lineIndexZero].querySelector('code')?.getBoundingClientRect().width)
+    // console.log((editorLinesRef.current?.children[lineIndexZero].getBoundingClientRect().width) / editorCharWidth)
 
     if (caretXIndex < 0) {
       caretXIndex = 0
@@ -189,6 +197,17 @@ const Editor = ({ content }: { content: string }) => {
     })
   }
 
+  const handleScrollX = () => {
+    if (
+      !editorViewRef.current
+      || !currentLineHighlightRef.current
+    ) {
+      return
+    }
+
+    currentLineHighlightRef.current.style.left = `${editorViewRef.current.scrollLeft}px`
+  }
+
   /**
    * Setting visual position(top/left) of textarea caret on top of editorView
    */
@@ -197,9 +216,20 @@ const Editor = ({ content }: { content: string }) => {
     caretYIndex: number,
   ): void => {
     const { current: textAreaEl } = textAreaRef
-    if (!textAreaEl) {
+    const { current: editorLinesEl } = editorLinesRef
+    if (!textAreaEl || !editorLinesEl) {
       return
     }
+
+    /**
+     * Char width differs depending on how many chars are on the same line
+     * this is a workaround so instead of calculating the individual character width
+     * we calculate the character width for the current line
+     */
+    // const selectedLineWidth = editorLinesEl.children[caretYIndex].querySelector('code')?.getBoundingClientRect().width || 0
+    // const currentLineLength = getLines(documentContent)[caretYIndex].length
+    // const lineCharWidth = (selectedLineWidth / currentLineLength) || 0
+
 
     const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
     const editorCharWidth = getEditorCharWidth()
@@ -471,20 +501,20 @@ const Editor = ({ content }: { content: string }) => {
         {/* Left margin ( line enumeration ) */}
         <div ref={editorMarginRef} className={styles.editorMargin}>{ lineEnumerationEl }</div>
 
-
         {/* Editor view */}
         <div
           ref={editorViewRef}
           className={styles.editorView}
         >
           {/* Lines */}
-          <div className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
+          <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
           {/* This is used to get the width of each character in the editorView */}
           <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>x</div>
 
           {/* Current line highlight */}
           <div
+            ref={currentLineHighlightRef}
             className={styles.currentLineHighlight}
             style={{
               display: `${currentLineNumber > 0 ? 'block' : 'none' }`,

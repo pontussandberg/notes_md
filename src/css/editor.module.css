@@ -63,8 +63,8 @@
   outline: none;
   border: none;
   width: 100%;
-  font-size: 12px;
-  letter-spacing: 1px !important;
+  font-size: 13px;
+  /* letter-spacing: .792px !important; */
 
   /*** For no wrap ***/
   white-space: pre;
