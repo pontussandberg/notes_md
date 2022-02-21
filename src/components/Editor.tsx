@@ -60,22 +60,24 @@ const Editor = ({ content }: { content: string }) => {
    * Event listeners
    */
   useEffect(() => {
-    editorContainerRef?.current?.addEventListener('mouseup', handleEditorClickEvent)
-    editorContainerRef?.current?.addEventListener('mousedown', handleEditorClickEvent)
+    editorContainerRef?.current?.addEventListener('mouseup', (event) => handleEditorClickEvent(event, true))
+    editorContainerRef?.current?.addEventListener('mousedown', (event) => handleEditorClickEvent(event, false))
     editorViewRef?.current?.addEventListener('scroll', handleScrollX)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
+    window.addEventListener('mouseup', handleSelectText)
 
     return () => {
-      editorContainerRef?.current?.removeEventListener('mouseup', handleEditorClickEvent)
-      editorContainerRef?.current?.removeEventListener('mousedown', handleEditorClickEvent)
+      editorContainerRef?.current?.removeEventListener('mouseup', (event) => handleEditorClickEvent(event, true))
+      editorContainerRef?.current?.removeEventListener('mousedown', (event) => handleEditorClickEvent(event, false))
       editorViewRef?.current?.removeEventListener('scroll', handleScrollX)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
+      window.removeEventListener('mouseup', handleSelectText)
     }
   }, [showMdViewer, activeKeys])
 
@@ -97,7 +99,11 @@ const Editor = ({ content }: { content: string }) => {
    *     </>       *
    *****************/
 
-  const handleEditorClickEvent = (event: MouseEvent) => {
+  const handleSelectText = () => {
+    console.log(window.getSelection())
+  }
+
+  const handleEditorClickEvent = (event: MouseEvent, focusTextarea: boolean) => {
     if (
       !editorViewRef.current
       || !textAreaRef.current
@@ -162,8 +168,6 @@ const Editor = ({ content }: { content: string }) => {
 
     // The index on X axis - most left character on each line is index 0
     let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth + scrollLeft) / editorCharWidth)
-    console.log(editorLinesRef.current?.children[lineIndexZero].querySelector('code')?.getBoundingClientRect().width)
-    // console.log((editorLinesRef.current?.children[lineIndexZero].getBoundingClientRect().width) / editorCharWidth)
 
     if (caretXIndex < 0) {
       caretXIndex = 0
@@ -193,7 +197,9 @@ const Editor = ({ content }: { content: string }) => {
 
     // Focus textarea element on next tick - after it's visual position has been updated
     setTimeout(() => {
-      textAreaEl.focus()
+      if (focusTextarea) {
+        textAreaEl.focus()
+      }
     })
   }
 
@@ -245,7 +251,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const getEditorCharWidth = (): number => {
     if (singleCharRef.current) {
-      return singleCharRef.current.getBoundingClientRect().width
+      return singleCharRef.current.getBoundingClientRect().width / 40
     }
 
     return 0
@@ -350,7 +356,7 @@ const Editor = ({ content }: { content: string }) => {
       linesHTML.push(lineHtml)
     }
 
-    const html = linesHTML.join('')
+    const html = linesHTML.join('').replace(/\ /, '&nbsp;')
     setEditorViewLines(html)
   }
 
@@ -510,7 +516,7 @@ const Editor = ({ content }: { content: string }) => {
           <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
           {/* This is used to get the width of each character in the editorView */}
-          <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>x</div>
+          <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>abcdefghijklmnopqrstuvxyz123451234512345</div>
 
           {/* Current line highlight */}
           <div
@@ -524,12 +530,12 @@ const Editor = ({ content }: { content: string }) => {
 
           {/* Text input */}
           <textarea
-          spellCheck={false}
-          disabled={showMdViewer}
-          ref={textAreaRef}
-          value={documentContent}
-          onChange={handleInputChange}
-          className={styles.textInput}
+            spellCheck={false}
+            disabled={showMdViewer}
+            ref={textAreaRef}
+            value={documentContent}
+            onChange={handleInputChange}
+            className={styles.textInput}
           ></textarea>
         </div>
       </div>
