@@ -17,6 +17,8 @@
   min-height: 100vh;
 }
 .textInput {
+  user-select: none;
+  pointer-events: none;
   position: absolute;
   z-index: 10;
   top: 50vh;
@@ -78,6 +80,9 @@
 }
 .editorViewLines > * {
   height: var(--editor-line-height);
+}
+.editorViewLines code {
+  white-space: pre !important;
 }
 
 /* *** */

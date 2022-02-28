@@ -31,7 +31,12 @@ const Editor = ({ content }: { content: string }) => {
   const [ mdHtml, setMdHtml ] = useState('')
   const [ showMdViewer, setShowMdViewer ] = useState(false)
   const [ activeKeys, setActiveKeys ] = useState<TActiveKeys>({})
+  const [ isSelectingEditorContent, setIsSelectingEditorContent ] = useState(false)
 
+  const [ selectionEndLine, setSelectionEndLine ] = useState<number>(0)
+  const [ selectionStartLine, setSelectionStartLine ] = useState<number>(0)
+
+  let range = null
 
   useEffect(() => {
     // TODO - Refactor into updateEditorViewLines()
@@ -56,6 +61,17 @@ const Editor = ({ content }: { content: string }) => {
     updateEditorViewLines(documentContent)
   }, [])
 
+  useEffect(() => {
+    if (isSelectingEditorContent) {
+      //addSpaceToEmptyLines()
+    } else {
+      //removeSpaceFromEmptyLines()
+    }
+  }, [isSelectingEditorContent])
+
+
+
+
   /**
    * Event listeners
    */
@@ -67,7 +83,7 @@ const Editor = ({ content }: { content: string }) => {
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
-    window.addEventListener('mouseup', handleSelectText)
+    window.addEventListener('mouseup', setTextareaSelection)
 
     return () => {
       editorContainerRef?.current?.removeEventListener('mouseup', (event) => handleEditorClickEvent(event, true))
@@ -77,9 +93,9 @@ const Editor = ({ content }: { content: string }) => {
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
-      window.removeEventListener('mouseup', handleSelectText)
+      window.removeEventListener('mouseup', setTextareaSelection)
     }
-  }, [showMdViewer, activeKeys])
+  }, [showMdViewer, activeKeys, selectionStartLine, selectionEndLine])
 
 
   /*****************
@@ -99,11 +115,30 @@ const Editor = ({ content }: { content: string }) => {
    *     </>       *
    *****************/
 
-  const handleSelectText = () => {
-    console.log(window.getSelection())
+  const setTextareaSelection = () => {
+    const selection = window.getSelection()
+    const range = selection?.getRangeAt(0)
+
+    if (!range) {
+      return
+    }
+
+    const lines = getLines(documentContent)
+    const textAreaEl = textAreaRef.current
+
+    if (!textAreaEl) {
+      return
+    }
+
+    const startIndex = getTextareaContentIndex(selectionStartLine - 1, range.startOffset, lines)
+    const endIndex = getTextareaContentIndex(selectionEndLine - 1, range.endOffset, lines)
+
+    textAreaEl.selectionStart = startIndex
+    textAreaEl.selectionEnd = endIndex
   }
 
-  const handleEditorClickEvent = (event: MouseEvent, focusTextarea: boolean) => {
+  const handleEditorClickEvent = (event: MouseEvent, isMouseUpEvent: boolean) => {
+
     if (
       !editorViewRef.current
       || !textAreaRef.current
@@ -129,34 +164,29 @@ const Editor = ({ content }: { content: string }) => {
 
     const { x, y } = event
 
-    /**
-     * # Setting caret selection position in textarea
-     *
-     * The full content string index position of caret
-     * @param caretContentIndex
-     */
-    const setEditorCaretPos = (
-      caretContentIndex: number,
-    ): void => {
-      textAreaEl.selectionStart = caretContentIndex
-      textAreaEl.selectionEnd = caretContentIndex
-    }
-
     // Calculating current line by checking mouse Y position
     let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
+
+
+
+    if (isMouseUpEvent) {
+      setSelectionEndLine(mouseLineNumber)
+    } else {
+      setSelectionStartLine(mouseLineNumber)
+    }
+
+
 
     /**
      * Check if click was recorded outside of lines
      */
     if (mouseLineNumber < 1) {
-      setEditorCaretPos(0)
       setVisualCarretPos(0, 0)
       setCurrentLineNumber(1)
       return
       /* *** */
     } else if (mouseLineNumber > linesCount) {
       const currentLineLength = lines[linesCount - 1].length
-      setEditorCaretPos(documentContent.length)
       setVisualCarretPos(currentLineLength, linesCount)
       setCurrentLineNumber(linesCount)
       return
@@ -178,17 +208,6 @@ const Editor = ({ content }: { content: string }) => {
       caretXIndex = currentLineLength
     }
 
-    // Getting all content before the selected line
-    const linesClone = [...lines]
-    linesClone.length = lineIndexZero
-    const stringPreSelection = linesClone.join('')
-
-    // Caret index position in text content
-    const caretContentIndex = stringPreSelection.length + caretXIndex + lineIndexZero
-
-    // Setting caret position inside of textarea el
-    setEditorCaretPos(caretContentIndex)
-
     // Setting visial caret position with css
     setVisualCarretPos(caretXIndex, lineIndexZero)
 
@@ -197,10 +216,19 @@ const Editor = ({ content }: { content: string }) => {
 
     // Focus textarea element on next tick - after it's visual position has been updated
     setTimeout(() => {
-      if (focusTextarea) {
+      if (isMouseUpEvent) {
         textAreaEl.focus()
       }
     })
+  }
+
+  const getTextareaContentIndex = (lineIndexZero: number, offsetIndex: number, lines: string[]) => {
+    const linesClone = [...lines]
+    linesClone.length = lineIndexZero
+    const stringPreSelection = linesClone.join('')
+
+    // Index position in text content
+    return stringPreSelection.length + offsetIndex + lineIndexZero
   }
 
   const handleScrollX = () => {
@@ -352,11 +380,11 @@ const Editor = ({ content }: { content: string }) => {
     const linesHTML: string[] = []
     const lines = getLines(textContent)
     for (const line of lines) {
-      const lineHtml = `<div><code class="language-markdown">${line}</code></div>`
+      const lineHtml = `<div><code class="language-markdown">${line.replace(/\ /, '&nbsp;')}${line.length === 0 ? '&nbsp;' : ''}</code></div>`
       linesHTML.push(lineHtml)
     }
 
-    const html = linesHTML.join('').replace(/\ /, '&nbsp;')
+    const html = linesHTML.join('')
     setEditorViewLines(html)
   }
 
