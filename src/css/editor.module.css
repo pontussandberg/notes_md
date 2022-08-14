@@ -28,7 +28,7 @@
   height: var(--editor-line-height);
 
   /* Test snippet to show input */
-  /**
+  /**/
   height: 500px !important;
   bottom: 0 !important;
   left: 0 !important;
@@ -37,7 +37,7 @@
   width: 100% !important;
   color: #fff !important;
   background-color: #393d53 !important;
-  **/
+  /**/
 
   background: transparent;
   color: transparent;

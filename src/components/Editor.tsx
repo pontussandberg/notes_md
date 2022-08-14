@@ -40,7 +40,7 @@ const Editor = ({ content }: { content: string }) => {
     // TODO - Refactor into updateEditorViewLines()
 
     // @ts-ignore
-    if (window.Prism) {
+    if (window && window.Prism) {
       // @ts-ignore
       window.Prism.highlightAll()
     }
@@ -79,17 +79,27 @@ const Editor = ({ content }: { content: string }) => {
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
-    // window.addEventListener('mouseup', setTextareaSelection)
+    window.addEventListener('mouseup', setTextareaSelection)
 
+    // document.addEventListener('selectionChange', handleSelectionChange)
+
+    // Cleanup
     return () => {
       editorViewRef?.current?.removeEventListener('scroll', handleScrollX)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
-      // window.removeEventListener('mouseup', setTextareaSelection)
+      window.removeEventListener('mouseup', setTextareaSelection)
+
+      // document.addEventListener('selectionchange', handleSelectionChange)
     }
   }, [showMdViewer, activeKeys, selectionStartLine, selectionEndLine])
+
+
+  const handleSelectionChange = (event: Event) => {
+    console.log(event)
+  }
 
 
   /*****************
@@ -109,9 +119,11 @@ const Editor = ({ content }: { content: string }) => {
    *     </>       *
    *****************/
 
+  /**
+   * Text selection or highlight
+   */
   const setTextareaSelection = () => {
     const selection = window.getSelection()
-    console.log(selection?.rangeCount)
 
     const range = selection && selection.rangeCount > 0
       ? selection?.getRangeAt(0)
@@ -140,7 +152,6 @@ const Editor = ({ content }: { content: string }) => {
   }
 
   const handleEditorClickEvent = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, isMouseUpEvent: boolean) => {
-    console.log('handleEditorClickEvent')
     if (
       !editorViewRef.current
       || !textAreaRef.current
@@ -175,8 +186,6 @@ const Editor = ({ content }: { content: string }) => {
     } else {
       setSelectionStartLine(mouseLineNumber)
     }
-
-
 
     /**
      * Check if click was recorded outside of lines
@@ -215,29 +224,112 @@ const Editor = ({ content }: { content: string }) => {
     // Update currentLineNumber state
     setCurrentLineNumber(mouseLineNumber)
 
-    // Focus textarea element on next tick - after it's visual position has been updated
+    // Focus textarea element on next tick - after it's visual position has been updated - because
     setTimeout(() => {
       if (isMouseUpEvent) {
-        textAreaEl.focus()
+
+        /**
+         * SELECTION CODE
+         * START
+         */
+
+        // Helper var to know if selection was made in editor
+        let selectionIsValid = false
+
+        const selection = window.getSelection()
+        const selectedCharsLength = selection && selection.toString()
+          ? selection.toString().length
+          : 0
+
+        if (selection) {
+          // Selection start / end nodes
+          let selectionStartNode = selection.anchorNode
+          let selectionEndNode = selection.focusNode
+
+          // Selection char counts
+          let startNodeSelectionStartIndex = selection.anchorOffset
+          let endNodeSelectionEndIndex = selection.focusOffset
+
+          // Row "div[data-row]" container elems for start / end nodes
+          let selectionStartRowElem = selectionStartNode?.parentElement?.closest('div[data-row]') as HTMLElement | null
+          let selectionEndRowElem = selectionEndNode?.parentElement?.closest('div[data-row]') as HTMLElement | null
+
+          if (selectionStartRowElem && selectionEndRowElem) {
+
+            // Selection is valid since selectionStartRowElem & selectionEndRowElem exists AND there is selected text
+            if (selectedCharsLength) {
+              selectionIsValid = true
+            }
+
+            // Row numbers for selection start / end nodes
+            let selectionStartRowNum = selectionStartRowElem?.dataset?.row ? parseInt(selectionStartRowElem.dataset.row) : 0
+            let selectionEndRowNum = selectionEndRowElem?.dataset?.row ? parseInt(selectionEndRowElem.dataset.row) : 0
+
+            /**
+             * If selection is reversed, i.e start row is greater than end row -
+             * swap variable values so that terminology makes sense;
+             *
+             * $selectionStartRowElem       <-->  $selectionEndRowElem
+             * $selectionStartRowNum        <-->  $selectionEndRowNum
+             * $startNodeSelectionStartIndex  <-->  $endNodeSelectionEndIndex
+             * $selectionStartNode          <-->  $selectionEndNode
+             */
+            if (selectionStartRowNum > selectionEndRowNum) {
+              const tmpselectionStartRowElem = selectionStartRowElem
+              selectionStartRowElem = selectionEndRowElem
+              selectionEndRowElem = tmpselectionStartRowElem
+
+              const tmpSelectionStartRowNum = selectionStartRowNum
+              selectionStartRowNum = selectionEndRowNum
+              selectionEndRowNum = tmpSelectionStartRowNum
+
+              const tmpStartNodeSelectionStartIndex = startNodeSelectionStartIndex
+              startNodeSelectionStartIndex = endNodeSelectionEndIndex
+              endNodeSelectionEndIndex = tmpStartNodeSelectionStartIndex
+
+              const tmpSelectionStartNode = selectionStartNode
+              selectionStartNode = selectionEndNode
+              selectionEndNode = tmpSelectionStartNode
+            }
+
+            const textareaSelectionStartIndex = getTextareaContentIndex(
+              selectionStartRowNum - 1,
+              startNodeSelectionStartIndex,
+              lines,
+            )
+
+            const textareaSelectionEndIndex = getTextareaContentIndex(
+              selectionEndRowNum - 1,
+              endNodeSelectionEndIndex,
+              lines,
+            )
+
+            // Set selection in textarea
+            textAreaEl.focus()
+            textAreaEl.setSelectionRange(textareaSelectionStartIndex, textareaSelectionEndIndex)
+          }
+        }
+
+        /**
+         * SELECTION CODE
+         * END
+         */
       }
     })
 
-    const contentIndex = getTextareaContentIndex(lineIndexZero, caretXIndex, lines)
-    textAreaEl.selectionStart = contentIndex
-    textAreaEl.selectionEnd = contentIndex
   }
 
-  const getTextareaContentIndex = (lineIndexZero: number, rowCharIndex: number, lines: string[]) => {
-    if (lineIndexZero < 0) {
+  const getTextareaContentIndex = (rowIndexZero: number, colCharIndexZero: number, lines: string[]) => {
+    if (rowIndexZero < 0) {
       return 0
     }
 
     const linesClone = [...lines]
-    linesClone.length = lineIndexZero
+    linesClone.length = rowIndexZero
     const stringPreSelection = linesClone.join('')
 
     // Index position in text content
-    return stringPreSelection.length + rowCharIndex + lineIndexZero
+    return stringPreSelection.length + colCharIndexZero + rowIndexZero
   }
 
   const handleScrollX = () => {
@@ -391,8 +483,10 @@ const Editor = ({ content }: { content: string }) => {
   const updateEditorViewLines = (textContent: string) => {
     const linesHTML: string[] = []
     const lines = getLines(textContent)
-    for (const line of lines) {
-      const lineHtml = `<div><code class="language-markdown">${line.replace(/\ /, '&nbsp;')}${line.length === 0 ? '&nbsp;' : ''}</code></div>`
+    for (const [i, line] of lines.entries()) {
+
+      // TODO - cleanup this row
+      const lineHtml = `<div data-row="${i + 1}" ><code class="language-markdown">${line.replace(/\ /, '&nbsp;')}${line.length === 0 ? '&nbsp;' : ''}</code></div>`
       linesHTML.push(lineHtml)
     }
 
