@@ -9,14 +9,17 @@ import uniqid from 'uniqid'
 import showdown from 'showdown'
 
 import styles from '../css/editor.module.css'
-import GlassButton from './Buttons/GlassButton'
+// import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
-import e from 'express'
+
+// TODO - make custom scrollbar for vertical
+// TODO - make custom scrollbar into component
+// TODO - make custom scrollbar draggable
 
 const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
-  const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const customScrollbarRef = useRef<HTMLDivElement>(null)
   const editorWrapperRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
@@ -130,19 +133,37 @@ const Editor = ({ content }: { content: string }) => {
     if (
       !editorViewRef.current
       || !currentLineHighlightRef.current
-      || !textAreaRef.current
+      || !textareaRef.current
       || !customScrollbarRef.current
+      || !editorWrapperRef.current
     ) {
       return
     }
 
-    // TODO - customScrollbarRef styles
+    const { editorMarginWidth } = getEditorCssVars()
 
+    // Scroll X values
+    const fullWidth = editorWrapperRef.current.getBoundingClientRect().width
+    const maxScrollX = textareaRef.current.scrollWidth - textareaRef.current.clientWidth
 
+    // Custom scrollbar width
+    const dletaHiddenContent = 1 - (maxScrollX / fullWidth)
+    const finalWidth = dletaHiddenContent * fullWidth
 
-    currentLineHighlightRef.current.style.left = `${textAreaRef.current.scrollLeft}px`
-    editorViewRef.current.scrollLeft = textAreaRef.current.scrollLeft
-    editorViewRef.current.scrollTop = textAreaRef.current.scrollTop
+    // Custom scrollbar left position
+    const deltaScrolled = (textareaRef.current.scrollLeft / maxScrollX)
+    const widthDiff = fullWidth - finalWidth
+    const finalLeft = widthDiff * deltaScrolled
+
+    // Set custom scrollbar position and width
+    customScrollbarRef.current.style.width = `${finalWidth}px`
+    customScrollbarRef.current.style.left = `${finalLeft + editorMarginWidth}px`
+
+    // Set current line highlight position
+    currentLineHighlightRef.current.style.left = `${textareaRef.current.scrollLeft}px`
+
+    // Set scroll position for editorView element
+    editorViewRef.current.scrollLeft = textareaRef.current.scrollLeft
   }
 
   /**
@@ -174,8 +195,6 @@ const Editor = ({ content }: { content: string }) => {
     toggleActiveKey(keyLower, true)
 
     const { alt, shift, control, meta } = activeKeys
-
-    console.log(activeKeys)
 
     // Duplicate line
     if (
@@ -215,7 +234,7 @@ const Editor = ({ content }: { content: string }) => {
    * Handler for editor margin line enumeration click event
    */
   const handleLineEnumerationClick = (index: number) => {
-    const { current: textareaEl } = textAreaRef
+    const { current: textareaEl } = textareaRef
 
     if (!textareaEl) {
       return
@@ -253,15 +272,6 @@ const Editor = ({ content }: { content: string }) => {
       setHideCurrentLineHighlight(true)
     } else {
       setHideCurrentLineHighlight(false)
-    }
-  }
-
-  const handleEditorContainerScrollY = () => {
-    if (
-      editorContainerRef.current
-      && textAreaRef.current
-    ) {
-
     }
   }
 
@@ -304,7 +314,7 @@ const Editor = ({ content }: { content: string }) => {
    * Duplicates the current line onto the next line
    */
   const duplicateLine = (moveDown: boolean) => {
-    const { current: el } = textAreaRef
+    const { current: el } = textareaRef
 
     if (el) {
       const lines = el.value.split('\n')
@@ -334,7 +344,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const updateCurrentLineNumber = () => {
     requestAnimationFrame(() => {
-      const { current: el } = textAreaRef
+      const { current: el } = textareaRef
 
       if (el) {
         const currLine = el.value.substr(0, el.selectionStart).split("\n").length
@@ -453,13 +463,10 @@ const Editor = ({ content }: { content: string }) => {
 
 
   /**
-   *********************
-   * Render functions. *
-   * *******************
-   *
+   *******************
+   * Render helpers  *
+   * *****************
    */
-
-
   const renderCurrentLineHighlight = () => {
     const style = {
       display: `${currentLineNumber > 0 ? 'block' : 'none'}`,
@@ -479,13 +486,18 @@ const Editor = ({ content }: { content: string }) => {
     )
   }
 
+
+  /**
+   **********
+   * Render *
+   * ********
+   */
   return (
     <div className={styles.componentWrapper}>
 
       <div
         ref={editorContainerRef}
         className={styles.container}
-        onScroll={handleEditorContainerScrollY}
       >
 
 
@@ -505,14 +517,13 @@ const Editor = ({ content }: { content: string }) => {
 
             {/* Current line highlight */}
             {renderCurrentLineHighlight()}
-
           </div>
 
           {/* Text input */}
           <textarea
             spellCheck={false}
             disabled={showMdViewer}
-            ref={textAreaRef}
+            ref={textareaRef}
             value={documentContent}
             onChange={handleInputChange}
             className={styles.textInput}
@@ -521,6 +532,8 @@ const Editor = ({ content }: { content: string }) => {
             onMouseDown={handleEditorClickEvent}
             onMouseUp={handleEditorClickEvent}
             ></textarea>
+
+          <div ref={customScrollbarRef} className={styles.customScrollbar}></div>
         </div>
 
 
