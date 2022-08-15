@@ -14,12 +14,10 @@ import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
 
 const Editor = ({ content }: { content: string }) => {
-  const editorScrollYContainerRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const editorMarginRef = useRef<HTMLDivElement>(null)
+  const customScrollbarRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
-  const singleCharRef = useRef<HTMLDivElement>(null)
   const currentLineHighlightRef = useRef<HTMLDivElement>(null)
   const editorLinesRef = useRef<HTMLDivElement>(null)
 
@@ -31,10 +29,6 @@ const Editor = ({ content }: { content: string }) => {
   const [mdHtml, setMdHtml] = useState('')
   const [showMdViewer, setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
-  const [isSelectingEditorContent, setIsSelectingEditorContent] = useState(false)
-
-  const [selectionEndLine, setSelectionEndLine] = useState<number>(0)
-  const [selectionStartLine, setSelectionStartLine] = useState<number>(0)
 
   useEffect(() => {
     // TODO - Refactor into updateEditorViewLines()
@@ -59,37 +53,22 @@ const Editor = ({ content }: { content: string }) => {
     updateEditorViewLines(documentContent)
   }, [])
 
-  useEffect(() => {
-    if (isSelectingEditorContent) {
-      //addSpaceToEmptyLines()
-    } else {
-      //removeSpaceFromEmptyLines()
-    }
-  }, [isSelectingEditorContent])
-
-
-
-
   /**
    * Event listeners
    */
   useEffect(() => {
-    editorViewRef?.current?.addEventListener('scroll', handleScrollX)
 
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
-    // window.addEventListener('mouseup', setTextareaSelection)
 
     return () => {
-      editorViewRef?.current?.removeEventListener('scroll', handleScrollX)
 
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
-      // window.removeEventListener('mouseup', setTextareaSelection)
     }
-  }, [showMdViewer, activeKeys, selectionStartLine, selectionEndLine])
+  }, [showMdViewer, activeKeys])
 
 
   /*****************
@@ -98,203 +77,66 @@ const Editor = ({ content }: { content: string }) => {
 
   useEffect(() => {
     updateLineEnumerationEl()
-    syncVisualCaretPosition()
   }, [currentLineNumber, documentContent, showMdViewer])
 
   useEffect(() => {
     updateCurrentLineNumber()
-  }, [documentContent, showMdViewer])
+  }, [documentContent])
 
   /*****************
    *     </>       *
    *****************/
-
-  const setTextareaSelection = () => {
-    const selection = window.getSelection()
-    console.log(selection?.rangeCount)
-
-    const range = selection && selection.rangeCount > 0
-      ? selection?.getRangeAt(0)
-      : null
-
-    if (!range) {
+  const handleEditorClickEvent = (event: React.MouseEvent<HTMLTextAreaElement>) => {
+    if (!editorContainerRef.current) {
       return
     }
+    console.log('click')
 
-    const lines = getLines(documentContent)
-    const textAreaEl = textAreaRef.current
-
-    if (!textAreaEl) {
-      return
-    }
-
-    const startIndex = getTextareaContentIndex(selectionStartLine - 1, range.startOffset, lines)
-    const endIndex = getTextareaContentIndex(selectionEndLine - 1, range.endOffset, lines)
-
-    if (!startIndex || !endIndex) {
-      return
-    }
-
-    textAreaEl.selectionStart = startIndex
-    textAreaEl.selectionEnd = endIndex
-  }
-
-  const handleEditorClickEvent = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, isMouseUpEvent: boolean) => {
-    console.log('handleEditorClickEvent')
-    if (
-      !editorViewRef.current
-      || !textAreaRef.current
-      || !editorScrollYContainerRef.current
-    ) {
-      return
-    }
-
-    const { scrollTop } = editorScrollYContainerRef.current
-    const { scrollLeft } = editorViewRef.current
-    const { current: textAreaEl } = textAreaRef
-
+    const { scrollTop } = editorContainerRef.current
+    const { y } = event.nativeEvent
     const lines = getLines(documentContent)
     const linesCount = lines.length
 
-    const editorCharWidth = getEditorCharWidth()
     const {
-      editorPaddingLeft,
       editorPaddingTop,
       editorLineHeight,
-      editorMarginWidth
     } = getEditorCssVars()
 
-    const { x, y } = event.nativeEvent
     // Calculating current line by checking mouse Y position
     let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
 
-
-
-    if (isMouseUpEvent) {
-      setSelectionEndLine(mouseLineNumber)
-    } else {
-      setSelectionStartLine(mouseLineNumber)
-    }
-
-
-
     /**
-     * Check if click was recorded outside of lines
+     * Check line number
      */
     if (mouseLineNumber < 1) {
-      setVisualCarretPos(0, 0)
+      // setVisualCarretPos(0, 0)
       setCurrentLineNumber(1)
       return
       /* *** */
     } else if (mouseLineNumber > linesCount) {
-      const currentLineLength = lines[linesCount - 1].length
-      setVisualCarretPos(currentLineLength, linesCount)
       setCurrentLineNumber(linesCount)
       return
       /* *** */
+    } else {
+      setCurrentLineNumber(mouseLineNumber)
     }
-
-    const lineIndexZero = mouseLineNumber - 1
-    const currentLineLength = lines[lineIndexZero].length
-
-    // The index on X axis - most left character on each line is index 0
-    let caretXIndex = Math.round((x - editorPaddingLeft - editorMarginWidth + scrollLeft) / editorCharWidth)
-
-    if (caretXIndex < 0) {
-      caretXIndex = 0
-    }
-
-    // Setting caretXIndex to last index of line
-    if (caretXIndex >= currentLineLength) {
-      caretXIndex = currentLineLength
-    }
-
-    // Setting visial caret position with css
-    setVisualCarretPos(caretXIndex, lineIndexZero)
-
-    // Update currentLineNumber state
-    setCurrentLineNumber(mouseLineNumber)
-
-    // Focus textarea element on next tick - after it's visual position has been updated
-    setTimeout(() => {
-      if (isMouseUpEvent) {
-        textAreaEl.focus()
-      }
-    })
-
-    const contentIndex = getTextareaContentIndex(lineIndexZero, caretXIndex, lines)
-    textAreaEl.selectionStart = contentIndex
-    textAreaEl.selectionEnd = contentIndex
   }
 
-  const getTextareaContentIndex = (lineIndexZero: number, rowCharIndex: number, lines: string[]) => {
-    if (lineIndexZero < 0) {
-      return 0
-    }
-
-    const linesClone = [...lines]
-    linesClone.length = lineIndexZero
-    const stringPreSelection = linesClone.join('')
-
-    // Index position in text content
-    return stringPreSelection.length + rowCharIndex + lineIndexZero
-  }
-
-  const handleScrollX = () => {
+  const handleTextareaScroll = () => {
     if (
       !editorViewRef.current
       || !currentLineHighlightRef.current
+      || !textAreaRef.current
+      || !customScrollbarRef.current
     ) {
       return
     }
 
-    currentLineHighlightRef.current.style.left = `${editorViewRef.current.scrollLeft}px`
-  }
+    // TODO - customScrollbarRef styles
 
-  /**
-   * Setting visual position(top/left) of textarea caret on top of editorView
-   */
-  const setVisualCarretPos = (
-    caretXIndex: number,
-    caretYIndex: number,
-  ): void => {
-    const { current: textAreaEl } = textAreaRef
-    const { current: editorLinesEl } = editorLinesRef
-    if (!textAreaEl || !editorLinesEl) {
-      return
-    }
-
-    /**
-     * Char width differs depending on how many chars are on the same line
-     * this is a workaround so instead of calculating the individual character width
-     * we calculate the character width for the current line
-     */
-    // const selectedLineWidth = editorLinesEl.children[caretYIndex].querySelector('code')?.getBoundingClientRect().width || 0
-    // const currentLineLength = getLines(documentContent)[caretYIndex].length
-    // const lineCharWidth = (selectedLineWidth / currentLineLength) || 0
-
-
-    // Can't explain but the cursur needs to be pushed back
-    const hackyFixLeftValue = -1
-
-    const { editorPaddingLeft, editorPaddingTop, editorLineHeight } = getEditorCssVars()
-    const editorCharWidth = getEditorCharWidth()
-
-    const caretTopPos = (caretYIndex * editorLineHeight) + editorPaddingTop
-    const caretLeftPos = (caretXIndex * editorCharWidth) + editorPaddingLeft + hackyFixLeftValue
-    textAreaEl.style.top = `${caretTopPos}px`
-    textAreaEl.style.left = `${caretLeftPos}px`
-  }
-
-  /**
-   * Get character width of editor text
-   */
-  const getEditorCharWidth = (): number => {
-    if (singleCharRef.current) {
-      return singleCharRef.current.getBoundingClientRect().width / 40
-    }
-
-    return 0
+    currentLineHighlightRef.current.style.left = `${textAreaRef.current.scrollLeft}px`
+    editorViewRef.current.scrollLeft = textAreaRef.current.scrollLeft
+    editorViewRef.current.scrollTop = textAreaRef.current.scrollTop
   }
 
   /**
@@ -339,7 +181,6 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     if (isArrowKey(keyLower)) {
-      syncVisualCaretPosition()
       updateCurrentLineNumber()
     } else if (keyLower === 'escape') {
       toggleMdViewer()
@@ -347,28 +188,25 @@ const Editor = ({ content }: { content: string }) => {
   }
 
   /**
-   * Synching visual caret position with actual caret position
+   * Handler for editor margin line enumeration click event
    */
-  const syncVisualCaretPosition = (editorTextContent?: string) => {
+  const handleLineEnumerationClick = (index: number) => {
+    const { current: textareaEl } = textAreaRef
+
+    if (!textareaEl) {
+      return
+    }
+
+    setCurrentLineNumber(index + 1)
+
+    const lines = getLines(documentContent)
+    const lineStart = getTextareaContentIndex(index, 0, lines)
+    const lineEnd = getTextareaContentIndex(index, lines[index].length, lines)
+
+    textareaEl.focus()
+
     setTimeout(() => {
-      if (!editorTextContent) {
-        editorTextContent = documentContent
-      }
-
-      if (textAreaRef.current && currentLineNumber > 0) {
-        const { selectionStart } = textAreaRef.current
-        const currentLineIndex = currentLineNumber - 1
-
-        const lines = getLines(editorTextContent)
-
-        const contentPreCurrentLine = [...lines]
-        contentPreCurrentLine.length = currentLineIndex
-
-        const charsBeforeCurrentLine = contentPreCurrentLine.join('').length + currentLineIndex
-        const x = selectionStart - charsBeforeCurrentLine
-
-        setVisualCarretPos(x, currentLineIndex)
-      }
+      textareaEl.setSelectionRange(lineStart, lineEnd)
     })
   }
 
@@ -467,6 +305,7 @@ const Editor = ({ content }: { content: string }) => {
 
     return (
       <span
+        onClick={() => handleLineEnumerationClick(index)}
         className={styles.lineEnumeration}
         key={uniqid()}
         style={{
@@ -519,6 +358,19 @@ const Editor = ({ content }: { content: string }) => {
     return getCssVariables(cssVars)
   }
 
+  const getTextareaContentIndex = (rowIndexZero: number, colCharIndexZero: number, lines: string[]) => {
+    if (rowIndexZero < 0) {
+      return 0
+    }
+
+    const linesClone = [...lines]
+    linesClone.length = rowIndexZero
+    const stringPreSelection = linesClone.join('')
+
+    // Index position in text content
+    return stringPreSelection.length + colCharIndexZero + rowIndexZero
+  }
+
   /**
    * Top position for current line highlight(cover)
    */
@@ -536,39 +388,35 @@ const Editor = ({ content }: { content: string }) => {
   }
 
   return (
-    <div
-      ref={editorScrollYContainerRef}
-      className={styles.scrollYContainer}
-    >
+    <>
       <div
         ref={editorContainerRef}
         className={styles.container}
-        onMouseUp={(e) => handleEditorClickEvent(e, true)}
-        onMouseDown={(e) => handleEditorClickEvent(e, false)}
       >
         {/* Left margin ( line enumeration ) */}
-        <div ref={editorMarginRef} className={styles.editorMargin}>{lineEnumerationEl}</div>
+        <div className={styles.editorMargin}>{lineEnumerationEl}</div>
 
-        {/* Editor view */}
-        <div
-          ref={editorViewRef}
-          className={styles.editorView}
-        >
-          {/* Lines */}
-          <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
+        {/* Editor */}
+        <div style={{ position: 'relative', overflow: 'hidden', height: '100%' }}>
 
-          {/* This is used to get the width of each character in the editorView */}
-          <div ref={singleCharRef} className={`${styles.singleCharRef} ${styles.editorViewLines}`}>abcdefghijklmnopqrstuvxyz123451234512345</div>
-
-          {/* Current line highlight */}
+          {/* Editor view */}
           <div
-            ref={currentLineHighlightRef}
-            className={styles.currentLineHighlight}
-            style={{
-              display: `${currentLineNumber > 0 ? 'block' : 'none'}`,
-              top: `${getCurrentLineHighlightTopPostion()}px`,
-            }}
-          ></div>
+            ref={editorViewRef}
+            className={styles.editorView}
+          >
+            {/* Lines */}
+            <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
+
+            {/* Current line highlight */}
+            <div
+              ref={currentLineHighlightRef}
+              className={styles.currentLineHighlight}
+              style={{
+                display: `${currentLineNumber > 0 ? 'block' : 'none'}`,
+                top: `${getCurrentLineHighlightTopPostion()}px`,
+              }}
+            ></div>
+          </div>
 
           {/* Text input */}
           <textarea
@@ -578,6 +426,10 @@ const Editor = ({ content }: { content: string }) => {
             value={documentContent}
             onChange={handleInputChange}
             className={styles.textInput}
+            onScroll={handleTextareaScroll}
+            onClick={handleEditorClickEvent}
+            onMouseDown={handleEditorClickEvent}
+            onMouseUp={handleEditorClickEvent}
           ></textarea>
         </div>
       </div>
@@ -602,8 +454,7 @@ const Editor = ({ content }: { content: string }) => {
         dangerouslySetInnerHTML={{ __html: mdHtml }}
         style={{ display: showMdViewer ? 'block' : 'none' }}
       ></div>
-    </div>
-
+    </>
   )
 }
 
