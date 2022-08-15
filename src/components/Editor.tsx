@@ -18,6 +18,7 @@ const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const customScrollbarRef = useRef<HTMLDivElement>(null)
+  const editorWrapperRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
   const currentLineHighlightRef = useRef<HTMLDivElement>(null)
   const editorLinesRef = useRef<HTMLDivElement>(null)
@@ -25,10 +26,11 @@ const Editor = ({ content }: { content: string }) => {
   const [documentContent, setDocumentContent] = useState(content)
   const [editorViewLines, setEditorViewLines] = useState('')
   const [currentLineNumber, setCurrentLineNumber] = useState(0)
+  const [hideCurrentLineHighlight, setHideCurrentLineHighlight] = useState(false)
   const [currentLinesCount, setCurrentLinesCount] = useState(0)
   const [lineEnumerationEl, setLineEnumerationEl] = useState<null | ReactElement[]>(null)
   const [mdHtml, setMdHtml] = useState('')
-  const [showMdViewer, setShowMdViewer] = useState(false)
+  const [showMdViewer, _setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
 
   useEffect(() => {
@@ -61,12 +63,14 @@ const Editor = ({ content }: { content: string }) => {
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
-
+    document.addEventListener('selectionchange', handleDocumentSelectionChange)
+    // ***
     return () => {
-
       window.removeEventListener('resize', updateLineEnumerationEl)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
+      document.removeEventListener('selectionchange', handleDocumentSelectionChange)
+      // ***
     }
   }, [showMdViewer, activeKeys])
 
@@ -133,6 +137,8 @@ const Editor = ({ content }: { content: string }) => {
     }
 
     // TODO - customScrollbarRef styles
+
+
 
     currentLineHighlightRef.current.style.left = `${textAreaRef.current.scrollLeft}px`
     editorViewRef.current.scrollLeft = textAreaRef.current.scrollLeft
@@ -239,6 +245,27 @@ const Editor = ({ content }: { content: string }) => {
     updateEditorViewLines(value)
   }
 
+
+  const handleDocumentSelectionChange = () => {
+    const selection = window.getSelection()
+
+    if (selection && selection.toString().length) {
+      setHideCurrentLineHighlight(true)
+    } else {
+      setHideCurrentLineHighlight(false)
+    }
+  }
+
+  const handleEditorContainerScrollY = () => {
+    if (
+      editorContainerRef.current
+      && textAreaRef.current
+    ) {
+
+    }
+  }
+
+
   /**
    * Update state with HTML translation of text content
    *
@@ -247,8 +274,11 @@ const Editor = ({ content }: { content: string }) => {
   const updateEditorViewLines = (textContent: string) => {
     const linesHTML: string[] = []
     const lines = getLines(textContent)
+
     for (const line of lines) {
-      const lineHtml = `<div><code class="language-markdown">${line.replace(/\ /, '&nbsp;')}${line.length === 0 ? '&nbsp;' : ''}</code></div>`
+      const sanitizedLine = line.replace(/\ /, '&nbsp;')
+      const lineHtml = `<div><code class="language-markdown">${sanitizedLine}</code></div>`
+
       linesHTML.push(lineHtml)
     }
 
@@ -388,6 +418,10 @@ const Editor = ({ content }: { content: string }) => {
     return getCssVariables(cssVars)
   }
 
+  /**
+   * Getting the index of a character in a list of strings,
+   * each list element characters are counted as seperate elements the returned index value.
+   */
   const getTextareaContentIndex = (rowIndexZero: number, colCharIndexZero: number, lines: string[]) => {
     if (rowIndexZero < 0) {
       return 0
@@ -417,35 +451,61 @@ const Editor = ({ content }: { content: string }) => {
 
   }
 
+
+  /**
+   *********************
+   * Render functions. *
+   * *******************
+   *
+   */
+
+
+  const renderCurrentLineHighlight = () => {
+    const style = {
+      display: `${currentLineNumber > 0 ? 'block' : 'none'}`,
+      top: `${getCurrentLineHighlightTopPostion()}px`,
+    }
+
+    if (hideCurrentLineHighlight) {
+      return null
+    }
+
+    return (
+      <div
+        ref={currentLineHighlightRef}
+        className={styles.currentLineHighlight}
+        style={style}
+      ></div>
+    )
+  }
+
   return (
-    <>
+    <div className={styles.componentWrapper}>
+
       <div
         ref={editorContainerRef}
         className={styles.container}
+        onScroll={handleEditorContainerScrollY}
       >
+
+
         {/* Left margin ( line enumeration ) */}
         <div className={styles.editorMargin}>{lineEnumerationEl}</div>
 
         {/* Editor */}
-        <div style={{ position: 'relative', overflow: 'hidden', height: '100%' }}>
+        <div ref={editorWrapperRef} className={styles.editorWrapper}>
 
           {/* Editor view */}
           <div
             ref={editorViewRef}
             className={styles.editorView}
-          >
+            >
             {/* Lines */}
             <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 
             {/* Current line highlight */}
-            <div
-              ref={currentLineHighlightRef}
-              className={styles.currentLineHighlight}
-              style={{
-                display: `${currentLineNumber > 0 ? 'block' : 'none'}`,
-                top: `${getCurrentLineHighlightTopPostion()}px`,
-              }}
-            ></div>
+            {renderCurrentLineHighlight()}
+
           </div>
 
           {/* Text input */}
@@ -460,31 +520,33 @@ const Editor = ({ content }: { content: string }) => {
             onClick={handleEditorClickEvent}
             onMouseDown={handleEditorClickEvent}
             onMouseUp={handleEditorClickEvent}
-          ></textarea>
+            ></textarea>
         </div>
+
+
+        {/* Editor / Markdown viewer toggle */}
+        {/* <GlassButton
+            onClick={toggleMdViewer}
+            title={showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)'}
+            style={{
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              zIndex: 30,
+            }}
+          /> */}
+
+        {/* Markdown viewer */}
+        {/* <div
+            onClick={toggleMdViewer}
+            className={styles.mdViewer}
+            dangerouslySetInnerHTML={{ __html: mdHtml }}
+            style={{ display: showMdViewer ? 'block' : 'none' }}
+          ></div> */}
+
+
       </div>
-
-
-      {/* Editor / Markdown viewer toggle */}
-      <GlassButton
-        onClick={toggleMdViewer}
-        title={showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)'}
-        style={{
-          position: 'absolute',
-          top: '15px',
-          right: '15px',
-          zIndex: 30,
-        }}
-      />
-
-      {/* Markdown viewer */}
-      <div
-        onClick={toggleMdViewer}
-        className={styles.mdViewer}
-        dangerouslySetInnerHTML={{ __html: mdHtml }}
-        style={{ display: showMdViewer ? 'block' : 'none' }}
-      ></div>
-    </>
+    </div>
   )
 }
 

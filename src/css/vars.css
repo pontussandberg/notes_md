@@ -6,6 +6,9 @@
   --editor-padding-left: 16px;
   --editor-margin-width: 50px;
   --editor-margin-right-width: 12px;
+  --editor-wrapper-height: 100vh;
+  --editor-font-size: 13px;
+  --editor-letter-spacing: .82px;
   /* *** */
 
   --editor-bg: #282B3D;
