@@ -34,7 +34,7 @@
   padding-right: 10px;
   font-size: 13px;
   letter-spacing: .82px !important;
-  color: red;
+  /* color: red; */
 
   /** For no wrap **/
   white-space: pre;

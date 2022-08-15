@@ -12,6 +12,7 @@ import styles from '../css/editor.module.css'
 import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
+import e from 'express'
 
 const Editor = ({ content }: { content: string }) => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
@@ -57,7 +58,6 @@ const Editor = ({ content }: { content: string }) => {
    * Event listeners
    */
   useEffect(() => {
-
     window.addEventListener('resize', updateLineEnumerationEl)
     window.addEventListener('keydown', handleKeyDown)
     window.addEventListener('keyup', handleKeyUp)
@@ -167,22 +167,40 @@ const Editor = ({ content }: { content: string }) => {
     const keyLower = key.toLowerCase()
     toggleActiveKey(keyLower, true)
 
-    const { meta, shift, control } = activeKeys
+    const { alt, shift, control, meta } = activeKeys
+
+    console.log(activeKeys)
 
     // Duplicate line
     if (
-      (meta && shift && keyLower === 'arrowdown')
-      || (meta && shift && keyLower === 'arrowup')
-      || (control && shift && keyLower === 'arrowup')
+      (control && shift && keyLower === 'arrowup')
       || (control && shift && keyLower === 'arrowdown')
     ) {
       event.preventDefault()
-      duplicateLine()
+      duplicateLine(false)
+      /* * */
+    } else if (
+      (alt && shift && keyLower === 'arrowdown')
+      || (alt && shift && keyLower === 'arrowup')
+    ) {
+      event.preventDefault()
+      duplicateLine(true)
+      /* * */
     }
 
+    // TODO
+    // Delete line from selection feature
+    if (meta && keyLower === 'backspace') {
+      event.preventDefault()
+    }
+
+    // Move line
     if (isArrowKey(keyLower)) {
       updateCurrentLineNumber()
-    } else if (keyLower === 'escape') {
+    }
+
+    // Toggle md viewer
+    if (keyLower === 'escape') {
       toggleMdViewer()
     }
   }
@@ -255,17 +273,29 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Duplicates the current line onto the next line
    */
-  const duplicateLine = () => {
+  const duplicateLine = (moveDown: boolean) => {
     const { current: el } = textAreaRef
 
     if (el) {
       const lines = el.value.split('\n')
       const currentLineContent = lines[currentLineNumber - 1]
 
-      lines.splice(currentLineNumber, 0, currentLineContent).join()
+      lines.splice(currentLineNumber, 0, currentLineContent).join('')
       const content = lines.join('\n')
 
       setDocumentContent(content)
+      updateEditorViewLines(content)
+
+      const newLineNumber = moveDown
+        ? currentLineNumber + 1
+        : currentLineNumber - 1
+
+      const newLineIndex = newLineNumber - 1
+
+      const selectionStart = getTextareaContentIndex(newLineIndex, 0, lines)
+      const selectionEnd = getTextareaContentIndex(newLineIndex, currentLineContent.length, lines)
+
+      el.setSelectionRange(selectionStart, selectionEnd)
     }
   }
 
