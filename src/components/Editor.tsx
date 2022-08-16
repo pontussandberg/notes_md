@@ -164,6 +164,7 @@ const Editor = ({ content }: { content: string }) => {
   }
 
   /**
+   * # Keybinds
    * Handler for key down event
    */
   const handleKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -173,37 +174,45 @@ const Editor = ({ content }: { content: string }) => {
 
     const { alt, shift, control, meta } = activeKeys
 
-    // Duplicate line
+    // Duplicate keybind
     if (
       (control && shift && keyLower === 'arrowup')
       || (control && shift && keyLower === 'arrowdown')
     ) {
       event.preventDefault()
-      duplicateLine(false)
-      /* * */
-    } else if (
+      duplicateLine('up')
+    }
+    else if (
       (alt && shift && keyLower === 'arrowdown')
       || (alt && shift && keyLower === 'arrowup')
     ) {
       event.preventDefault()
-      duplicateLine(true)
-      /* * */
+      duplicateLine('down')
     }
 
-    // TODO
-    // Delete line from selection feature
+    // TODO - fix so that it doesn't erase everything when there's no whitespace in front of cursor.
     if (meta && keyLower === 'backspace') {
+      // const lines = getLines(documentContent)
+      // const currentLineIndex = currentLineNumber - 1
+
+      // const currentLine = lines[currentLineIndex]
+
+      // if (!currentLine.endsWith(' ')) {
+      //   console.log('hello')
+      //   lines[currentLineIndex] = currentLine + ' '
+
+      //   setDocumentContent(lines.join(''))
+      // }
+    }
+
+    // No default save
+    if (meta && keyLower === 's') {
       event.preventDefault()
     }
 
     // Move line
     if (isArrowKey(keyLower)) {
       updateCurrentLineNumber()
-    }
-
-    // Toggle md viewer
-    if (keyLower === 'escape') {
-      toggleMdViewer()
     }
   }
 
@@ -290,7 +299,8 @@ const Editor = ({ content }: { content: string }) => {
   /**
    * Duplicates the current line onto the next line
    */
-  const duplicateLine = (moveDown: boolean) => {
+  const duplicateLine = (direction: 'up' | 'down') => {
+    const moveDown = direction === 'down'
     const { current: el } = textareaRef
 
     if (el) {
