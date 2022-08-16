@@ -188,8 +188,11 @@ const CustomScrollbar = (
     const maxScrollX = scrollElementRef.current.scrollWidth - scrollElementRef.current.clientWidth
 
     // Custom scrollbar width
-    const dletaHiddenContent = 1 - (maxScrollX / fullWidth)
-    const finalWidth = dletaHiddenContent * fullWidth
+    const deltaHiddenContent = 1 - (maxScrollX / fullWidth)
+    const finalWidth = deltaHiddenContent * fullWidth
+
+    const min = fullWidth / 10
+    const finalWidthCapped = finalWidth < min ? min : finalWidth
 
     /**
      * If scrollElementRef and containerElementRef are same node,
@@ -198,12 +201,12 @@ const CustomScrollbar = (
     const multiplier = scrollElementRef === containerElementRef ? 2 : 1
 
     // Custom scrollbar left position
-    const widthDiff = fullWidth - finalWidth
+    const widthDiff = fullWidth - finalWidthCapped
     const deltaScrolled = (scrollElementRef.current.scrollLeft / maxScrollX)
     const finalLeft = widthDiff * deltaScrolled * multiplier
 
 
-    customScrollbarRef.current.style.width = `${finalWidth}px`
+    customScrollbarRef.current.style.width = `${finalWidthCapped}px`
     customScrollbarRef.current.style.left = `${finalLeft + (positionFixedLeft || 0)}px`
   }
 
@@ -224,6 +227,9 @@ const CustomScrollbar = (
     const deltaHiddenContent = 1 - (maxScrollY / fullHeight)
     const finalHeight = deltaHiddenContent * fullHeight
 
+    const min = fullHeight / 10
+    const finalHeightCapped = finalHeight < min ? min : finalHeight
+
     /**
      * If scrollElementRef and containerElementRef are same node,
      * the scrolled value need to be doubled
@@ -231,12 +237,12 @@ const CustomScrollbar = (
     const multiplier = scrollElementRef === containerElementRef ? 2 : 1
 
     // Custom scrollbar top position
-    const heightDiff = fullHeight - finalHeight
+    const heightDiff = fullHeight - finalHeightCapped
     const deltaScrolled = (scrollElementRef.current.scrollTop / maxScrollY)
     const finalTop = heightDiff * deltaScrolled * multiplier
 
 
-    customScrollbarRef.current.style.height = `${finalHeight}px`
+    customScrollbarRef.current.style.height = `${finalHeightCapped}px`
     customScrollbarRef.current.style.top = `${finalTop + (positionFixedTop || 0)}px`
   }
 
