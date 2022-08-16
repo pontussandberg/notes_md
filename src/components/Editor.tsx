@@ -12,15 +12,12 @@ import styles from '../css/editor.module.css'
 // import GlassButton from './Buttons/GlassButton'
 import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
-
-// TODO - make custom scrollbar for vertical
-// TODO - make custom scrollbar into component
-// TODO - make custom scrollbar draggable
+import CustomScrollbar from './CustomScrollbar'
 
 const Editor = ({ content }: { content: string }) => {
+  const componentWrapperRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const customScrollbarRef = useRef<HTMLDivElement>(null)
   const editorWrapperRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<HTMLDivElement>(null)
   const currentLineHighlightRef = useRef<HTMLDivElement>(null)
@@ -134,30 +131,10 @@ const Editor = ({ content }: { content: string }) => {
       !editorViewRef.current
       || !currentLineHighlightRef.current
       || !textareaRef.current
-      || !customScrollbarRef.current
       || !editorWrapperRef.current
     ) {
       return
     }
-
-    const { editorMarginWidth } = getEditorCssVars()
-
-    // Scroll X values
-    const fullWidth = editorWrapperRef.current.getBoundingClientRect().width
-    const maxScrollX = textareaRef.current.scrollWidth - textareaRef.current.clientWidth
-
-    // Custom scrollbar width
-    const dletaHiddenContent = 1 - (maxScrollX / fullWidth)
-    const finalWidth = dletaHiddenContent * fullWidth
-
-    // Custom scrollbar left position
-    const deltaScrolled = (textareaRef.current.scrollLeft / maxScrollX)
-    const widthDiff = fullWidth - finalWidth
-    const finalLeft = widthDiff * deltaScrolled
-
-    // Set custom scrollbar position and width
-    customScrollbarRef.current.style.width = `${finalWidth}px`
-    customScrollbarRef.current.style.left = `${finalLeft + editorMarginWidth}px`
 
     // Set current line highlight position
     currentLineHighlightRef.current.style.left = `${textareaRef.current.scrollLeft}px`
@@ -461,7 +438,6 @@ const Editor = ({ content }: { content: string }) => {
 
   }
 
-
   /**
    *******************
    * Render helpers  *
@@ -493,13 +469,19 @@ const Editor = ({ content }: { content: string }) => {
    * ********
    */
   return (
-    <div className={styles.componentWrapper}>
+    <div className={styles.componentWrapper} ref={componentWrapperRef}>
+
+      {/* Scrollbar for editor scroll Y axis */}
+      <CustomScrollbar
+        containerElementRef={componentWrapperRef}
+        scrollElementRef={editorContainerRef}
+        orientation={'verticalRight'}
+      />
 
       <div
         ref={editorContainerRef}
         className={styles.container}
       >
-
 
         {/* Left margin ( line enumeration ) */}
         <div className={styles.editorMargin}>{lineEnumerationEl}</div>
@@ -531,9 +513,16 @@ const Editor = ({ content }: { content: string }) => {
             onClick={handleEditorClickEvent}
             onMouseDown={handleEditorClickEvent}
             onMouseUp={handleEditorClickEvent}
-            ></textarea>
+          ></textarea>
 
-          <div ref={customScrollbarRef} className={styles.customScrollbar}></div>
+          {/* Scrollbar for editor scroll X axis */}
+          <CustomScrollbar
+            containerElementRef={editorWrapperRef}
+            scrollElementRef={textareaRef}
+            orientation={'horizontalBottom'}
+            positionFixedLeft={getEditorCssVars().editorMarginWidth}
+            positionFixed={true}
+          />
         </div>
 
 
