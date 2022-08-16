@@ -14,6 +14,13 @@ export const timer = (
   })
 }
 
+export const setCssVariable = (
+  key: string,
+  value: string,
+): void => {
+  document.documentElement.style.setProperty(key, value)
+}
+
 export const getCssVariables = (
   keys: string[]
 ): TKeyNumberValue => {
