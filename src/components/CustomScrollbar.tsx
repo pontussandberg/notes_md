@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 type CustomScrollbarProps = {
   /**
@@ -28,7 +28,7 @@ type CustomScrollbarProps = {
   backgroundColor?: string
 }
 
-// TODO - Make draggable
+// TODO - When $containerElementRef is not taking full space from offset, draggable desont work properly
 const CustomScrollbar = (
   {
     orientation,
@@ -40,28 +40,42 @@ const CustomScrollbar = (
 
     // Settings
     fadeOutTimerMS = 3000,
-    zIndex = 100,
+    zIndex = 1000000,
     scrollbarThickness = 6,
     borderRadius = 3,
     backgroundColor = 'rgba(157, 165, 204, 0.5)'
   }: CustomScrollbarProps
   ) => {
 
+  // Refs
   const customScrollbarRef = useRef<HTMLDivElement>(null)
+  const customScrollbarContainerRef = useRef<HTMLDivElement>(null)
+
+  // State
   const [show, setShow] = useState<boolean>(true)
+  const [lastTrackedMouseCoordinate, setLastTrackedMouseCoordinate] = useState<null | number>(null)
+  const [isMouseHoveringScrollbar, setIsMouseHoveringScrollbar] = useState(false)
+
+  // Constants
+  const isVerticalScrollbar = orientation === 'verticalLeft' || orientation === 'verticalRight'
 
   /**
    * Fade out scrollbar after delay
    */
   useEffect(() => {
     if (customScrollbarRef.current) {
+
       if (show) {
-        customScrollbarRef.current.style.transition = 'opacity .2s'
+        customScrollbarRef.current.style.transition = 'none'
 
         const timer = setTimeout(() => {
           const { current: customScrollbarEl } = customScrollbarRef
 
-          if (customScrollbarEl) {
+          if (
+            customScrollbarEl
+            && !lastTrackedMouseCoordinate
+            && !isMouseHoveringScrollbar
+          ) {
             customScrollbarEl.style.transition = 'opacity .6s'
             setShow(false)
           }
@@ -79,13 +93,16 @@ const CustomScrollbar = (
       }
     }
 
-  }, [show])
+  })
 
   useEffect(() => {
     if (!scrollElementRef.current) {
       return
     }
 
+    window.addEventListener('resize', initValues)
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
     scrollElementRef.current.addEventListener('scroll', handleScroll)
     /* * */
     return () => {
@@ -93,10 +110,13 @@ const CustomScrollbar = (
         return
       }
 
+      window.removeEventListener('resize', initValues)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
       scrollElementRef.current.removeEventListener('scroll', handleScroll)
       /* * */
     }
-  }, [])
+  }, [lastTrackedMouseCoordinate])
 
   /**
    * 1. If positionFixed prop is enabled,
@@ -107,54 +127,59 @@ const CustomScrollbar = (
    * 3. Setting styles from props.
    */
   useEffect(() => {
-    const { current: customScrollbarEl } = customScrollbarRef
+    initValues()
+  }, [])
 
-    if (customScrollbarEl) {
+  const initValues = () => {
+    const { current: customScrollbarEl } = customScrollbarRef
+    const { current: customScrollbarContainerEl } = customScrollbarContainerRef
+    const { current: containerEl } = containerElementRef
+
+    if (customScrollbarContainerEl && customScrollbarEl && containerEl) {
       /**
        * 1.
        */
       if (positionFixed) {
-        customScrollbarEl.style.position = 'fixed'
+        customScrollbarContainerEl.style.position = 'fixed'
 
         if (positionFixedTop) {
-          customScrollbarEl.style.top = `${positionFixedTop}px`
+          customScrollbarContainerEl.style.top = `${positionFixedTop}px`
         } else {
-          customScrollbarEl.style.bottom = '0px'
+          customScrollbarContainerEl.style.bottom = '0px'
         }
 
         if (positionFixedLeft) {
-          customScrollbarEl.style.left = `${positionFixedLeft}px`
+          customScrollbarContainerEl.style.left = `${positionFixedLeft}px`
         } else {
-          customScrollbarEl.style.right = '0px'
+          customScrollbarContainerEl.style.right = '0px'
         }
-
-        customScrollbarEl.style.left = `${positionFixedLeft}px`
       }
+
       /**
        * 2.
        */
       else {
-        customScrollbarEl.style.position = 'absolute'
+        customScrollbarContainerEl.style.position = 'absolute'
 
         switch(orientation) {
           case 'verticalLeft':
-            customScrollbarEl.style.top = '0'
-            customScrollbarEl.style.left = '0'
+            customScrollbarContainerEl.style.top = '0'
+            customScrollbarContainerEl.style.left = '0'
             break
 
           case 'verticalRight':
-            customScrollbarEl.style.top = '0'
-            customScrollbarEl.style.right = '0'
+            customScrollbarContainerEl.style.top = '0'
+            customScrollbarContainerEl.style.right = '0'
             break
 
           case 'horizontalTop':
-            customScrollbarEl.style.left = '0'
-            customScrollbarEl.style.top = '0'
+            customScrollbarContainerEl.style.left = '0'
+            customScrollbarContainerEl.style.top = '0'
             break
 
           case 'horizontalBottom':
-            customScrollbarEl.style.left = '0'
-            customScrollbarEl.style.bottom = '0'
+            customScrollbarContainerEl.style.left = '0'
+            customScrollbarContainerEl.style.bottom = '0'
             break
         }
       }
@@ -162,29 +187,160 @@ const CustomScrollbar = (
       /**
        * 3.
        */
-      if (orientation === 'verticalLeft' || orientation === 'verticalRight') {
+      if (isVerticalScrollbar) {
         customScrollbarEl.style.width = `${scrollbarThickness}px`
+        customScrollbarContainerEl.style.width = `${scrollbarThickness}px`
       } else {
         customScrollbarEl.style.height = `${scrollbarThickness}px`
+        customScrollbarContainerEl.style.height = `${scrollbarThickness}px`
       }
 
-      customScrollbarEl.style.zIndex = `${zIndex}`
+      const containerRect = containerEl.getBoundingClientRect()
+      const fullWidth = containerRect.width
+      const fullHeight = containerRect.height
+
+      if (isVerticalScrollbar) {
+        customScrollbarContainerEl.style.height = `${fullHeight}px`
+      } else {
+        customScrollbarContainerEl.style.width = `${fullWidth}px`
+      }
+
+
+      customScrollbarContainerEl.style.zIndex = `${zIndex}`
       customScrollbarEl.style.borderRadius = `${borderRadius}px`
       customScrollbarEl.style.backgroundColor = backgroundColor
+
+      // Set initial scrollbar values on next tick.
+      setTimeout(() => {
+        if (isVerticalScrollbar) {
+          handleScrollY()
+        } else {
+          handleScrollX()
+        }
+      })
     }
-  }, [])
+  }
+
+  const getScrollbarLength = () => {
+    if (!customScrollbarRef.current) {
+      return 0
+    }
+
+    const rect = customScrollbarRef.current.getBoundingClientRect()
+    return isVerticalScrollbar ? rect.height : rect.width
+  }
+
+  const getScrollbarContainerOffset = () => {
+    if (!customScrollbarContainerRef.current) {
+      return 0
+    }
+
+    const rect = customScrollbarContainerRef.current.getBoundingClientRect()
+    return isVerticalScrollbar ? rect.top : rect.left
+  }
+
+  const getScrollbarPos = () => {
+    if (!scrollElementRef.current) {
+      return 0
+    }
+
+    return isVerticalScrollbar
+      ? scrollElementRef.current.scrollTop
+      : scrollElementRef.current.scrollLeft
+  }
+
+  const setScrollElementScrollPos = (value: number): boolean => {
+    if (!scrollElementRef.current) {
+      return false
+    }
+
+    isVerticalScrollbar
+      ? scrollElementRef.current.scrollTop = value
+      : scrollElementRef.current.scrollLeft = value
+
+    return true
+  }
+
+
+  /****************
+   * Mouse events *
+   ****************/
+
+  const handleMouseEnter = () => {
+    setShow(true)
+    setIsMouseHoveringScrollbar(true)
+  }
+
+  const handleMouseLeave = () => {
+    if (!lastTrackedMouseCoordinate) {
+      setShow(false)
+    }
+
+    setIsMouseHoveringScrollbar(false)
+  }
+
+  const handleMouseDown = (isContainerClick?: boolean) => (event: React.MouseEvent) => {
+    const coordinateKey = isVerticalScrollbar ? 'pageY' : 'pageX'
+    const coordinate = event[coordinateKey]
+    setLastTrackedMouseCoordinate(coordinate)
+
+    if (isContainerClick) {
+      const scrollbarLength = getScrollbarLength()
+      const scrollbarPos = getScrollbarPos()
+      const scrollbarContainerOffset = getScrollbarContainerOffset()
+
+      if (coordinate < scrollbarPos) {
+        setScrollElementScrollPos(coordinate - scrollbarContainerOffset)
+      } else if (coordinate > scrollbarPos + scrollbarLength) {
+        setScrollElementScrollPos(coordinate - scrollbarLength - scrollbarContainerOffset)
+      }
+    }
+  }
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!lastTrackedMouseCoordinate || !scrollElementRef.current) {
+      return
+    }
+
+    // While dragging scrollbar, disable text select / highlight
+    document.body.style.userSelect = 'none'
+
+    /**
+     * Get diff between last position of mouse and current position of mouse,
+     * this diff is used to update scrollPosition of scrollElement
+     */
+    const coordinateKey = isVerticalScrollbar ? 'pageY' : 'pageX'
+    const mouseCoordinate = event[coordinateKey]
+    const pixelDiff = mouseCoordinate - lastTrackedMouseCoordinate
+    const scrollKey = isVerticalScrollbar ? 'scrollTop' : 'scrollLeft'
+
+    scrollElementRef.current[scrollKey] = scrollElementRef.current[scrollKey] + pixelDiff
+    handleScroll()
+
+    // Store current cordinate in state
+    setLastTrackedMouseCoordinate(mouseCoordinate)
+  }
+
+  const handleMouseUp = () => {
+    // Enable text select / highlight
+    document.body.style.userSelect = ''
+    setLastTrackedMouseCoordinate(null)
+  }
+  /**********
+   *  ###   *
+   **********/
 
   const handleScrollX = () => {
     if (
-      !containerElementRef.current
-      || !scrollElementRef.current
+      !customScrollbarContainerRef.current
       || !customScrollbarRef.current
+      || !scrollElementRef.current
     ) {
       return
     }
 
     // Scroll values
-    const fullWidth = containerElementRef.current.getBoundingClientRect().width
+    const fullWidth = customScrollbarContainerRef.current.getBoundingClientRect().width
     const maxScrollX = scrollElementRef.current.scrollWidth - scrollElementRef.current.clientWidth
 
     // Custom scrollbar width
@@ -205,22 +361,21 @@ const CustomScrollbar = (
     const deltaScrolled = (scrollElementRef.current.scrollLeft / maxScrollX)
     const finalLeft = widthDiff * deltaScrolled * multiplier
 
-
     customScrollbarRef.current.style.width = `${finalWidthCapped}px`
-    customScrollbarRef.current.style.left = `${finalLeft + (positionFixedLeft || 0)}px`
+    customScrollbarRef.current.style.left = `${finalLeft}px`
   }
 
   const handleScrollY = () => {
     if (
-      !containerElementRef.current
-      || !scrollElementRef.current
+      !customScrollbarContainerRef.current
       || !customScrollbarRef.current
+      || !scrollElementRef.current
     ) {
       return
     }
 
     // Scroll values
-    const fullHeight = containerElementRef.current.getBoundingClientRect().height
+    const fullHeight = customScrollbarContainerRef.current.getBoundingClientRect().height
     const maxScrollY = scrollElementRef.current.scrollHeight - scrollElementRef.current.clientHeight
 
     // Custom scrollbar height
@@ -241,7 +396,6 @@ const CustomScrollbar = (
     const deltaScrolled = (scrollElementRef.current.scrollTop / maxScrollY)
     const finalTop = heightDiff * deltaScrolled * multiplier
 
-
     customScrollbarRef.current.style.height = `${finalHeightCapped}px`
     customScrollbarRef.current.style.top = `${finalTop + (positionFixedTop || 0)}px`
   }
@@ -249,7 +403,7 @@ const CustomScrollbar = (
   const handleScroll = () => {
     setShow(true)
 
-    if (orientation === 'verticalLeft' || orientation === 'verticalRight') {
+    if (isVerticalScrollbar) {
       handleScrollY()
     } else {
       handleScrollX()
@@ -257,7 +411,19 @@ const CustomScrollbar = (
   }
 
   return (
-    <div ref={customScrollbarRef} style={{ opacity: 0 }}></div>
+    <div
+      ref={customScrollbarContainerRef}
+      style={{ position: 'relative' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown(true)}
+    >
+      <div
+        ref={customScrollbarRef}
+        style={{ position: 'absolute', opacity: 0 }}
+        onMouseDown={handleMouseDown()}
+      ></div>
+    </div>
   )
 }
 
