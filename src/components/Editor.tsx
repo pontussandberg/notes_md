@@ -33,6 +33,17 @@ const Editor = ({ content }: { content: string }) => {
   const [showMdViewer, _setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
 
+  /**
+   * This effect will make sure that editor padding is always shown
+   * when no more chars can be shown to left of carret.
+   */
+  useEffect(() => {
+    const { editorPaddingLeft } = getEditorCssVars()
+    if (textareaRef.current && textareaRef.current.scrollLeft <= editorPaddingLeft) {
+      textareaRef.current.scrollLeft = 0
+    }
+  })
+
   useEffect(() => {
     // TODO - Refactor into updateEditorViewLines()
 
@@ -94,7 +105,6 @@ const Editor = ({ content }: { content: string }) => {
     if (!editorContainerRef.current) {
       return
     }
-    console.log('click')
 
     const { scrollTop } = editorContainerRef.current
     const { y } = event.nativeEvent
@@ -175,7 +185,7 @@ const Editor = ({ content }: { content: string }) => {
 
     const { alt, shift, control, meta } = activeKeys
 
-    // Duplicate keybind
+    // Duplicate current row keybind
     if (
       (control && shift && keyLower === 'arrowup')
       || (control && shift && keyLower === 'arrowdown')
@@ -206,12 +216,12 @@ const Editor = ({ content }: { content: string }) => {
       // }
     }
 
-    // No default save
+    // Cancel default save
     if (meta && keyLower === 's') {
       event.preventDefault()
     }
 
-    // Move line
+    // Move row
     if (isArrowKey(keyLower)) {
       updateCurrentLineNumber()
     }
@@ -504,7 +514,7 @@ const Editor = ({ content }: { content: string }) => {
           <div
             ref={editorViewRef}
             className={styles.editorView}
-            >
+          >
             {/* Lines */}
             <div ref={editorLinesRef} className={styles.editorViewLines} dangerouslySetInnerHTML={{ __html: editorViewLines }}></div>
 

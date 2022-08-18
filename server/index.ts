@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import next from "next";
 
+const env_description = process.env.NODE_ENV === 'production' ? 'Production' : 'Development'
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();

@@ -69,13 +69,21 @@ const CustomScrollbar = (
    */
   useEffect(() => {
     const { current: customScrollbarEl } = customScrollbarRef
+
     if (customScrollbarEl) {
 
       /**
-       * Blocker
+       * Blocker for fadeout timer
        */
       if (disableFadeOut) {
-        setCssProp(customScrollbarEl, 'opacity', '1')
+
+        // Show if scrollable
+        if (getMaxScrollPos() > 0) {
+          setCssProp(customScrollbarEl, 'opacity', '1')
+        } else {
+          setCssProp(customScrollbarEl, 'opacity', '0')
+        }
+
         return
       }
 
@@ -106,7 +114,7 @@ const CustomScrollbar = (
       }
     }
 
-  }, [show])
+  })
 
   useEffect(() => {
     if (!scrollElementRef.current) {
@@ -401,7 +409,6 @@ const CustomScrollbar = (
     if (!isDraggingScrollbar) {
       setScrollbarTransition(true, true)
       setScrollbarThickness('S')
-      console.log('here')
       setShow(false)
     }
   }

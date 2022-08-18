@@ -128,8 +128,9 @@
 
 .editorMargin {
   position: relative;
-  background: transparent;
+  background: var(--editor-bg);
   margin: 0;
+  z-index: 1;
   border-right: 1px solid var(--editor-lighter);
 }
 
