@@ -23,7 +23,7 @@
 .editorWrapper {
   position: relative;
   display: flex;
-  width: calc(50vw - var(--editor-margin-width));
+  width: calc(100vw - var(--editor-margin-width));
 }
 
 

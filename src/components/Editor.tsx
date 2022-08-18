@@ -129,15 +129,16 @@ const Editor = ({ content }: { content: string }) => {
   const handleTextareaScroll = () => {
     if (
       !editorViewRef.current
-      || !currentLineHighlightRef.current
       || !textareaRef.current
       || !editorWrapperRef.current
     ) {
       return
     }
 
-    // Set current line highlight position
-    currentLineHighlightRef.current.style.left = `${textareaRef.current.scrollLeft}px`
+    if (currentLineHighlightRef.current) {
+      // Set current line highlight position
+      currentLineHighlightRef.current.style.left = `${textareaRef.current.scrollLeft}px`
+    }
 
     // Set scroll position for editorView element
     editorViewRef.current.scrollLeft = textareaRef.current.scrollLeft

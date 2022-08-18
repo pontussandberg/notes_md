@@ -53,7 +53,8 @@ const CustomScrollbar = (
 
   // State
   const [show, setShow] = useState<boolean>(true)
-  const [lastTrackedMouseCoordinate, setLastTrackedMouseCoordinate] = useState<null | number>(null)
+  const [mouseOffsetFromScrollbarStart, setMouseOffsetFromScrollbarStart] = useState<number>(0)
+  const [isDraggingScrollbar, setIsDraggingScrollbar] = useState(false)
   const [isMouseHoveringScrollbar, setIsMouseHoveringScrollbar] = useState(false)
 
   // Constants
@@ -73,7 +74,6 @@ const CustomScrollbar = (
 
           if (
             customScrollbarEl
-            && !lastTrackedMouseCoordinate
             && !isMouseHoveringScrollbar
           ) {
             customScrollbarEl.style.transition = 'opacity .6s'
@@ -116,7 +116,7 @@ const CustomScrollbar = (
       scrollElementRef.current.removeEventListener('scroll', handleScroll)
       /* * */
     }
-  }, [lastTrackedMouseCoordinate])
+  }, [isDraggingScrollbar])
 
   /**
    * 1. If positionFixed prop is enabled,
@@ -230,6 +230,16 @@ const CustomScrollbar = (
     return isVerticalScrollbar ? rect.height : rect.width
   }
 
+  const getScrollbarPosition = () => {
+    if (!customScrollbarRef.current) {
+      return 0
+    }
+
+    return isVerticalScrollbar
+      ? customScrollbarRef.current.getBoundingClientRect().top
+      : customScrollbarRef.current.getBoundingClientRect().left
+  }
+
   const getScrollbarContainerOffset = () => {
     if (!customScrollbarContainerRef.current) {
       return 0
@@ -239,14 +249,25 @@ const CustomScrollbar = (
     return isVerticalScrollbar ? rect.top : rect.left
   }
 
-  const getScrollbarPos = () => {
+  const getScrollbarContainerLength = () => {
+    if (!customScrollbarContainerRef.current) {
+      return 0
+    }
+
+    return isVerticalScrollbar
+      ? customScrollbarContainerRef.current.getBoundingClientRect().height
+      : customScrollbarContainerRef.current.getBoundingClientRect().width
+  }
+
+  const getMaxScrollPos = () => {
     if (!scrollElementRef.current) {
       return 0
     }
 
     return isVerticalScrollbar
-      ? scrollElementRef.current.scrollTop
-      : scrollElementRef.current.scrollLeft
+    ? scrollElementRef.current.scrollHeight - scrollElementRef.current.clientHeight
+    : scrollElementRef.current.scrollWidth - scrollElementRef.current.clientWidth
+
   }
 
   const setScrollElementScrollPos = (value: number): boolean => {
@@ -261,18 +282,43 @@ const CustomScrollbar = (
     return true
   }
 
+  const getScrollbarStartViewportOffset = () => {
+    if (!customScrollbarRef.current) {
+      return 0
+    }
+
+    return isVerticalScrollbar
+      ? customScrollbarRef.current.getBoundingClientRect().top + document.documentElement.scrollTop
+      : customScrollbarRef.current.getBoundingClientRect().left + document.documentElement.scrollLeft
+  }
+
+  /**
+   * Getting the multiply factor that will be used to translate SCROLLBAR position to SCROLL position.
+   */
+  const getMaxScrollToMaxScrollbarPosRatio = () => {
+    const scrollbarLength = getScrollbarLength()
+    const scrollbarContainerLength = getScrollbarContainerLength()
+    const maxScroll = getMaxScrollPos()
+
+    const maxScrollbarOffsetPos = scrollbarContainerLength - scrollbarLength
+
+    return maxScroll / maxScrollbarOffsetPos
+  }
+
 
   /****************
    * Mouse events *
    ****************/
 
   const handleMouseEnter = () => {
-    setShow(true)
+    if (getMaxScrollPos()) {
+      setShow(true)
+    }
     setIsMouseHoveringScrollbar(true)
   }
 
   const handleMouseLeave = () => {
-    if (!lastTrackedMouseCoordinate) {
+    if (!isDraggingScrollbar) {
       setShow(false)
     }
 
@@ -280,55 +326,61 @@ const CustomScrollbar = (
   }
 
   const handleMouseDown = (isContainerClick?: boolean) => (event: React.MouseEvent) => {
+    setIsDraggingScrollbar(true)
+
     const coordinateKey = isVerticalScrollbar ? 'pageY' : 'pageX'
     const coordinate = event[coordinateKey]
-    setLastTrackedMouseCoordinate(coordinate)
+    const scrollElementEl = scrollElementRef.current
 
-    if (isContainerClick) {
+    if (isContainerClick && scrollElementEl) {
       const scrollbarLength = getScrollbarLength()
-      const scrollbarPos = getScrollbarPos()
       const scrollbarContainerOffset = getScrollbarContainerOffset()
+      const scrollbarPosition = getScrollbarPosition()
 
-      if (coordinate < scrollbarPos) {
-        setScrollElementScrollPos(coordinate - scrollbarContainerOffset)
-      } else if (coordinate > scrollbarPos + scrollbarLength) {
-        setScrollElementScrollPos(coordinate - scrollbarLength - scrollbarContainerOffset)
+      const ratio = getMaxScrollToMaxScrollbarPosRatio()
+
+      if (coordinate < scrollbarPosition) {
+        setScrollElementScrollPos(ratio * (coordinate - scrollbarContainerOffset))
+        setMouseOffsetFromScrollbarStart(0)
+      } else if (coordinate > scrollbarPosition + scrollbarLength) {
+        setScrollElementScrollPos(ratio * (coordinate - scrollbarLength - scrollbarContainerOffset))
+        setMouseOffsetFromScrollbarStart(getScrollbarLength())
       }
+    }
+    else {
+      const _mouseOffsetFromScrollbarStart = coordinate - getScrollbarStartViewportOffset()
+      setMouseOffsetFromScrollbarStart(_mouseOffsetFromScrollbarStart)
     }
   }
 
   const handleMouseMove = (event: MouseEvent) => {
-    if (!lastTrackedMouseCoordinate || !scrollElementRef.current) {
+    if (!isDraggingScrollbar || !scrollElementRef.current) {
       return
     }
 
     // While dragging scrollbar, disable text select / highlight
     document.body.style.userSelect = 'none'
 
-    /**
-     * Get diff between last position of mouse and current position of mouse,
-     * this diff is used to update scrollPosition of scrollElement
-     */
     const coordinateKey = isVerticalScrollbar ? 'pageY' : 'pageX'
     const mouseCoordinate = event[coordinateKey]
-    const pixelDiff = mouseCoordinate - lastTrackedMouseCoordinate
-    const scrollKey = isVerticalScrollbar ? 'scrollTop' : 'scrollLeft'
+    const percentMouseMoved = (mouseCoordinate - mouseOffsetFromScrollbarStart - getScrollbarContainerOffset()) / (getScrollbarContainerLength() - getScrollbarLength())
+    const maxScrollPos = getMaxScrollPos()
+    const scrollPos = maxScrollPos * percentMouseMoved
 
-    scrollElementRef.current[scrollKey] = scrollElementRef.current[scrollKey] + pixelDiff
-    handleScroll()
-
-    // Store current cordinate in state
-    setLastTrackedMouseCoordinate(mouseCoordinate)
+    setScrollElementScrollPos(scrollPos)
   }
 
   const handleMouseUp = () => {
     // Enable text select / highlight
     document.body.style.userSelect = ''
-    setLastTrackedMouseCoordinate(null)
+
+    setIsDraggingScrollbar(false)
   }
+
   /**********
    *  ###   *
    **********/
+
 
   const handleScrollX = () => {
     if (
@@ -419,6 +471,7 @@ const CustomScrollbar = (
       onMouseDown={handleMouseDown(true)}
     >
       <div
+        id={!isVerticalScrollbar ? '1' : '0'}
         ref={customScrollbarRef}
         style={{ position: 'absolute', opacity: 0 }}
         onMouseDown={handleMouseDown()}
