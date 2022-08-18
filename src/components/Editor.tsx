@@ -117,7 +117,7 @@ const Editor = ({ content }: { content: string }) => {
     } = getEditorCssVars()
 
     // Calculating current line by checking mouse Y position
-    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
+    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop) / editorLineHeight)
 
     /**
      * Check line number
@@ -447,6 +447,7 @@ const Editor = ({ content }: { content: string }) => {
    * Top position for current line highlight(cover)
    */
   const getCurrentLineHighlightTopPostion = () => {
+    console.log(currentLineNumber)
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
     return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop
   }
