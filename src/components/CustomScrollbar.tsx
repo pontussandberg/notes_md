@@ -24,6 +24,7 @@ type CustomScrollbarProps = {
   // CSS settings
   zIndex?: number
   scrollbarThickness?: number
+  scrollbarThicknessActive?: number
   borderRadius?: number
   backgroundColor?: string
 }
@@ -42,6 +43,7 @@ const CustomScrollbar = (
     fadeOutTimerMS = 3000,
     zIndex = 1000000,
     scrollbarThickness = 6,
+    scrollbarThicknessActive = 10,
     borderRadius = 3,
     backgroundColor = 'rgba(157, 165, 204, 0.5)'
   }: CustomScrollbarProps
@@ -67,7 +69,7 @@ const CustomScrollbar = (
     if (customScrollbarRef.current) {
 
       if (show) {
-        customScrollbarRef.current.style.transition = 'none'
+        setScrollbarTransition(false, true)
 
         const timer = setTimeout(() => {
           const { current: customScrollbarEl } = customScrollbarRef
@@ -76,7 +78,7 @@ const CustomScrollbar = (
             customScrollbarEl
             && !isMouseHoveringScrollbar
           ) {
-            customScrollbarEl.style.transition = 'opacity .6s'
+            setScrollbarTransition(true, true)
             setShow(false)
           }
         }, fadeOutTimerMS)
@@ -89,6 +91,7 @@ const CustomScrollbar = (
         }
       } else {
         /***/
+        setScrollbarTransition(true, true)
         customScrollbarRef.current.style.opacity = '0'
       }
     }
@@ -118,6 +121,11 @@ const CustomScrollbar = (
     }
   }, [isDraggingScrollbar])
 
+  useEffect(() => {
+    initValues()
+  }, [])
+
+
   /**
    * 1. If positionFixed prop is enabled,
    *    setting fixed position values for custom scrollbar.
@@ -126,10 +134,6 @@ const CustomScrollbar = (
    *
    * 3. Setting styles from props.
    */
-  useEffect(() => {
-    initValues()
-  }, [])
-
   const initValues = () => {
     const { current: customScrollbarEl } = customScrollbarRef
     const { current: customScrollbarContainerEl } = customScrollbarContainerRef
@@ -144,14 +148,18 @@ const CustomScrollbar = (
 
         if (positionFixedTop) {
           customScrollbarContainerEl.style.top = `${positionFixedTop}px`
+          customScrollbarEl.style.top = '0'
         } else {
           customScrollbarContainerEl.style.bottom = '0px'
+          customScrollbarEl.style.bottom = '0'
         }
 
         if (positionFixedLeft) {
           customScrollbarContainerEl.style.left = `${positionFixedLeft}px`
+          customScrollbarEl.style.left = '0'
         } else {
           customScrollbarContainerEl.style.right = '0px'
+          customScrollbarEl.style.right = '0'
         }
       }
 
@@ -165,21 +173,25 @@ const CustomScrollbar = (
           case 'verticalLeft':
             customScrollbarContainerEl.style.top = '0'
             customScrollbarContainerEl.style.left = '0'
+            customScrollbarEl.style.left = '0'
             break
 
           case 'verticalRight':
             customScrollbarContainerEl.style.top = '0'
             customScrollbarContainerEl.style.right = '0'
+            customScrollbarEl.style.right = '0'
             break
 
           case 'horizontalTop':
             customScrollbarContainerEl.style.left = '0'
             customScrollbarContainerEl.style.top = '0'
+            customScrollbarEl.style.top = '0'
             break
 
           case 'horizontalBottom':
             customScrollbarContainerEl.style.left = '0'
             customScrollbarContainerEl.style.bottom = '0'
+            customScrollbarEl.style.bottom = '0'
             break
         }
       }
@@ -189,10 +201,10 @@ const CustomScrollbar = (
        */
       if (isVerticalScrollbar) {
         customScrollbarEl.style.width = `${scrollbarThickness}px`
-        customScrollbarContainerEl.style.width = `${scrollbarThickness}px`
+        customScrollbarContainerEl.style.width = `${scrollbarThicknessActive}px`
       } else {
         customScrollbarEl.style.height = `${scrollbarThickness}px`
-        customScrollbarContainerEl.style.height = `${scrollbarThickness}px`
+        customScrollbarContainerEl.style.height = `${scrollbarThicknessActive}px`
       }
 
       const containerRect = containerEl.getBoundingClientRect()
@@ -218,6 +230,46 @@ const CustomScrollbar = (
           handleScrollX()
         }
       })
+    }
+  }
+
+  /***********
+   * Helpers *
+   ***********/
+
+  const setScrollbarTransition = (opacityTransition: boolean, heightWidthTransition: boolean) => {
+    if (!customScrollbarRef.current) {
+      return
+    }
+
+    let transition = ''
+
+    if (opacityTransition) {
+      transition += 'opacity .6s, '
+    }
+
+    if (heightWidthTransition) {
+      transition += 'height .2s, width .2s'
+    }
+
+    customScrollbarRef.current.style.transition = transition
+  }
+
+  const setScrollbarThickness = (size: 'S' | 'L') => {
+    if (!customScrollbarRef.current) {
+      return
+    }
+
+    if (size === 'L') {
+      customScrollbarRef.current.style.borderRadius = '6px'
+      isVerticalScrollbar
+        ? customScrollbarRef.current.style.width = `${scrollbarThicknessActive}px`
+        : customScrollbarRef.current.style.height = `${scrollbarThicknessActive}px`
+    } else {
+      customScrollbarRef.current.style.borderRadius = '3px'
+      isVerticalScrollbar
+        ? customScrollbarRef.current.style.width = `${scrollbarThickness}px`
+        : customScrollbarRef.current.style.height = `${scrollbarThickness}px`
     }
   }
 
@@ -305,20 +357,30 @@ const CustomScrollbar = (
     return maxScroll / maxScrollbarOffsetPos
   }
 
+  /**********
+   *  ###   *
+   **********/
+
 
   /****************
    * Mouse events *
    ****************/
 
   const handleMouseEnter = () => {
+    setScrollbarTransition(true, true)
+    setScrollbarThickness('L')
+
     if (getMaxScrollPos()) {
       setShow(true)
     }
     setIsMouseHoveringScrollbar(true)
+
   }
 
   const handleMouseLeave = () => {
     if (!isDraggingScrollbar) {
+      setScrollbarTransition(true, true)
+      setScrollbarThickness('S')
       setShow(false)
     }
 
@@ -363,7 +425,10 @@ const CustomScrollbar = (
 
     const coordinateKey = isVerticalScrollbar ? 'pageY' : 'pageX'
     const mouseCoordinate = event[coordinateKey]
+
+    // Percent mouse move with scrollbar length mouse offset and scrollbar length considered.
     const percentMouseMoved = (mouseCoordinate - mouseOffsetFromScrollbarStart - getScrollbarContainerOffset()) / (getScrollbarContainerLength() - getScrollbarLength())
+
     const maxScrollPos = getMaxScrollPos()
     const scrollPos = maxScrollPos * percentMouseMoved
 
@@ -374,7 +439,10 @@ const CustomScrollbar = (
     // Enable text select / highlight
     document.body.style.userSelect = ''
 
-    setIsDraggingScrollbar(false)
+    if (isDraggingScrollbar) {
+      setScrollbarThickness('S')
+      setIsDraggingScrollbar(false)
+    }
   }
 
   /**********
@@ -471,7 +539,6 @@ const CustomScrollbar = (
       onMouseDown={handleMouseDown(true)}
     >
       <div
-        id={!isVerticalScrollbar ? '1' : '0'}
         ref={customScrollbarRef}
         style={{ position: 'absolute', opacity: 0 }}
         onMouseDown={handleMouseDown()}
