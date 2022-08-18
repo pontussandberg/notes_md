@@ -369,7 +369,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const getLineNumEl = (index: number, isCurrentLine = false): ReactElement => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
-    const topPos = (index * editorLineHeight) + editorPaddingTop + 1
+    const topPos = (index * editorLineHeight) + editorPaddingTop - 0.4
 
     return (
       <span
@@ -447,9 +447,9 @@ const Editor = ({ content }: { content: string }) => {
    * Top position for current line highlight(cover)
    */
   const getCurrentLineHighlightTopPostion = () => {
-    console.log(currentLineNumber)
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
-    return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop
+    const randomCorrectionValue = 0
+    return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop - randomCorrectionValue
   }
 
   /**

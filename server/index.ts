@@ -13,8 +13,6 @@ const port = process.env.PORT || 3000;
     const server = express();
 
     server.all("*", (req: Request, res: Response) => {
-      console.log(req)
-      console.log(res)
       return handle(req, res);
     });
     server.listen(port, (err?: any) => {
