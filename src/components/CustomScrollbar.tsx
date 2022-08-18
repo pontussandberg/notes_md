@@ -20,6 +20,7 @@ type CustomScrollbarProps = {
 
   // Settings
   fadeOutTimerMS?: number
+  disableFadeOut?: boolean
 
   // CSS settings
   zIndex?: number
@@ -41,6 +42,7 @@ const CustomScrollbar = (
 
     // Settings
     fadeOutTimerMS = 3000,
+    disableFadeOut = false, // Disable timer that hides inactive scrollbar.
     zIndex = 1000000,
     scrollbarThickness = 6,
     scrollbarThicknessActive = 10,
@@ -54,7 +56,7 @@ const CustomScrollbar = (
   const customScrollbarContainerRef = useRef<HTMLDivElement>(null)
 
   // State
-  const [show, setShow] = useState<boolean>(true)
+  const [show, setShow] = useState<boolean>(true) // Disabled functionality if $disableFadeOut is true
   const [mouseOffsetFromScrollbarStart, setMouseOffsetFromScrollbarStart] = useState<number>(0)
   const [isDraggingScrollbar, setIsDraggingScrollbar] = useState(false)
   const [isMouseHoveringScrollbar, setIsMouseHoveringScrollbar] = useState(false)
@@ -66,14 +68,21 @@ const CustomScrollbar = (
    * Fade out scrollbar after delay
    */
   useEffect(() => {
-    if (customScrollbarRef.current) {
+    const { current: customScrollbarEl } = customScrollbarRef
+    if (customScrollbarEl) {
 
+      /**
+       * Blocker
+       */
+      if (disableFadeOut) {
+        setCssProp(customScrollbarEl, 'opacity', '1')
+        return
+      }
+
+      // * Show *
       if (show) {
         setScrollbarTransition(false, true)
-
         const timer = setTimeout(() => {
-          const { current: customScrollbarEl } = customScrollbarRef
-
           if (
             customScrollbarEl
             && !isMouseHoveringScrollbar
@@ -83,20 +92,21 @@ const CustomScrollbar = (
           }
         }, fadeOutTimerMS)
 
-        /***/
-        customScrollbarRef.current.style.opacity = '1'
+        setCssProp(customScrollbarEl, 'opacity', '1')
 
         return () => {
           clearTimeout(timer)
         }
+
+      // * Hide *
       } else {
         /***/
         setScrollbarTransition(true, true)
-        customScrollbarRef.current.style.opacity = '0'
+        setCssProp(customScrollbarEl, 'opacity', '0')
       }
     }
 
-  })
+  }, [show])
 
   useEffect(() => {
     if (!scrollElementRef.current) {
@@ -217,10 +227,9 @@ const CustomScrollbar = (
         customScrollbarContainerEl.style.width = `${fullWidth}px`
       }
 
-
-      customScrollbarContainerEl.style.zIndex = `${zIndex}`
-      customScrollbarEl.style.borderRadius = `${borderRadius}px`
-      customScrollbarEl.style.backgroundColor = backgroundColor
+      setCssProp(customScrollbarContainerEl, 'zIndex', zIndex.toString())
+      setCssProp(customScrollbarEl, 'borderRadius', borderRadius.toString())
+      setCssProp(customScrollbarEl, 'backgroundColor', backgroundColor)
 
       // Set initial scrollbar values on next tick.
       setTimeout(() => {
@@ -233,26 +242,37 @@ const CustomScrollbar = (
     }
   }
 
+
+
   /***********
    * Helpers *
    ***********/
+
+  const setCssProp = (
+    element: HTMLElement,
+    key: keyof CSSStyleDeclaration,
+    value: string
+  ) => {
+    ;(element.style as any)[key] = value
+  }
 
   const setScrollbarTransition = (opacityTransition: boolean, heightWidthTransition: boolean) => {
     if (!customScrollbarRef.current) {
       return
     }
 
-    let transition = ''
+    const transitionValues = []
 
     if (opacityTransition) {
-      transition += 'opacity .6s, '
+      transitionValues.push('opacity .6s')
     }
 
     if (heightWidthTransition) {
-      transition += 'height .2s, width .2s'
+      transitionValues.push('height .2s')
+      transitionValues.push('width .2s')
     }
 
-    customScrollbarRef.current.style.transition = transition
+    customScrollbarRef.current.style.transition = transitionValues.join(', ')
   }
 
   const setScrollbarThickness = (size: 'S' | 'L') => {
@@ -261,7 +281,6 @@ const CustomScrollbar = (
     }
 
     if (size === 'L') {
-      customScrollbarRef.current.style.borderRadius = '6px'
       isVerticalScrollbar
         ? customScrollbarRef.current.style.width = `${scrollbarThicknessActive}px`
         : customScrollbarRef.current.style.height = `${scrollbarThicknessActive}px`
@@ -369,22 +388,35 @@ const CustomScrollbar = (
   const handleMouseEnter = () => {
     setScrollbarTransition(true, true)
     setScrollbarThickness('L')
+    setIsMouseHoveringScrollbar(true)
 
     if (getMaxScrollPos()) {
       setShow(true)
     }
-    setIsMouseHoveringScrollbar(true)
-
   }
 
   const handleMouseLeave = () => {
+    setIsMouseHoveringScrollbar(false)
+
     if (!isDraggingScrollbar) {
       setScrollbarTransition(true, true)
       setScrollbarThickness('S')
+      console.log('here')
       setShow(false)
     }
+  }
 
-    setIsMouseHoveringScrollbar(false)
+  const handleMouseUp = () => {
+    // Enable text select / highlight
+    setCssProp(document.body, 'userSelect', '')
+
+    if (isDraggingScrollbar) {
+      setIsDraggingScrollbar(false)
+    }
+
+    if (!isMouseHoveringScrollbar) {
+      setScrollbarThickness('S')
+    }
   }
 
   const handleMouseDown = (isContainerClick?: boolean) => (event: React.MouseEvent) => {
@@ -433,16 +465,6 @@ const CustomScrollbar = (
     const scrollPos = maxScrollPos * percentMouseMoved
 
     setScrollElementScrollPos(scrollPos)
-  }
-
-  const handleMouseUp = () => {
-    // Enable text select / highlight
-    document.body.style.userSelect = ''
-
-    if (isDraggingScrollbar) {
-      setScrollbarThickness('S')
-      setIsDraggingScrollbar(false)
-    }
   }
 
   /**********
@@ -533,14 +555,14 @@ const CustomScrollbar = (
   return (
     <div
       ref={customScrollbarContainerRef}
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', userSelect: 'none' }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown(true)}
     >
       <div
         ref={customScrollbarRef}
-        style={{ position: 'absolute', opacity: 0 }}
+        style={{ position: 'absolute', opacity: 0, userSelect: 'none' }}
         onMouseDown={handleMouseDown()}
       ></div>
     </div>

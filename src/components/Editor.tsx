@@ -533,6 +533,9 @@ const Editor = ({ content }: { content: string }) => {
             orientation={'horizontalBottom'}
             positionFixedLeft={getEditorCssVars().editorMarginWidth}
             positionFixed={true}
+            disableFadeOut={true}
+            scrollbarThickness={10}
+            scrollbarThicknessActive={14}
           />
         </div>
 
