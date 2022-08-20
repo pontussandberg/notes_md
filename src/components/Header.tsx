@@ -1,3 +1,7 @@
+type HeaderProps = {
+
+}
+
 const Header = () => {
 
 

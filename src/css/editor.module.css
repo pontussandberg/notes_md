@@ -142,6 +142,10 @@
   font-size: 10px;
   color: var(--editor-light);
   cursor: pointer;
+  height: var(--editor-line-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* *** */

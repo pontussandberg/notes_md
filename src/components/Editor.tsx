@@ -117,7 +117,7 @@ const Editor = ({ content }: { content: string }) => {
     } = getEditorCssVars()
 
     // Calculating current line by checking mouse Y position
-    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - 2) / editorLineHeight)
+    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop) / editorLineHeight)
 
     /**
      * Check line number
@@ -369,7 +369,7 @@ const Editor = ({ content }: { content: string }) => {
    */
   const getLineNumEl = (index: number, isCurrentLine = false): ReactElement => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
-    const topPos = (index * editorLineHeight) + editorPaddingTop + 1
+    const topPos = (index * editorLineHeight) + editorPaddingTop - 0.4
 
     return (
       <span
@@ -448,7 +448,8 @@ const Editor = ({ content }: { content: string }) => {
    */
   const getCurrentLineHighlightTopPostion = () => {
     const { editorLineHeight, editorPaddingTop } = getEditorCssVars()
-    return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop
+    const randomCorrectionValue = 0
+    return (currentLineNumber - 1) * editorLineHeight + editorPaddingTop - randomCorrectionValue
   }
 
   /**
