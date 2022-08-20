@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import next from "next";
 
-const env_description = process.env.NODE_ENV === 'production' ? 'Production' : 'Development'
+const env_description = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000;
     });
     server.listen(port, (err?: any) => {
       if (err) throw err;
-      console.log(`> Ready on localhost:${port} - env ${process.env.NODE_ENV}`);
+      console.log(`> Ready on localhost:${port} - env ${env_description}`);
     });
   } catch (e) {
     console.error(e);
