@@ -1,0 +1,5 @@
+.editorWithHeaderWrapper {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 40px calc(100vh - 40px);
+}

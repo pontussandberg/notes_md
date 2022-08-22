@@ -1,0 +1,15 @@
+.editorHeader {
+  background: var(--editor-bg);
+  border-bottom: var(--editor-lighter) 1px solid;
+  height: 100%;
+  user-select: none;
+}
+
+.menuButton {
+  border: none;
+  background: none;
+  outline: none;
+  padding: 0 18px 0 12px;
+  height: 100%;
+  cursor: pointer;
+}

@@ -1,6 +1,8 @@
-// import Editor from "../components/Editor";
-import { useEffect, useState } from "react";
-import Editor from "../components/Editor";
+
+import { useEffect, useState } from "react"
+import styles from '../css/index.module.css'
+import Editor from "../components/Editor"
+import Header from '../components/EditorHeader'
 
 const IndexPage = () => {
   const [content, setContent] = useState<string | null>(null)
@@ -12,8 +14,23 @@ const IndexPage = () => {
     }
   }, [])
 
+  const handleShowMenu = () => {
+    console.log('menu clicked')
+  }
+
   if (typeof content === 'string') {
-    return <Editor content={content}/>
+    return (
+      <main>
+        <section className={styles.editorWithHeaderWrapper}>
+          <Header
+            onMenuClick={handleShowMenu}
+          />
+          <Editor
+            content={content}
+          />
+        </section>
+      </main>
+    )
   }
 
   return null

@@ -1,10 +1,5 @@
 /* *** */
 
-.componentWrapper {
-  width: 100%;
-  height: 100vh;;
-}
-
 .container {
   height: var(--editor-wrapper-height);
   position: relative;

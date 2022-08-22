@@ -14,7 +14,24 @@ import { TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'
 
-const Editor = ({ content }: { content: string }) => {
+type EditorProps = {
+  content: string
+
+  /* Default height and width are "100%" */
+  height?: number
+  width?: number
+  heightUnits?: string
+  widthUnits?: string
+}
+
+const Editor = ({
+  content,
+  height = 100,
+  width = 100,
+  heightUnits = '%',
+  widthUnits = '%',
+
+}: EditorProps) => {
   const componentWrapperRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -32,6 +49,17 @@ const Editor = ({ content }: { content: string }) => {
   const [mdHtml, setMdHtml] = useState('')
   const [showMdViewer, _setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
+
+  /**
+   * Set editor dimensions on mount.
+   */
+  useEffect(() => {
+    const { current: componentWrapperEl } = componentWrapperRef
+    if (componentWrapperEl) {
+      componentWrapperEl.style.height = `${height}${heightUnits}`
+      componentWrapperEl.style.width = `${width}${widthUnits}`
+    }
+  }, [])
 
   /**
    * This effect will make sure that editor padding is always shown
@@ -104,7 +132,10 @@ const Editor = ({ content }: { content: string }) => {
    *     </>       *
    *****************/
   const handleEditorClickEvent = (event: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (!editorContainerRef.current) {
+    if (
+      !editorContainerRef.current
+      || !componentWrapperRef.current
+    ) {
       return
     }
 
@@ -118,8 +149,10 @@ const Editor = ({ content }: { content: string }) => {
       editorLineHeight,
     } = getEditorCssVars()
 
+    const editorTopOffset = componentWrapperRef.current.getBoundingClientRect().top + document.documentElement.scrollTop
+
     // Calculating current line by checking mouse Y position
-    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop) / editorLineHeight)
+    let mouseLineNumber = Math.ceil((y - editorPaddingTop + scrollTop - editorTopOffset) / editorLineHeight)
 
     /**
      * Check line number
