@@ -127,6 +127,7 @@
 }
 
 .editorMargin {
+  user-select: none;
   position: relative;
   background: var(--editor-bg);
   margin: 0;
@@ -135,6 +136,7 @@
 }
 
 .lineEnumeration {
+  height: var(--editor-line-height);
   position: absolute;
   width: 100%;
   text-align: center;

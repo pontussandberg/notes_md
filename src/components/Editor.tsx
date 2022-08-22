@@ -49,8 +49,10 @@ const Editor = ({ content }: { content: string }) => {
 
     // @ts-ignore
     if (window.Prism) {
-      // @ts-ignore
-      window.Prism.highlightAll()
+      setTimeout(() => {
+        // @ts-ignore
+        window.Prism.highlightAll()
+      })
     }
     ////////
 
@@ -243,9 +245,9 @@ const Editor = ({ content }: { content: string }) => {
     const lineStart = getTextareaContentIndex(index, 0, lines)
     const lineEnd = getTextareaContentIndex(index, lines[index].length, lines)
 
-    textareaEl.focus()
 
     setTimeout(() => {
+      textareaEl.focus()
       textareaEl.setSelectionRange(lineStart, lineEnd)
     })
   }
@@ -373,7 +375,7 @@ const Editor = ({ content }: { content: string }) => {
 
     return (
       <span
-        onClick={() => handleLineEnumerationClick(index)}
+        onMouseDown={() => handleLineEnumerationClick(index)}
         className={styles.lineEnumeration}
         key={uniqid()}
         style={{
@@ -387,6 +389,8 @@ const Editor = ({ content }: { content: string }) => {
   }
 
   /**
+   * TODO - Refactor into render function
+   *
    * Setting state var lineEnumerationEl with line enumeration els.
    */
   const updateLineEnumerationEl = () => {
