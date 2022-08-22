@@ -8,11 +8,14 @@
   --editor-margin-right-width: 12px;
   --editor-wrapper-height: 100vh;
   --editor-font-size: 13px;
-  --editor-letter-spacing: .82px;
+  --editor-letter-spacing: .78px;
   /* *** */
 
+  --editor-header-height: 40px;
+
   --editor-bg: #282B3D;
-  --editor-light: #6C75AC;
+  --editor-light: rgba(108, 117, 172, 1);
+  --editor-light-subdued: rgba(108, 117, 172, .4);
   --editor-lighter: rgba(108, 117, 172, .2);
 
   --primary-bg: #1B1D2B;
@@ -23,8 +26,8 @@
   --menu-bg: #212121;
 
   --dashboard-document-side-length: 150px;
-  --dashboard-document-grid-gap: 100px;
-  --editor-close-animation-time: 0.2s;
+  --dashboard-document-grid-gap: 80px;
+  --editor-close-animation-time: .2s;
   --editor-close-animation-transition: height ease var(--editor-close-animation-time), width ease var(--editor-close-animation-time), top ease var(--editor-close-animation-time), left ease var(--editor-close-animation-time);
 
 }

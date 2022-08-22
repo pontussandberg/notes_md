@@ -9,8 +9,7 @@ import uniqid from 'uniqid'
 import showdown from 'showdown'
 
 import styles from '../css/editor.module.css'
-// import GlassButton from './Buttons/GlassButton'
-import { TActiveKeys } from '../types'
+import { DocumentFile, TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'
 
@@ -22,6 +21,7 @@ type EditorProps = {
   width?: number
   heightUnits?: string
   widthUnits?: string
+  onDocumentUpdate: (data: DocumentFile) => void
 }
 
 const Editor = ({
@@ -30,7 +30,7 @@ const Editor = ({
   width = 100,
   heightUnits = '%',
   widthUnits = '%',
-
+  onDocumentUpdate,
 }: EditorProps) => {
   const componentWrapperRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
@@ -46,7 +46,7 @@ const Editor = ({
   const [hideCurrentLineHighlight, setHideCurrentLineHighlight] = useState(false)
   const [currentLinesCount, setCurrentLinesCount] = useState(0)
   const [lineEnumerationEl, setLineEnumerationEl] = useState<null | ReactElement[]>(null)
-  const [mdHtml, setMdHtml] = useState('')
+  const [_mdHtml, setMdHtml] = useState('')
   const [showMdViewer, _setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
 
@@ -126,7 +126,21 @@ const Editor = ({
 
   useEffect(() => {
     updateCurrentLineNumber()
+    emitContentUpdate()
   }, [documentContent])
+
+  const getDocTitle = () => {
+    return getLines(documentContent)[0].slice(0, 16)
+  }
+
+  const emitContentUpdate = () => {
+    onDocumentUpdate({
+      rowsCount: getLines(documentContent).length,
+      title: getDocTitle(),
+      content: documentContent,
+      fileExtension: '.md'
+    })
+  }
 
   /*****************
    *     </>       *
@@ -492,10 +506,10 @@ const Editor = ({
   /**
    * Toggle between editor view & markdown view
    */
-  const toggleMdViewer = () => {
-    // setShowMdViewer(!showMdViewer)
+  // const toggleMdViewer = () => {
+  //  setShowMdViewer(!showMdViewer)
 
-  }
+  // }
 
   /**
    *******************

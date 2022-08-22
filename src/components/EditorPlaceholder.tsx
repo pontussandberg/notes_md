@@ -9,6 +9,7 @@ type EditorPlaceholderProps = {
 
 const EditorPlaceholder = ({
   rowsCount = 5,
+  title = '',
   onClick = () => {},
 }: EditorPlaceholderProps) => {
 
@@ -29,18 +30,21 @@ const EditorPlaceholder = ({
 
 
   return (
-    <div className={styles.editorPlaceholder} onClick={onClick}>
-      <div className={styles.editorPlaceholderHeader}></div>
+    <div>
+      <div className={styles.editorPlaceholder} onClick={onClick}>
+        <div className={styles.editorPlaceholderHeader}></div>
+        <div style={{display: 'flex', alignItems: 'stretch', flexGrow: 1}}>
+          <div className={styles.editorPlaceholderMargin}>
+            {renderRows()}
+          </div>
 
-      <div style={{display: 'flex', alignItems: 'stretch', flexGrow: 1}}>
-        <div className={styles.editorPlaceholderMargin}>
-          {renderRows()}
-        </div>
-
-        <div className={styles.editorPlaceholderRows}>
-          {renderRows()}
+          <div className={styles.editorPlaceholderRows}>
+            {renderRows()}
+          </div>
         </div>
       </div>
+
+      <div className={styles.title}>{title}</div>
     </div>
 
   )

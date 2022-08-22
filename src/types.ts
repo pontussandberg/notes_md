@@ -1,9 +1,11 @@
 import { MouseEventHandler } from "react"
 
-export type Documents = {
+export type DocumentFile = {
+  listIndex?: number
   rowsCount: number
   title: string
   content: string
+  fileExtension: '.md'
 }
 
 // Hacky but thes props are handled by NextJS anyway
