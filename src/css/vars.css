@@ -12,9 +12,19 @@
   /* *** */
 
   --editor-bg: #282B3D;
-  --editor-light: rgba(108, 117, 172, 0.9);
+  --editor-light: #6C75AC;
   --editor-lighter: rgba(108, 117, 172, .2);
 
   --primary-bg: #1B1D2B;
   --primary-text: #fff;
+
+  /* Menu */
+  --menu-subdued: #414141;
+  --menu-bg: #212121;
+
+  --dashboard-document-side-length: 150px;
+  --dashboard-document-grid-gap: 100px;
+  --editor-close-animation-time: 0.2s;
+  --editor-close-animation-transition: height ease var(--editor-close-animation-time), width ease var(--editor-close-animation-time), top ease var(--editor-close-animation-time), left ease var(--editor-close-animation-time);
+
 }

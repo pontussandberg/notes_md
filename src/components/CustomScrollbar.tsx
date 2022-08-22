@@ -55,13 +55,21 @@ const CustomScrollbar = (
   const customScrollbarContainerRef = useRef<HTMLDivElement>(null)
 
   // State
-  const [show, setShow] = useState<boolean>(true) // Disabled functionality if $disableFadeOut is true
+  const [show, setShow] = useState<boolean>(false) // Disabled functionality if $disableFadeOut is true
   const [mouseOffsetFromScrollbarStart, setMouseOffsetFromScrollbarStart] = useState<number>(0)
   const [isDraggingScrollbar, setIsDraggingScrollbar] = useState(false)
   const [isMouseHoveringScrollbar, setIsMouseHoveringScrollbar] = useState(false)
 
   // Constants
   const isVerticalScrollbar = orientation === 'verticalLeft' || orientation === 'verticalRight'
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (getMaxScrollPos() > 0) {
+        setShow(true)
+      }
+    });
+  }, [])
 
   /**
    * Fade out scrollbar after delay
@@ -75,14 +83,10 @@ const CustomScrollbar = (
        * Blocker for fadeout timer
        */
       if (disableFadeOut) {
-
         // Show if scrollable
         if (getMaxScrollPos() > 0) {
           setCssProp(customScrollbarEl, 'opacity', '1')
-        } else {
-          setCssProp(customScrollbarEl, 'opacity', '0')
         }
-
         return
       }
 
@@ -235,7 +239,7 @@ const CustomScrollbar = (
       }
 
       setCssProp(customScrollbarContainerEl, 'zIndex', zIndex.toString())
-      setCssProp(customScrollbarEl, 'borderRadius', borderRadius.toString())
+      setCssProp(customScrollbarEl, 'borderRadius', `${borderRadius.toString()}px`)
       setCssProp(customScrollbarEl, 'backgroundColor', backgroundColor)
 
       // Set initial scrollbar values on next tick.

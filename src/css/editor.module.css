@@ -1,7 +1,11 @@
 /* *** */
 
+.componentWrapper {
+  position: relative;
+}
+
 .container {
-  height: var(--editor-wrapper-height);
+  height: 100%;
   position: relative;
   overflow-x: hidden;
   overflow-y: scroll;

@@ -1,5 +1,11 @@
 import { MouseEventHandler } from "react"
 
+export type Documents = {
+  rowsCount: number
+  title: string
+  content: string
+}
+
 // Hacky but thes props are handled by NextJS anyway
 export type AppProps = {
   Component: any

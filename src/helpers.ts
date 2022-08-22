@@ -59,11 +59,21 @@ export const getCssVariables = (
   return result
 }
 
+export const getRawCssVarianble = (
+  key: string
+): string => {
+  return getComputedStyle(document.documentElement).getPropertyValue(key)
+}
+
 export const getCssVariable = (
   key: string,
 ): number => {
   if (typeof window !== "undefined") {
-    return parseInt(getComputedStyle(document.documentElement).getPropertyValue(key).replace('px', ''))
+    return parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue(key)
+        .replace('px', '')
+        .replace('s', '')
+    )
   }
 
   return 0

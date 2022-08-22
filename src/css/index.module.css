@@ -1,5 +1,53 @@
-.editorWithHeaderWrapper {
+.editorContainer {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 40px calc(100vh - 40px);
+  position: relative;
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--menu-bg);
+}
+
+.menuSidebar {
+  border-right: 1px solid var(--menu-subdued);
+}
+
+.menuDashboard {
+  padding: 100px;
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+.dashboardDocumentCards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--dashboard-document-side-length));
+  grid-template-rows: repeat(auto-fit, var(--dashboard-document-side-length));
+  grid-gap: var(--dashboard-document-grid-gap);
+}
+
+.editorPlaceholderContainer {
+  width: var(--dashboard-document-side-length);
+  height: var(--dashboard-document-side-length);
+}
+
+.animatedEditorPlaceholderContainer {
+  opacity: 0;
+  z-index: 999999999999;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: var(--editor-close-animation-transition);
 }
