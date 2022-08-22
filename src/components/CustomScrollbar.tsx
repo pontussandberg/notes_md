@@ -30,7 +30,6 @@ type CustomScrollbarProps = {
   backgroundColor?: string
 }
 
-// TODO - When $containerElementRef is not taking full space from offset, draggable desont work properly
 const CustomScrollbar = (
   {
     orientation,
