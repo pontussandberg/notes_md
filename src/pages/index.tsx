@@ -109,7 +109,7 @@ const IndexPage = () => {
 
     return (
       <div className={styles.editorContainer}>
-        <Header onMenuClick={handleShowMenu}/>
+        <Header title={documents[currentDocumentIndex].title} onMenuClick={handleShowMenu}/>
         <Editor onDocumentUpdate={handleDocumentUpdate} content={documents[currentDocumentIndex].content}/>
       </div>
     )

@@ -1,4 +1,5 @@
 .editorHeader {
+  position: relative;
   background: var(--editor-bg);
   border-bottom: var(--editor-lighter) 1px solid;
   height: 100%;
@@ -6,10 +7,27 @@
 }
 
 .menuButton {
+  display: flex;
+  align-items: center;
   border: none;
   background: none;
   outline: none;
   padding: 0 18px 0 12px;
   height: 100%;
   cursor: pointer;
+}
+
+.menuButton:hover path,
+.menuButton:hover rect {
+  fill: #FFE58A;
+}
+
+.title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e4e4e4;
+  font-size: 16px;
+  font-weight: 700;
 }

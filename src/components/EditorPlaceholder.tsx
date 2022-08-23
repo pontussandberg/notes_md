@@ -30,8 +30,8 @@ const EditorPlaceholder = ({
 
 
   return (
-    <div>
-      <div className={styles.editorPlaceholder} onClick={onClick}>
+    <div onClick={onClick} className={styles.editorPlaceholderContainer}>
+      <div className={styles.editorPlaceholder}>
         <div className={styles.editorPlaceholderHeader}></div>
         <div style={{display: 'flex', alignItems: 'stretch', flexGrow: 1}}>
           <div className={styles.editorPlaceholderMargin}>

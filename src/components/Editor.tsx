@@ -130,7 +130,7 @@ const Editor = ({
   }, [documentContent])
 
   const getDocTitle = () => {
-    return getLines(documentContent)[0].slice(0, 16)
+    return getLines(documentContent)[0].slice(0, 32)
   }
 
   const emitContentUpdate = () => {

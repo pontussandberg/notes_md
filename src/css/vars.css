@@ -11,12 +11,13 @@
   --editor-letter-spacing: .78px;
   /* *** */
 
-  --editor-header-height: 40px;
+  --editor-header-height: 50px;
 
   --editor-bg: #282B3D;
   --editor-light: rgba(108, 117, 172, 1);
   --editor-light-subdued: rgba(108, 117, 172, .4);
   --editor-lighter: rgba(108, 117, 172, .2);
+  --highlight: #ffefb4;
 
   --primary-bg: #1B1D2B;
   --primary-text: #fff;
