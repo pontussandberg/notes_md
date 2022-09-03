@@ -82,11 +82,6 @@ const Editor = ({
         window.Prism.highlightAll()
       })
     }
-    ////////
-
-    if (documentContent) {
-      localStorage.setItem('note', documentContent)
-    }
   }, [documentContent])
 
   /**

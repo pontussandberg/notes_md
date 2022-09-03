@@ -39,7 +39,7 @@
   background: var(--editor-bg);
 }
 .documentCardContainer__documentCard:hover {
-  border: 2px solid var(--highlight);
+  border: 2px solid #fff;
 }
 
 .documentCard__header {

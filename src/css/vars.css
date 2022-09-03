@@ -1,22 +1,29 @@
 :root {
   /* Updated with JS */
-  --editor-line-height: 18px;
-  --editor-padding-top: 12px;
+  --editor-padding-top: 20px;
   --editor-padding-bottom: 12px;
   --editor-padding-left: 16px;
   --editor-margin-width: 50px;
   --editor-margin-right-width: 12px;
   --editor-wrapper-height: 100vh;
-  --editor-font-size: 13px;
+  --editor-line-height: 22px;
+  --editor-font-size: 16px;
   --editor-letter-spacing: .78px;
   /* *** */
 
+  --cta: rgb(61, 82, 216);
+  --cta-hover: rgb(67, 89, 235);
+
   --editor-header-height: 50px;
 
-  --editor-bg: #282B3D;
+  --editor-bg: #2b2d38;
+  --editor-lighter: #383b49;
+
+
+
+
   --editor-light: rgba(108, 117, 172, 1);
   --editor-light-subdued: rgba(108, 117, 172, .4);
-  --editor-lighter: rgba(108, 117, 172, .2);
   --highlight:rgb(209, 209, 209);
   --carret: #ffefb4;
 
@@ -24,9 +31,11 @@
   --primary-text: #fff;
 
   /* Menu */
-  --menu-subdued: #414141;
+  --menu-subdued: #2d3044;
   --menu-subdued-light: #2c2c2c;
-  --menu-bg: #212121;
+  --menu-bg: #292828;
+  --menu-bg: rgb(32, 31, 31);
+  --menu-text: rgba(255, 255, 255, 0.85);
 
   --dashboard-document-side-length: 150px;
   --dashboard-document-grid-gap: 80px;

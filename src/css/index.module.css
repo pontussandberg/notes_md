@@ -18,14 +18,33 @@
 }
 
 .menu__sidebar {
+  user-select: none;
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid var(--menu-subdued);
+  padding-top: 65px;
 }
+.sidebar__item {
+  padding: 12px 32px;
+  color: var(--editor-light);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: padding 0.2s;
+  position: relative;
+}
+.active.sidebar__item {
+  color: var(--menu-text);
+}
+
 
 .menu__main {
   position: relative;
 }
 
+
 .documents__header {
+  user-select: none;
   padding: 6px 32px;
   height: 100px;
   display: flex;
