@@ -17,13 +17,15 @@
   --editor-light: rgba(108, 117, 172, 1);
   --editor-light-subdued: rgba(108, 117, 172, .4);
   --editor-lighter: rgba(108, 117, 172, .2);
-  --highlight: #ffefb4;
+  --highlight:rgb(209, 209, 209);
+  --carret: #ffefb4;
 
   --primary-bg: #1B1D2B;
   --primary-text: #fff;
 
   /* Menu */
   --menu-subdued: #414141;
+  --menu-subdued-light: #2c2c2c;
   --menu-bg: #212121;
 
   --dashboard-document-side-length: 150px;

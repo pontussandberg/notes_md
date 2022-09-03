@@ -17,20 +17,63 @@
   background: var(--menu-bg);
 }
 
-.menuSidebar {
+.menu__sidebar {
   border-right: 1px solid var(--menu-subdued);
 }
 
-.menuDashboard {
-  padding: 100px;
-  display: flex;
-  justify-content: stretch;
-  align-items: stretch;
+.menu__main {
+  position: relative;
 }
 
-.dashboardDocumentCards {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, var(--dashboard-document-side-length));
-  grid-gap: var(--dashboard-document-grid-gap);
+.documents__header {
+  padding: 6px 32px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--menu-subdued);
+  display: flex;
+  gap: 64px;
 }
+
+.documents__itemList {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+}
+.documents__itemList > * {
+  padding-left: 32px;
+}
+
+.documents__itemCards {
+  margin-top: 40px;
+  padding: 0 32px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  gap: 50px;
+}
+
+
+/* Menu documents show options */
+.showOption {
+  padding: 0 24px;
+}
+.showOptionBtn {
+  cursor: pointer;
+  padding: 16px;
+  transform: scale(1.3)
+}
+.showOptionBtn.active rect,
+.showOptionBtn.active path {
+  fill: var(--highlight) !important;
+}
+.showOptionBtn rect {
+  fill: #414141 !important;
+}
+
+.showOptionBtn:hover rect {
+  fill: var(--highlight) !important;
+}
+
+

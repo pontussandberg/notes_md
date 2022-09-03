@@ -139,7 +139,6 @@
   position: absolute;
   width: 100%;
   text-align: center;
-  font-family: monospace;
   font-size: 10px;
   color: var(--editor-light);
   cursor: pointer;
