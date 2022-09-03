@@ -11,6 +11,7 @@ import PrimaryButton from "../components/PrimaryButton"
 
 
 type ShowOption = 'list' | 'card'
+type MenuOption = 'documents' | 'settings'
 const debug = true
 
 const IndexPage = () => {
@@ -18,6 +19,7 @@ const IndexPage = () => {
   const [currentDocumentIndex, setCurrentDocumentIndex] = useState(0)
   const [showMenu, setShowMenu] = useState(true)
   const [showOption, setShowOption] = useState<ShowOption>('list')
+  const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
 
 
   /**
@@ -151,20 +153,32 @@ const IndexPage = () => {
     )
   }
 
+  const renderMenuSettings = () => {
+    return <></>
+  }
+
+  const renderCurrentMenu = () => {
+    switch (currentMenu) {
+      case 'documents':
+        return renderMenuDocuments()
+      case 'settings':
+        return renderMenuSettings()
+    }
+  }
+
   const renderMenu = () => {
     return (
       <div className={styles.menu}>
 
         {/* Sidebar */}
         <div className={styles.menu__sidebar}>
+          <a onClick={() => setCurrentMenu('documents')} className={`${styles.sidebar__item} ${currentMenu === 'documents' ? styles.active : ''}`}>Documents</a>
+          <a onClick={() => setCurrentMenu('settings')} className={`${styles.sidebar__item} ${currentMenu === 'settings' ? styles.active : ''}`}>Settings</a>
         </div>
 
         {/* Menu main content */}
         <div className={styles.menu__main}>
-          {renderMenuDocuments()}
-
-          {/* Settings */}
-          {/* <div></div> */}
+          {renderCurrentMenu()}
         </div>
       </div>
     )
@@ -173,8 +187,14 @@ const IndexPage = () => {
   const renderEditor = () => {
     return (
       <div className={styles.editorContainer}>
-        <Header title={documents[currentDocumentIndex].title} onMenuClick={handleShowMenu}/>
-        <Editor onDocumentUpdate={handleDocumentUpdate} content={documents[currentDocumentIndex].content}/>
+        <Header
+          title={documents[currentDocumentIndex].title}
+          onMenuClick={handleShowMenu}
+        />
+        <Editor
+          onDocumentUpdate={handleDocumentUpdate}
+          content={documents[currentDocumentIndex].content}
+        />
       </div>
     )
   }
