@@ -1,29 +1,38 @@
 import styles from '../css/editorHeader.module.css'
 
 type EditorHeaderProps = {
-  onMenuClick: () => void
+  onDrawerToggleClick: () => void
+  drawerOpen: boolean
   title: string
 }
 
-const Header = ({
-  onMenuClick,
+const EditorHeader = ({
+  onDrawerToggleClick,
+  drawerOpen,
   title,
 }: EditorHeaderProps) => {
 
+  const getButtonStyles = () => {
+    const classes = [styles.menuButton]
+
+    if (!drawerOpen) {
+      classes.push(styles.closed)
+    }
+
+    return classes.join(' ')
+  }
 
   return (
     <header className={styles.editorHeader}>
-      <button className={styles.menuButton} onClick={onMenuClick}>
-      <svg width="27" height="16" viewBox="0 0 27 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0.292893 7.29289C-0.0976311 7.68342 -0.0976311 8.31658 0.292893 8.70711L6.65685 15.0711C7.04738 15.4616 7.68054 15.4616 8.07107 15.0711C8.46159 14.6805 8.46159 14.0474 8.07107 13.6569L2.41421 8L8.07107 2.34315C8.46159 1.95262 8.46159 1.31946 8.07107 0.928932C7.68054 0.538408 7.04738 0.538408 6.65685 0.928932L0.292893 7.29289ZM25 7L1 7L1 9L25 9L25 7Z" fill="#E4E4E4"/>
-        <rect x="24" y="7" width="3" height="2" rx="1" fill="#E4E4E4"/>
-      </svg>
 
+      <button className={getButtonStyles()} onClick={onDrawerToggleClick}>
+      <svg width="100%" height="100%" version="1.1" viewBox="0 0 20 20" x="0px" y="0px"><g><path d="M4 16V4H2v12h2zM13 15l-1.5-1.5L14 11H6V9h8l-2.5-2.5L13 5l5 5-5 5z"></path></g></svg>
       </button>
+
       <div className={styles.title}>{title}</div>
     </header>
   )
 }
 
 
-export default Header
+export default EditorHeader

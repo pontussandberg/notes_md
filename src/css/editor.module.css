@@ -229,3 +229,7 @@
 .editorBtn:hover {
   opacity: 1;
 }
+
+.menuDrawer {
+  background: var(--menu-bg);
+}

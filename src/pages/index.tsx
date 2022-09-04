@@ -3,11 +3,12 @@ import { useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 import styles from '../css/index.module.css'
 import Editor from "../components/Editor"
-import Header from '../components/EditorHeader'
+import EditorHeader from '../components/EditorHeader'
 import { DocumentFile } from "../types"
 import DocumentCard from "../components/DocumentCard"
 import DocumentListItem from "../components/DocumentListItem"
 import PrimaryButton from "../components/PrimaryButton"
+import MenuDrawer from "../components/MenuDrawer"
 
 
 type ShowOption = 'list' | 'card'
@@ -20,7 +21,7 @@ const IndexPage = () => {
   const [showMenu, setShowMenu] = useState(true)
   const [showOption, setShowOption] = useState<ShowOption>('list')
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
-
+  const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
 
   /**
    * Runs on every rernder
@@ -63,7 +64,7 @@ const IndexPage = () => {
       fileExtension: '.md',
     }
 
-    setDocuments([...documents, defaultDocument])
+    setDocuments([defaultDocument, ...documents])
   }
 
   /**
@@ -139,8 +140,8 @@ const IndexPage = () => {
           </div>
 
           <div>
-            <button onClick={() => setShowOption('list')} className={`${styles.showOptionBtn} ${!showCards ? styles.active : ''}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
-            <button onClick={() => setShowOption('card')} className={`${styles.showOptionBtn} ${showCards ? styles.active : ''}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
+            <button onClick={() => setShowOption('list')} className={`${styles.showOptionBtn} ${!showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
+            <button onClick={() => setShowOption('card')} className={`${styles.showOptionBtn} ${showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
           </div>
         </div>
 
@@ -172,8 +173,9 @@ const IndexPage = () => {
 
         {/* Sidebar */}
         <div className={styles.menu__sidebar}>
-          <a onClick={() => setCurrentMenu('documents')} className={`${styles.sidebar__item} ${currentMenu === 'documents' ? styles.active : ''}`}>Documents</a>
-          <a onClick={() => setCurrentMenu('settings')} className={`${styles.sidebar__item} ${currentMenu === 'settings' ? styles.active : ''}`}>Settings</a>
+          <h1 className={styles.sidebar__title}>Notes MD</h1>
+          <a onClick={() => setCurrentMenu('documents')} className={`${styles.sidebar__item} ${currentMenu === 'documents' && styles.active}`}>Documents</a>
+          <a onClick={() => setCurrentMenu('settings')} className={`${styles.sidebar__item} ${currentMenu === 'settings' && styles.active}`}>Settings</a>
         </div>
 
         {/* Menu main content */}
@@ -183,18 +185,34 @@ const IndexPage = () => {
       </div>
     )
   }
+  const getCurrentDocument = () => documents[currentDocumentIndex]
 
   const renderEditor = () => {
     return (
-      <div className={styles.editorContainer}>
-        <Header
-          title={documents[currentDocumentIndex].title}
-          onMenuClick={handleShowMenu}
+      <div className={styles.documentViewer}>
+
+        {/* Menu drawer */}
+        <MenuDrawer
+          isOpen={isMenuDrawerOpen}
+          currentDocumentIndex={currentDocumentIndex}
+          indexedDocumentTitles={documents.map(({title}) => title)}
+          onItemClick={handleDocumentItemClick}
+          onShowMenu={handleShowMenu}
         />
-        <Editor
-          onDocumentUpdate={handleDocumentUpdate}
-          content={documents[currentDocumentIndex].content}
-        />
+
+        {/* Editor */}
+        <div className={styles.documentViewer__editorContainer}>
+          <EditorHeader
+            title={getCurrentDocument().title}
+            onDrawerToggleClick={() => setisMenuDrawerOpen(!isMenuDrawerOpen)}
+            drawerOpen={isMenuDrawerOpen}
+          />
+          <Editor
+            key={currentDocumentIndex}
+            content={getCurrentDocument().content}
+            onDocumentUpdate={handleDocumentUpdate}
+          />
+        </div>
       </div>
     )
   }

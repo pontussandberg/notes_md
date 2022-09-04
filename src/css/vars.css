@@ -9,6 +9,8 @@
   --editor-line-height: 22px;
   --editor-font-size: 16px;
   --editor-letter-spacing: .78px;
+
+  --menuDrawerWidth: var(--editor-margin-width);
   /* *** */
 
   --cta: rgb(61, 82, 216);
@@ -18,12 +20,7 @@
 
   --editor-bg: #2b2d38;
   --editor-lighter: #383b49;
-
-
-
-
   --editor-light: rgba(108, 117, 172, 1);
-  --editor-light-subdued: rgba(108, 117, 172, .4);
   --highlight:rgb(209, 209, 209);
   --carret: #ffefb4;
 

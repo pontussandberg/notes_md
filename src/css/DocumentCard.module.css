@@ -61,7 +61,7 @@
 
 .main__margin > span {
   display: block;
-  background: var(--editor-light-subdued);
+  background: rgba(108, 117, 172, .4);
   opacity: .75;
   width: 2px;
   height: 2px;
@@ -77,7 +77,7 @@
 
 .main__rows > span {
   display: block;
-  background: var(--editor-light-subdued);
+  background: rgba(108, 117, 172, .4);
   opacity: .75;
   width: 40px;
   height: 2px;

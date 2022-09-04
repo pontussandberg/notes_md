@@ -20,6 +20,12 @@
   border-radius: 0px;
   cursor: pointer;
 }
+.menuButton svg {
+  transform: rotate(180deg);
+}
+.menuButton.closed svg {
+  transform: rotate(0deg) !important;
+}
 
 .menuButton path,
 .menuButton rect {
