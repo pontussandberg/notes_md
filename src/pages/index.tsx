@@ -7,11 +7,12 @@ import EditorHeader from '../components/EditorHeader'
 import { DocumentFile } from "../types"
 import DocumentCard from "../components/DocumentCard"
 import DocumentListItem from "../components/DocumentListItem"
-import PrimaryButton from "../components/PrimaryButton"
+import Button from "../components/Button"
 import MenuDrawer from "../components/MenuDrawer"
+import MarkdownRenderer from "../components/MarkdownRenderer"
 
 
-type ShowOption = 'list' | 'card'
+type ViewOption = 'list' | 'card'
 type MenuOption = 'documents' | 'settings'
 const debug = true
 
@@ -19,9 +20,10 @@ const IndexPage = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
   const [currentDocumentIndex, setCurrentDocumentIndex] = useState(0)
   const [showMenu, setShowMenu] = useState(true)
-  const [showOption, setShowOption] = useState<ShowOption>('card')
+  const [viewOption, setViewOption] = useState<ViewOption>('card')
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
+  const [showMarkdownRenderer, setShowMarkdownRenderer] = useState(false)
 
   /**
    * Runs on every rernder
@@ -38,6 +40,15 @@ const IndexPage = () => {
   })
 
   /**
+   * Hide markdown renderer on selected component updates
+   */
+  useEffect(() => {
+    if (showMarkdownRenderer) {
+      setShowMarkdownRenderer(false)
+    }
+  }, [currentDocumentIndex, showMenu])
+
+  /**
    * Whenever state variable documents is updated, store files in DB.
    */
   useEffect(() => {
@@ -47,7 +58,7 @@ const IndexPage = () => {
   }, [documents])
 
   /**
-   * Get stored document files
+   * Get stored document files on mount
    */
   useEffect(() => {
     const storedDocumentFiles = localStorage.getItem('documentFiles')
@@ -95,6 +106,20 @@ const IndexPage = () => {
     setDocuments(docs)
   }
 
+  const toggleShowMarkdownRenderer = () => {
+    if (showMarkdownRenderer) {
+      setShowMarkdownRenderer(false)
+      return
+    }
+
+    // Only enable markdown if editor is shown
+    if (!showMenu && getCurrentDocument()) {
+      setShowMarkdownRenderer(true)
+    }
+  }
+
+  const getCurrentDocument = () => documents[currentDocumentIndex]
+
   /********************
    * Render functions *
    ********************/
@@ -125,20 +150,21 @@ const IndexPage = () => {
   }
 
   const renderMenuDocuments = () => {
-    const showCards = showOption === 'card'
+    const showCards = viewOption === 'card'
 
     return (
       <div className={styles.main__documents}>
 
         {/* Header */}
         <div className={styles.documents__header}>
-          <PrimaryButton
+          <Button
+            type='primary'
             title={'New document'}
             onClick={createNewDocument}
           />
           <div>
-            <button onClick={() => setShowOption('card')} className={`${styles.showOptionBtn} ${showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
-            <button onClick={() => setShowOption('list')} className={`${styles.showOptionBtn} ${!showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
+            <button onClick={() => setViewOption('card')} className={`${styles.showOptionBtn} ${showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
+            <button onClick={() => setViewOption('list')} className={`${styles.showOptionBtn} ${!showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
           </div>
         </div>
 
@@ -185,7 +211,6 @@ const IndexPage = () => {
       </div>
     )
   }
-  const getCurrentDocument = () => documents[currentDocumentIndex]
 
   const renderEditor = () => {
     return (
@@ -204,14 +229,17 @@ const IndexPage = () => {
         <div className={styles.documentViewer__editorContainer}>
           <EditorHeader
             title={getCurrentDocument().title}
-            onDrawerToggleClick={() => setisMenuDrawerOpen(!isMenuDrawerOpen)}
             drawerOpen={isMenuDrawerOpen}
+            onDrawerToggleClick={() => setisMenuDrawerOpen(!isMenuDrawerOpen)}
+            toggleShowMarkdownRenderer={toggleShowMarkdownRenderer}
+            showMarkdownRenderer={showMarkdownRenderer}
           />
-          <Editor
-            key={currentDocumentIndex}
-            content={getCurrentDocument().content}
-            onDocumentUpdate={handleDocumentUpdate}
-          />
+          {
+          showMarkdownRenderer
+            ? <MarkdownRenderer markdownText={getCurrentDocument().content}/>
+            : <Editor key={currentDocumentIndex}content={getCurrentDocument().content}onDocumentUpdate={handleDocumentUpdate}/>
+          }
+
         </div>
       </div>
     )

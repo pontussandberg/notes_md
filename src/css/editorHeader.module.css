@@ -6,9 +6,10 @@
   border-bottom: var(--editor-lighter) 1px solid;
   height: 100%;
   user-select: none;
+  padding-right: var(--editor-padding-left)
 }
 
-.menuButton {
+.drawerButton {
   width: var(--editor-margin-width);
   display: flex;
   align-items: center;
@@ -20,15 +21,15 @@
   border-radius: 0px;
   cursor: pointer;
 }
-.menuButton svg {
+.drawerButton svg {
   transform: rotate(180deg);
 }
-.menuButton.closed svg {
+.drawerButton.closed svg {
   transform: rotate(0deg) !important;
 }
 
-.menuButton path,
-.menuButton rect {
+.drawerButton path,
+.drawerButton rect {
   fill: #fff;
 }
 
@@ -37,4 +38,8 @@
   color: #e4e4e4;
   font-size: 16px;
   font-weight: 700;
+}
+
+.renderMarkdownButton {
+  margin-left: auto;
 }

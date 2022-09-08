@@ -6,7 +6,6 @@ import {
   ReactElement,
 } from 'react'
 import uniqid from 'uniqid'
-import showdown from 'showdown'
 
 import styles from '../css/editor.module.css'
 import { DocumentFile, TActiveKeys } from '../types'
@@ -46,8 +45,6 @@ const Editor = ({
   const [hideCurrentLineHighlight, setHideCurrentLineHighlight] = useState(false)
   const [currentLinesCount, setCurrentLinesCount] = useState(0)
   const [lineEnumerationEl, setLineEnumerationEl] = useState<null | ReactElement[]>(null)
-  const [_mdHtml, setMdHtml] = useState('')
-  const [showMdViewer, _setShowMdViewer] = useState(false)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
 
   /**
@@ -108,7 +105,7 @@ const Editor = ({
       document.removeEventListener('selectionchange', handleDocumentSelectionChange)
       // ***
     }
-  }, [showMdViewer, activeKeys])
+  }, [activeKeys])
 
 
   /*****************
@@ -117,7 +114,7 @@ const Editor = ({
 
   useEffect(() => {
     updateLineEnumerationEl()
-  }, [currentLineNumber, documentContent, showMdViewer])
+  }, [currentLineNumber, documentContent])
 
   useEffect(() => {
     updateCurrentLineNumber()
@@ -300,7 +297,6 @@ const Editor = ({
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target
 
-    updateMdHtml(value)
     setDocumentContent(value)
     updateEditorViewLines(value)
   }
@@ -395,14 +391,6 @@ const Editor = ({
     })
   }
 
-  /**
-   * Setting state with editor content compiled to markdown html
-   */
-  const updateMdHtml = (value: string) => {
-    const converter = new showdown.Converter()
-    const html = converter.makeHtml(value)
-    setMdHtml(html)
-  }
 
   const getLines = (value: string): string[] => {
     return value.split('\n')
@@ -499,14 +487,6 @@ const Editor = ({
   }
 
   /**
-   * Toggle between editor view & markdown view
-   */
-  // const toggleMdViewer = () => {
-  //  setShowMdViewer(!showMdViewer)
-
-  // }
-
-  /**
    *******************
    * Render helpers  *
    * *****************
@@ -572,7 +552,6 @@ const Editor = ({
           {/* Text input */}
           <textarea
             spellCheck={false}
-            disabled={showMdViewer}
             ref={textareaRef}
             value={documentContent}
             onChange={handleInputChange}
@@ -595,29 +574,6 @@ const Editor = ({
             scrollbarThicknessActive={14}
           />
         </div>
-
-
-        {/* Editor / Markdown viewer toggle */}
-        {/* <GlassButton
-            onClick={toggleMdViewer}
-            title={showMdViewer ? 'Show editor (esc)' : 'Show markdown (esc)'}
-            style={{
-              position: 'absolute',
-              top: '15px',
-              right: '15px',
-              zIndex: 30,
-            }}
-          /> */}
-
-        {/* Markdown viewer */}
-        {/* <div
-            onClick={toggleMdViewer}
-            className={styles.mdViewer}
-            dangerouslySetInnerHTML={{ __html: mdHtml }}
-            style={{ display: showMdViewer ? 'block' : 'none' }}
-          ></div> */}
-
-
       </div>
     </div>
   )

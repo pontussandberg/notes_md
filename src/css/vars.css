@@ -14,12 +14,13 @@
   /* *** */
 
   --cta: rgb(61, 82, 216);
-  --cta-hover: rgb(67, 89, 235);
+  --ctaSecondary: rgb(71, 81, 150);
+  --ctaHover: rgb(67, 89, 235);
 
   --editor-header-height: 50px;
 
-  --editor-bg: #2b2d38;
-  --editor-lighter: #383b49;
+  --editor-bg: #252838;
+  --editor-lighter: #303449;
   --editor-light: rgba(108, 117, 172, 1);
   --highlight:rgb(209, 209, 209);
   --carret: #ffefb4;

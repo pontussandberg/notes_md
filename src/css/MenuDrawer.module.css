@@ -4,7 +4,7 @@
   transition: width 0.1s, opacity 0.1s;
 }
 .menuDrawer__menuButton {
-  color: var(--cta-hover);
+  color: var(--ctaHover);
   font-size: 16px;
   font-weight: 700;
   height: 50px;
