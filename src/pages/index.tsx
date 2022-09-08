@@ -19,7 +19,7 @@ const IndexPage = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
   const [currentDocumentIndex, setCurrentDocumentIndex] = useState(0)
   const [showMenu, setShowMenu] = useState(true)
-  const [showOption, setShowOption] = useState<ShowOption>('list')
+  const [showOption, setShowOption] = useState<ShowOption>('card')
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
 
@@ -128,26 +128,26 @@ const IndexPage = () => {
     const showCards = showOption === 'card'
 
     return (
-      <div className={styles.documents}>
+      <div className={styles.main__documents}>
 
         {/* Header */}
         <div className={styles.documents__header}>
+          <PrimaryButton
+            title={'New document'}
+            onClick={createNewDocument}
+          />
           <div>
-            <PrimaryButton
-              title={'New document'}
-              onClick={createNewDocument}
-              />
-          </div>
-
-          <div>
-            <button onClick={() => setShowOption('list')} className={`${styles.showOptionBtn} ${!showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
             <button onClick={() => setShowOption('card')} className={`${styles.showOptionBtn} ${showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
+            <button onClick={() => setShowOption('list')} className={`${styles.showOptionBtn} ${!showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="12" width="15" height="3" rx="1" fill="#D9D9D9"/><rect y="6" width="15" height="3" rx="1" fill="#D9D9D9"/></svg></button>
           </div>
         </div>
 
         {/* Content */}
-        <div className={showCards ? styles.documents__itemCards : styles.documents__itemList}>
-          {showCards ? renderDocumentCards() : renderDocumentListItems()}
+        <div className={styles.documents__documentItems}>
+          {showCards
+            ? <div className={styles.documentItems__cards}>{renderDocumentCards()}</div>
+            : <div className={styles.documentItems__list}>{renderDocumentListItems()}</div>
+          }
         </div>
 
       </div>

@@ -1,6 +1,5 @@
 .documentListItem {
   height: 40px;
-  padding: 0 32px;
   display: flex;
   align-items: center;
   cursor: pointer;

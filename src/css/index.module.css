@@ -1,15 +1,12 @@
 .menu {
   display: grid;
   grid-template-columns: 250px 1fr;
-  height: 100vh;
-  overflow-y: auto;
+  grid-template-rows: 100vh;
   width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
   background: var(--menu-bg);
 }
 .menu__main {
+  height: 100%;
   position: relative;
 }
 .menu__sidebar {
@@ -46,28 +43,36 @@
 }
 
 
+.main__documents {
+  --menuDocumentsHeaderHeight: calc(50px + var(--editor-padding-top));
+  --menuDocumentsContentHeight: calc(100% - var(--menuDocumentsHeaderHeight));
 
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: var(--menuDocumentsHeaderHeight) var(--menuDocumentsContentHeight);
+  flex-direction: column;
+  overflow: hidden;
+}
 .documents__header {
   user-select: none;
   padding: 6px 32px;
-  height: calc(50px + var(--editor-padding-top));
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--menu-subdued);
   display: flex;
   gap: 42px;
 }
-.documents__itemList {
-  margin-top: 40px;
+.documents__documentItems {
+  padding: 40px 32px;
+  overflow: auto;
+}
+.documentItems__list {
   display: flex;
   flex-direction: column;
+  padding-left: 12px;
 }
-.documents__itemList > * {
-  padding-left: 32px;
-}
-.documents__itemCards {
-  margin-top: 40px;
-  padding: 0 32px;
+.documentItems__cards {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
