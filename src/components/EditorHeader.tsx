@@ -7,7 +7,6 @@ type EditorHeaderProps = {
   drawerOpen: boolean
   onDrawerToggleClick: () => void
 
-  showMarkdownRenderer: boolean
   toggleShowMarkdownRenderer: () => void
 }
 
@@ -16,7 +15,6 @@ const EditorHeader = ({
   drawerOpen,
   title,
   toggleShowMarkdownRenderer,
-  showMarkdownRenderer,
 }: EditorHeaderProps) => {
 
   const getDrawerButtonStyles = () => {
@@ -41,7 +39,7 @@ const EditorHeader = ({
       <div className={styles.renderMarkdownButton}>
         <Button
           type='secondary'
-          title={showMarkdownRenderer ? 'Back' : 'Render Markdown'}
+          title='Render Markdown'
           onClick={toggleShowMarkdownRenderer}
         />
       </div>

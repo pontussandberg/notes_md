@@ -2,6 +2,7 @@ import { MouseEventHandler } from "react"
 
 export type DocumentFile = {
   listIndex?: number
+  id: string
   rowsCount: number
   title: string
   content: string

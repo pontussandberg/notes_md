@@ -43,7 +43,7 @@
 }
 
 
-.main__documents {
+.documents {
   --menuDocumentsHeaderHeight: calc(50px + var(--editor-padding-top));
   --menuDocumentsContentHeight: calc(100% - var(--menuDocumentsHeaderHeight));
 
@@ -86,12 +86,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
 }
-.documentViewer__editorContainer {
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: var(--editor-header-height) calc(100vh - var(--editor-header-height));
-  position: relative;
-}
+
 
 
 
