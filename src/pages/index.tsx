@@ -14,7 +14,6 @@ import MarkdownRenderer from "../components/MarkdownRenderer"
 
 type ViewOption = 'list' | 'card'
 type MenuOption = 'documents' | 'settings'
-const debug = true
 
 const IndexPage = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
@@ -24,20 +23,6 @@ const IndexPage = () => {
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
   const [showMarkdownRenderer, setShowMarkdownRenderer] = useState(false)
-
-  /**
-   * Runs on every rernder
-   */
-  const logger = () => {
-    if (!debug) {
-      return
-    }
-
-    console.log(documents)
-  }
-  useEffect(() => {
-    logger()
-  })
 
   /**
    * Hide markdown renderer on selected component updates

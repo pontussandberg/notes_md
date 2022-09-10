@@ -4,8 +4,8 @@
   cursor: pointer;
   width: var(--document-card-side);
 }
-.documentCardContainer:hover .documentCard {
-  border-color: var(--highlight);
+.documentCardContainer:hover .documentCardContainer__documentCard {
+  border: 2px solid var(--highlight);
 }
 .documentCardContainer:hover .documentCardRows > span,
 .documentCardContainer:hover .documentCardMargin > span {
@@ -38,13 +38,6 @@
   user-select: none;
   background: var(--editor-bg);
 }
-.documentCardContainer__documentCard:hover {
-  border: 2px solid #fff;
-}
-
-.documentCard__header {
-  border-bottom: 1px solid var(--editor-lighter);
-}
 
 .documentCard__main {
   display: grid;
@@ -52,7 +45,6 @@
 }
 
 .main__margin {
-  border-right: 1px solid var(--editor-lighter);
   padding-top: 6px;
   display: flex;
   flex-direction: column;
@@ -71,8 +63,8 @@
 
 .main__rows {
   flex-grow: 1;
-  padding-top: 6px;
-  padding-left: 6px;
+  padding-top: 12px;
+  padding-left: 12px;
 }
 
 .main__rows > span {

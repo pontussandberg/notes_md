@@ -19,10 +19,11 @@
 
   --editor-header-height: 50px;
 
-  --editor-bg: #252838;
-  --editor-lighter: #303449;
-  --editor-light: rgba(108, 117, 172, 1);
-  --highlight:rgb(209, 209, 209);
+  --editor-bg: #2b2d38;
+  --editor-lighter: #383b49;
+  --editor-light: rgba(121, 140, 223, 0.5);
+  --highlight: rgba(87, 118, 255, .75);
+
   --carret: #ffefb4;
 
   --primary-bg: #1B1D2B;

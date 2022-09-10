@@ -39,7 +39,7 @@
   padding-left: 16px;
   font-size: 24px;
   font-weight: 700;
-  color: rgba(108, 117, 172, 1);
+  color: var(--highlight);
 }
 
 

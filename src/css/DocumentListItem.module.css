@@ -6,7 +6,7 @@
 }
 
 .documentListItem:hover .documentListItem__icon {
-  background-color: #fff;
+  background-color: var(--highlight);
 }
 
 .documentListItem__icon {

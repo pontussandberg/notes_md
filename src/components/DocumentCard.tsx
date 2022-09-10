@@ -18,7 +18,7 @@ const DocumentCard = ({
    */
   const renderRows = () => {
     const elements = []
-    const rowsCountCapped = rowsCount <= 16 ? rowsCount : 16
+    const rowsCountCapped = rowsCount <= 10 ? rowsCount : 10
 
     for (let i = 0; i < rowsCountCapped; i++) {
       elements.push(<span key={i}></span>)
@@ -32,16 +32,8 @@ const DocumentCard = ({
   return (
     <div onClick={onClick} className={styles.documentCardContainer}>
       <div className={styles.documentCardContainer__documentCard}>
-        <div className={styles.documentCard__header}></div>
-
-        <div className={styles.documentCard__main}>
-          <div className={styles.main__margin}>
-            {renderRows()}
-          </div>
-
-          <div className={styles.main__rows}>
-            {renderRows()}
-          </div>
+        <div className={styles.main__rows}>
+          {renderRows()}
         </div>
       </div>
 
