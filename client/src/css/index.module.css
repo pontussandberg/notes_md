@@ -1,0 +1,114 @@
+.menu {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 100vh;
+  width: 100%;
+  background: var(--menu-bg);
+}
+.menu__main {
+  height: 100%;
+  position: relative;
+}
+.menu__sidebar {
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--menu-subdued);
+}
+.sidebar__item {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: var(--menu-text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: padding 0.2s;
+  position: relative;
+  opacity: 0.85;
+}
+.active.sidebar__item {
+  opacity: 1;
+  background: var(--editor-bg);
+}
+.sidebar__title {
+  height: calc(50px + var(--editor-padding-top));
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--highlight);
+}
+
+
+.documents {
+  --menuDocumentsHeaderHeight: calc(50px + var(--editor-padding-top));
+  --menuDocumentsContentHeight: calc(100% - var(--menuDocumentsHeaderHeight));
+
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: var(--menuDocumentsHeaderHeight) var(--menuDocumentsContentHeight);
+  flex-direction: column;
+  overflow: hidden;
+}
+.documents__header {
+  user-select: none;
+  padding: 6px 32px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--menu-subdued);
+  display: flex;
+  gap: 42px;
+}
+.documents__documentItems {
+  padding: 40px 32px;
+  overflow: auto;
+}
+.documentItems__list {
+  display: flex;
+  flex-direction: column;
+  padding-left: 12px;
+}
+.documentItems__cards {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  gap: 50px;
+}
+
+
+/* Editor / EditorHeader / MenuDrawer  */
+.documentViewer {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+
+
+
+/* Menu documents show options */
+.showOption {
+  padding: 0 24px;
+}
+.showOptionBtn {
+  cursor: pointer;
+  padding: 16px;
+  transform: scale(1.3)
+}
+.showOptionBtn.active rect,
+.showOptionBtn.active path {
+  fill: var(--highlight) !important;
+}
+.showOptionBtn rect {
+  fill: #414141 !important;
+}
+
+.showOptionBtn:hover rect {
+  fill: var(--highlight) !important;
+}
+
+
