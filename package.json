@@ -1,36 +1,20 @@
 {
-  "name": "notes_md",
+  "name": "notes-md",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node --project tsconfig.server.json server/index.ts",
-    "build:server": "tsc --project tsconfig.server.json",
-    "build:next": "next build",
-    "build": "npm run build:next && npm run build:server",
-    "start": "NODE_ENV=production node dist/index.js",
-    "tsc-watch": "mkdir -p ./src && tsc --watch"
+    "build": "mkdir dist && webpack"
   },
   "keywords": [],
-  "author": "",
+  "author": "Pontus Sandberg",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1",
-    "next": "^12.0.7",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "showdown": "^1.9.1",
-    "uniqid": "^5.4.0",
-    "uuid": "^8.3.2"
-  },
   "devDependencies": {
-    "@types/express": "^4.17.13",
-    "@types/jquery": "^3.5.10",
-    "@types/react": "^17.0.37",
-    "@types/showdown": "^1.9.4",
-    "@types/uniqid": "^5.3.1",
-    "@types/uuid": "^8.3.4",
+    "webpack": "^5.74.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
   }
 }
