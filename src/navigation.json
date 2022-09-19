@@ -1,0 +1,11 @@
+{
+  "menu": {
+    "path": "/"
+  },
+  "edit": {
+    "path": "/edit"
+  },
+  "markdown": {
+    "path": "/markdown"
+  }
+}

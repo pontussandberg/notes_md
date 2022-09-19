@@ -1,44 +1,79 @@
 {
-  "name": "-",
+  "name": "react-typescript-webpack-starter",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "description": "A starter template for React with Typescript using Webpack 5",
   "scripts": {
-    "dev": "mkdirp public && webpack serve",
-    "build": "mkdirp public && webpack"
+    "dev": "webpack serve --config webpack/webpack.config.js --env env=dev",
+    "build": "webpack --config webpack/webpack.config.js --env env=prod",
+    "lint": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx,json}\"",
+    "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.19.1",
-    "@babel/preset-env": "^7.19.1",
-    "@babel/preset-react": "^7.12.13",
-    "@babel/runtime": "^7.13.10",
-    "@babel/preset-typescript": "^7.12.16",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^18.0.6",
-    "@types/shortid": "^0.0.29",
-    "@types/showdown": "^2.0.0",
-    "@webpack-cli/serve": "^1.7.0",
-    "babel-loader": "^8.2.5",
-    "css-loader": "^6.7.1",
-    "css-modules-typescript-loader": "^4.0.1",
-    "html-webpack-plugin": "^5.5.0",
-    "mkdirp": "^1.0.4",
-    "style-loader": "^3.3.1",
-    "ts-loader": "^9.3.1",
-    "typescript": "^4.8.3",
-    "typescript-plugin-css-modules": "^3.4.0",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.0"
-  },
+  "keywords": [
+    "React",
+    "TypeScript",
+    "Webpack 5",
+    "Starter Template",
+    "Boilerplate"
+  ],
+  "author": "Vishwas",
+  "license": "MIT",
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "css-modules-typescript-loader": "^4.0.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^6.4.0",
     "shortid": "^2.2.16",
     "showdown": "^2.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/plugin-transform-runtime": "^7.13.10",
+    "@babel/preset-env": "^7.12.16",
+    "@babel/preset-react": "^7.12.13",
+    "@babel/preset-typescript": "^7.12.16",
+    "@babel/runtime": "^7.13.10",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.1",
+    "@types/shortid": "0.0.29",
+    "@types/showdown": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.15.0",
+    "@typescript-eslint/parser": "^4.15.0",
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^5.0.2",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "html-webpack-plugin": "^5.1.0",
+    "husky": "4",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1",
+    "react-refresh": "^0.9.0",
+    "style-loader": "^2.0.0",
+    "typescript": "^4.1.5",
+    "webpack": "^5.21.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.7.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json}": [
+      "eslint --fix"
+    ],
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   }
 }
-
-

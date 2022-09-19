@@ -13,16 +13,18 @@ import shortid from 'shortid'
 
 type EditorProps = {
   content: string
+  documentId: string
 
   /* Default height and width are "100%" */
   height?: number
   width?: number
   heightUnits?: string
   widthUnits?: string
-  onDocumentUpdate: (data: DocumentFile) => void
+  onDocumentUpdate: (documentId: string, documentData: DocumentFile) => void
 }
 
 const Editor = ({
+  documentId,
   content,
   height = 100,
   width = 100,
@@ -125,12 +127,16 @@ const Editor = ({
   }
 
   const emitContentUpdate = () => {
-    onDocumentUpdate({
-      rowsCount: getLines(documentContent).length,
-      title: getDocTitle(),
-      content: documentContent,
-      fileExtension: '.md'
-    })
+    onDocumentUpdate(
+      documentId,
+      {
+        id: documentId,
+        rowsCount: getLines(documentContent).length,
+        title: getDocTitle(),
+        content: documentContent,
+        fileExtension: '.md'
+      }
+    )
   }
 
   /*****************
