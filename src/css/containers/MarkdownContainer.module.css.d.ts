@@ -3,6 +3,7 @@
 interface CssExports {
   'markdownContainer': string;
   'markdownContainer__editButtonContainer': string;
+  'markdownContainer__main': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

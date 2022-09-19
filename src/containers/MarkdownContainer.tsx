@@ -30,17 +30,23 @@ const MarkdownContainer = ({
       {/* Absolute position button */}
       <div className={styles.markdownContainer__editButtonContainer}>
         <Link to={`${navigationData.edit.path}/${documentId}`}>
-          <Button title="Edit" type='secondary'/>
+          <Button
+            title="Edit"
+            type='secondary'
+          />
         </Link>
       </div>
 
-      <MenuDrawer
-        documents={documents}
-        isOpen={isMenuDrawerOpen}
-        currentDocumentIndex={currentDocumentIndex}
-      />
-
-      <MarkdownRenderer markdownText={currentDocument.content}/>
+      <div className={styles.markdownContainer__main}>
+        <MenuDrawer
+          documents={documents}
+          isOpen={isMenuDrawerOpen}
+          currentDocumentIndex={currentDocumentIndex}
+        />
+        <MarkdownRenderer
+          markdownText={currentDocument.content}
+        />
+      </div>
     </div>
   )
 }
