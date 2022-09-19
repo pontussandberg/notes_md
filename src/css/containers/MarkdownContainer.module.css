@@ -1,0 +1,11 @@
+.markdownContainer {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.markdownContainer__editButtonContainer {
+  position: absolute;
+  top: 7px;
+  right: 30px;
+}

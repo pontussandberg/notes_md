@@ -1,22 +1,22 @@
 
+
 import { useEffect } from 'react'
-import styles from '../css/MenuDrawer.module.css'
+import { Link } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
+import { DocumentFile } from '../types'
+import styles from '../css/components/MenuDrawer.module.css'
+import navigationData from '../navigation.json'
 
 type MenuDrawerProps = {
   isOpen: boolean
   currentDocumentIndex: number
-  indexedDocumentTitles: string[]
-  onItemClick: (index: number) => void
-  onShowMenu: () => void
+  documents: DocumentFile[]
 }
 
 const MenuDrawer = ({
   isOpen,
   currentDocumentIndex,
-  indexedDocumentTitles,
-  onItemClick,
-  onShowMenu,
+  documents,
 }: MenuDrawerProps) => {
 
   /**
@@ -53,15 +53,22 @@ const MenuDrawer = ({
 
   return (
     <div className={`${styles.menuDrawer} ${!isOpen && styles.closed}`}>
-      <button className={styles.menuDrawer__menuButton} onClick={onShowMenu}><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" rx="2" fill="#D9D9D9"/><rect y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect y="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" y="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" y="14" width="4" height="4" rx="2" fill="#D9D9D9"/></svg></button>
+      <Link to={navigationData.menu.path}>
+        <button
+          className={styles.menuDrawer__menuButton}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" rx="2" fill="#D9D9D9"/><rect y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect y="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="7" y="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" y="7" width="4" height="4" rx="2" fill="#D9D9D9"/><rect x="14" y="14" width="4" height="4" rx="2" fill="#D9D9D9"/></svg>
+        </button>
+      </Link>
 
       <div className={styles.menuDrawer__items}>
-        {indexedDocumentTitles.map((title , index) => (
-          <div
-            className={getMenuDrawerItemClasses(index)}
-            onClick={() => onItemClick(index)}
-          >{title || 'Empty doc'}
-          </div>
+        {documents.map((doc, index) => (
+          <Link
+            to={`${navigationData.edit.path}/${doc.id}`}
+            key={index}
+          >
+            <div className={getMenuDrawerItemClasses(index)}>{doc.title || 'Empty doc'}</div>
+          </Link>
         ))}
       </div>
     </div>

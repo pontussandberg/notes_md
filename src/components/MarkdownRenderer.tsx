@@ -1,5 +1,7 @@
+import React from 'react'
 import showdown from 'showdown'
-import styles from '../css/MarkdownRenderer.module.css'
+import styles from '../css/components/MarkdownRenderer.module.css'
+import { DocumentFile } from '../types'
 
 
 type MarkdownRendererProps = {
@@ -7,6 +9,7 @@ type MarkdownRendererProps = {
 }
 
 const MarkdownRenderer = ({markdownText}: MarkdownRendererProps) => {
+
   const getMarkdownHtml = () => {
     const converter = new showdown.Converter()
     return converter.makeHtml(markdownText)

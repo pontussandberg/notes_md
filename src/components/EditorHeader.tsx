@@ -1,22 +1,21 @@
-import styles from '../css/editorHeader.module.css'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import styles from '../css/components/EditorHeader.module.css'
 import Button from './Button'
+import navigationData from '../navigation.json'
 
 type EditorHeaderProps = {
   title: string
-
+  documentId: string
   drawerOpen: boolean
   onDrawerToggleClick: () => void
-
-  showMarkdownRenderer: boolean
-  toggleShowMarkdownRenderer: () => void
 }
 
 const EditorHeader = ({
   onDrawerToggleClick,
   drawerOpen,
   title,
-  toggleShowMarkdownRenderer,
-  showMarkdownRenderer,
+  documentId,
 }: EditorHeaderProps) => {
 
   const getDrawerButtonStyles = () => {
@@ -39,11 +38,12 @@ const EditorHeader = ({
       <div className={styles.title}>{title}</div>
 
       <div className={styles.renderMarkdownButton}>
-        <Button
-          type='secondary'
-          title={showMarkdownRenderer ? 'Back' : 'Render Markdown'}
-          onClick={toggleShowMarkdownRenderer}
-        />
+        <Link to={`${navigationData.markdown.path}/${documentId}`}>
+          <Button
+            type='secondary'
+            title={'Render Markdown'}
+          />
+        </Link>
       </div>
     </header>
   )

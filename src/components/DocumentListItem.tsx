@@ -1,13 +1,14 @@
-import styles from '../css/DocumentListItem.module.css'
+import React from 'react'
+import styles from '../css/components/DocumentListItem.module.css'
 
 type DocumentListItemProps = {
   title: string
-  onClick: () => void
+  onClick?: () => void
 }
 
 const DocumentListItem = ({
   title,
-  onClick,
+  onClick  = () => {},
 }: DocumentListItemProps) => {
 
   return (

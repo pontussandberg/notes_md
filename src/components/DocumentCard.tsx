@@ -1,4 +1,5 @@
-import styles from '../css/DocumentCard.module.css'
+import React from 'react'
+import styles from '../css/components/DocumentCard.module.css'
 
 type DocumentCardProps = {
   rowsCount: number

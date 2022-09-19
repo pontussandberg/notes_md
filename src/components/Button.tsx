@@ -1,15 +1,16 @@
-import styles from '../css/Button.module.css'
+import React from 'react'
+import styles from '../css/components/Button.module.css'
 
 type ButtonProps = {
   type?: 'primary' | 'secondary'
   title: string
-  onClick: () => void
+  onClick?: () => void
 }
 
 
 const Button = ({
   title,
-  onClick,
+  onClick = () => {},
   type = 'primary',
 }: ButtonProps) => {
 
