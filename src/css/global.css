@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+html,
+body,
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: sans-serif, 'Source Code Pro', monospace !important;
+}
+
+p {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+button {
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: #fff;
+}
+a:hover {
+  color: #fff;
+}
