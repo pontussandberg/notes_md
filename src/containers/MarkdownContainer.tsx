@@ -19,7 +19,7 @@ const MarkdownContainer = ({
   const currentDocument = documents.find(doc => doc.id === documentId)
 
   if (!documentId || !currentDocument) {
-    return <Navigate to='/404'/>
+    return <Navigate to={navigationData['404'].path}/>
   }
 
   const currentDocumentIndex = documents.indexOf(currentDocument)
