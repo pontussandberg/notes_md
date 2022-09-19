@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '../css/DocumentListItem.module.css'
+import styles from '../css/components/DocumentListItem.module.css'
 
 type DocumentListItemProps = {
   title: string

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
 import { DocumentFile } from '../types'
-import styles from '../css/MenuDrawer.module.css'
+import styles from '../css/components/MenuDrawer.module.css'
 import navigationData from '../navigation.json'
 
 type MenuDrawerProps = {

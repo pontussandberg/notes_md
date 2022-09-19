@@ -1,6 +1,6 @@
 import React from 'react'
 import showdown from 'showdown'
-import styles from '../css/MarkdownRenderer.module.css'
+import styles from '../css/components/MarkdownRenderer.module.css'
 import { DocumentFile } from '../types'
 
 

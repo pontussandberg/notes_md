@@ -4,8 +4,6 @@ interface CssExports {
   'active': string;
   'documentItems__cards': string;
   'documentItems__list': string;
-  'documentViewer': string;
-  'documentViewer__editorContainer': string;
   'documents__documentItems': string;
   'documents__header': string;
   'main__documents': string;

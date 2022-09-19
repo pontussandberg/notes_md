@@ -7,7 +7,7 @@ import DocumentCard from '../components/DocumentCard'
 import DocumentListItem from '../components/DocumentListItem'
 
 import navigationData from '../navigation.json'
-import styles from '../css/index.module.css'
+import styles from '../css/containers/menuContainer.module.css'
 import { DocumentFile } from '../types'
 
 type ViewOption = 'list' | 'card'

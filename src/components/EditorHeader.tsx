@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import styles from '../css/editorHeader.module.css'
+import styles from '../css/components/EditorHeader.module.css'
 import Button from './Button'
 import navigationData from '../navigation.json'
 

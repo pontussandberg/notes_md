@@ -5,7 +5,7 @@ import React, {
   ChangeEvent,
   ReactElement,
 } from 'react'
-import styles from '../css/editor.module.css'
+import styles from '../css/components/Editor.module.css'
 import { DocumentFile, TActiveKeys } from '../types'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'

@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import Editor from '../components/Editor'
 import EditorHeader from '../components/EditorHeader'
 import MenuDrawer from '../components/MenuDrawer'
-import styles from '../css/index.module.css'
+import styles from '../css/containers/EditorContainer.module.css'
 import { DocumentFile } from '../types'
 
 type EditorContainerProps = {

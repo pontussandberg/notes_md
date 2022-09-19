@@ -1,4 +1,4 @@
-import styles from '../css/MarkdownContainer.module.css'
+import styles from '../css/containers/MarkdownContainer.module.css'
 import { Link, useParams } from "react-router-dom"
 import MarkdownRenderer from "../components/MarkdownRenderer"
 import { DocumentFile } from "../types"
