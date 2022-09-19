@@ -27,7 +27,7 @@ const MenuContainer = ({
 
 
   const renderDocumentCards = () => {
-    return documents.map((document, index) => {
+    return documents.map((document) => {
       return (
         <Link
           to={`${navigationData.edit.path}/${document.id}`}
@@ -43,7 +43,7 @@ const MenuContainer = ({
   }
 
   const renderDocumentListItems = () => {
-    return documents.map((document, index) => {
+    return documents.map((document) => {
       return (
         <Link
           to={`${navigationData.edit.path}/${document.id}`}
