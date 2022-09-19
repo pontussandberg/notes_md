@@ -86,14 +86,17 @@ const App = () => {
             isMenuDrawerOpen={isMenuDrawerOpen}
             setisMenuDrawerOpen={setisMenuDrawerOpen}
             onDocumentUpdate={handleDocumentUpdate}
+            />
+          }
           />
-        }
-      />
 
       <Route
         path={`${navigationData.markdown.path}/:documentId`}
         element={
-          <MarkdownContainer documents={documents}/>
+          <MarkdownContainer
+            documents={documents}
+            isMenuDrawerOpen={isMenuDrawerOpen}
+          />
         }
       />
 

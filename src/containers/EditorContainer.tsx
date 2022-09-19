@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import Editor from '../components/Editor'
 import EditorHeader from '../components/EditorHeader'
 import MenuDrawer from '../components/MenuDrawer'
@@ -22,8 +22,7 @@ const EditorContainer = ({
   const currentDocument = documents.find(doc => doc.id === documentId)
 
   if (!documentId || !currentDocument) {
-    // TODO REDIRECT 404
-    return null
+    return <Navigate to='/404'/>
   }
 
   const currentDocumentIndex = documents.indexOf(currentDocument)

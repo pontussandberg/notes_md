@@ -1,11 +1,12 @@
 .markdownContainer {
   width: 100vw;
   height: 100vh;
+  grid-template-columns: auto 1fr;
   position: relative;
 }
 
 .markdownContainer__editButtonContainer {
   position: absolute;
   top: 7px;
-  right: 30px;
+  right: var(--editor-padding-left);
 }
