@@ -7,7 +7,7 @@ import DocumentCard from '../components/DocumentCard'
 import DocumentListItem from '../components/DocumentListItem'
 
 import navigationData from '../data/navigation.json'
-import styles from '../css/containers/menuContainer.module.css'
+import styles from '../css/containers/MenuContainer.module.css'
 import { DocumentFile } from '../types'
 
 type ViewOption = 'list' | 'card'
@@ -105,12 +105,20 @@ const MenuContainer = ({
   return (
     <div className={styles.menu}>
 
-      {/* Sidebar */}
-      <div className={styles.menu__sidebar}>
-        <h1 className={styles.sidebar__title}>Notes MD</h1>
-        <a onClick={() => setCurrentMenu('documents')} className={`${styles.sidebar__item} ${currentMenu === 'documents' && styles.active}`}>Documents</a>
-        <a onClick={() => setCurrentMenu('settings')} className={`${styles.sidebar__item} ${currentMenu === 'settings' && styles.active}`}>Settings</a>
+      {/* Menu Navigation */}
+      <div className={styles.menu__navigation}>
+        <h1 className={styles.navigation__title}>Notes MD</h1>
+        <div className={styles.navigation__linkGroup}>
+          <a onClick={() => setCurrentMenu('documents')} className={`${styles.linkGroup__link} ${currentMenu === 'documents' && styles.active}`}>Documents</a>
+          <a onClick={() => setCurrentMenu('settings')} className={`${styles.linkGroup__link} ${currentMenu === 'settings' && styles.active}`}>Settings</a>
+        </div>
+
+        <div className={styles.navigation__linkGroup}>
+          <a href="#" className={styles.linkGroup__link}>Login</a>
+
+        </div>
       </div>
+
 
       {/* Menu main content */}
       <div className={styles.menu__main}>

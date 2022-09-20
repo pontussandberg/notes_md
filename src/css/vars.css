@@ -25,15 +25,16 @@
   --highlight:rgb(209, 209, 209);
   --carret: #ffefb4;
 
-  --primary-bg: #1B1D2B;
-  --primary-text: #fff;
+  --primary-bg: #15161f;
+  --primary-text: rgb(246, 246, 248);
+  --secondary-text: rgba(246, 246, 248, 0.75);
 
   /* Menu */
-  --menu-subdued: #2d3044;
-  --menu-subdued-light: #2c2c2c;
-  --menu-bg: #292828;
-  --menu-bg: rgb(32, 31, 31);
-  --menu-text: rgba(255, 255, 255, 0.85);
+  --menu-border: rgb(25, 25, 25);
+  --menu-border-light: rgb(40, 40, 40);
+  --menu-border-lighter: rgb(65, 65, 65);
+  --menu-bg: rgb(15, 15, 15);
+  --menu-content-bg: rgb(25, 25, 25);
 
   --dashboard-document-side-length: 150px;
   --dashboard-document-grid-gap: 80px;

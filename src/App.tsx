@@ -21,6 +21,7 @@ const App = () => {
    */
   useEffect(() => {
     if (documents.length) {
+      localStorage.setItem('documentFiles', JSON.stringify(documents))
     }
   }, [documents])
 

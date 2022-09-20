@@ -6,14 +6,15 @@ interface CssExports {
   'documentItems__list': string;
   'documents__documentItems': string;
   'documents__header': string;
+  'linkGroup__link': string;
   'main__documents': string;
   'menu': string;
   'menu__main': string;
-  'menu__sidebar': string;
+  'menu__navigation': string;
+  'navigation__linkGroup': string;
+  'navigation__title': string;
   'showOption': string;
   'showOptionBtn': string;
-  'sidebar__item': string;
-  'sidebar__title': string;
 }
 export const cssExports: CssExports;
 export default cssExports;
