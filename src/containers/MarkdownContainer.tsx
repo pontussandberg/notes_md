@@ -3,7 +3,7 @@ import { Link, useParams, Navigate } from "react-router-dom"
 import MarkdownRenderer from "../components/MarkdownRenderer"
 import { DocumentFile } from "../types"
 import Button from '../components/Button'
-import navigationData from '../navigation.json'
+import navigationData from '../data/navigation.json'
 import MenuDrawer from '../components/MenuDrawer'
 
 type MarkdownContainerProps = {
@@ -19,7 +19,7 @@ const MarkdownContainer = ({
   const currentDocument = documents.find(doc => doc.id === documentId)
 
   if (!documentId || !currentDocument) {
-    return <Navigate to={navigationData['404'].path}/>
+    return <Navigate to={navigationData['404']}/>
   }
 
   const currentDocumentIndex = documents.indexOf(currentDocument)
@@ -29,7 +29,7 @@ const MarkdownContainer = ({
 
       {/* Absolute position button */}
       <div className={styles.markdownContainer__editButtonContainer}>
-        <Link to={`${navigationData.edit.path}/${documentId}`}>
+        <Link to={`${navigationData.edit}/${documentId}`}>
           <Button
             title="Edit"
             type='secondary'
@@ -42,6 +42,7 @@ const MarkdownContainer = ({
           documents={documents}
           isOpen={isMenuDrawerOpen}
           currentDocumentIndex={currentDocumentIndex}
+          navigationResource={'markdown'}
         />
         <MarkdownRenderer
           markdownText={currentDocument.content}

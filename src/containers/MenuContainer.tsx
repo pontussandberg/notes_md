@@ -6,7 +6,7 @@ import Button from '../components/Button'
 import DocumentCard from '../components/DocumentCard'
 import DocumentListItem from '../components/DocumentListItem'
 
-import navigationData from '../navigation.json'
+import navigationData from '../data/navigation.json'
 import styles from '../css/containers/menuContainer.module.css'
 import { DocumentFile } from '../types'
 
@@ -30,7 +30,7 @@ const MenuContainer = ({
     return documents.map((document) => {
       return (
         <Link
-          to={`${navigationData.edit.path}/${document.id}`}
+          to={`${navigationData.edit}/${document.id}`}
           key={shortid.generate()}
         >
           <DocumentCard
@@ -46,7 +46,7 @@ const MenuContainer = ({
     return documents.map((document) => {
       return (
         <Link
-          to={`${navigationData.edit.path}/${document.id}`}
+          to={`${navigationData.edit}/${document.id}`}
           key={shortid.generate()}
         >
           <DocumentListItem

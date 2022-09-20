@@ -1,4 +1,7 @@
 import { MouseEventHandler } from "react"
+import navigationData from "./data/navigation.json"
+
+export type NavigationData = typeof navigationData
 
 export type DocumentFile = {
   id: string

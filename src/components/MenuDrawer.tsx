@@ -1,22 +1,22 @@
-
-
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
-import { DocumentFile } from '../types'
+import { DocumentFile, NavigationData } from '../types'
 import styles from '../css/components/MenuDrawer.module.css'
-import navigationData from '../navigation.json'
+import navigationData from '../data/navigation.json'
 
 type MenuDrawerProps = {
   isOpen: boolean
   currentDocumentIndex: number
   documents: DocumentFile[]
+  navigationResource: keyof NavigationData
 }
 
 const MenuDrawer = ({
   isOpen,
   currentDocumentIndex,
   documents,
+  navigationResource,
 }: MenuDrawerProps) => {
 
   /**
@@ -53,7 +53,7 @@ const MenuDrawer = ({
 
   return (
     <div className={`${styles.menuDrawer} ${!isOpen && styles.closed}`}>
-      <Link to={navigationData.menu.path}>
+      <Link to={navigationData.menu}>
         <button
           className={styles.menuDrawer__menuButton}
         >
@@ -64,7 +64,7 @@ const MenuDrawer = ({
       <div className={styles.menuDrawer__items}>
         {documents.map((doc, index) => (
           <Link
-            to={`${navigationData.edit.path}/${doc.id}`}
+            to={`${navigationResource}/${doc.id}`}
             key={index}
           >
             <div className={getMenuDrawerItemClasses(index)}>{doc.title || 'Empty doc'}</div>

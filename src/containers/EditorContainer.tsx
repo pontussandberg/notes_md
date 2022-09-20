@@ -4,7 +4,7 @@ import EditorHeader from '../components/EditorHeader'
 import MenuDrawer from '../components/MenuDrawer'
 import styles from '../css/containers/EditorContainer.module.css'
 import { DocumentFile } from '../types'
-import navigationData from '../navigation.json'
+import navigationData from '../data/navigation.json'
 
 type EditorContainerProps = {
   documents: DocumentFile[]
@@ -23,7 +23,7 @@ const EditorContainer = ({
   const currentDocument = documents.find(doc => doc.id === documentId)
 
   if (!documentId || !currentDocument) {
-    return <Navigate to={navigationData['404'].path}/>
+    return <Navigate to={navigationData['404']}/>
   }
 
   const currentDocumentIndex = documents.indexOf(currentDocument)
@@ -36,6 +36,7 @@ const EditorContainer = ({
         isOpen={isMenuDrawerOpen}
         currentDocumentIndex={currentDocumentIndex}
         documents={documents}
+        navigationResource={'edit'}
       />
 
       {/* Editor */}

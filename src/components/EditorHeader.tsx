@@ -1,8 +1,7 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import styles from '../css/components/EditorHeader.module.css'
 import Button from './Button'
-import navigationData from '../navigation.json'
+import navigationData from '../data/navigation.json'
 
 type EditorHeaderProps = {
   title: string
@@ -38,7 +37,7 @@ const EditorHeader = ({
       <div className={styles.title}>{title}</div>
 
       <div className={styles.renderMarkdownButton}>
-        <Link to={`${navigationData.markdown.path}/${documentId}`}>
+        <Link to={`${navigationData.markdown}/${documentId}`}>
           <Button
             type='secondary'
             title={'Render Markdown'}

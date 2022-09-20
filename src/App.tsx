@@ -5,11 +5,15 @@ import { DocumentFile } from "./types"
 import MenuContainer from "./containers/MenuContainer"
 import EditorContainer from "./containers/EditorContainer"
 import MarkdownContainer from "./containers/MarkdownContainer"
-import navigationData from './navigation.json'
+import navigationData from './data/navigation.json'
 
 const App = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
+
+  useEffect(() => {
+    console.log('documents -->', documents)
+  })
 
 
   /**
@@ -17,7 +21,6 @@ const App = () => {
    */
   useEffect(() => {
     if (documents.length) {
-      localStorage.setItem('documentFiles', JSON.stringify(documents))
     }
   }, [documents])
 
@@ -69,7 +72,7 @@ const App = () => {
   return (
     <Routes>
       <Route
-        path={`${navigationData.menu.path}`}
+        path={`${navigationData.menu}`}
         element={
           <MenuContainer
             documents={documents}
@@ -79,7 +82,7 @@ const App = () => {
       />
 
       <Route
-        path={`${navigationData.edit.path}/:documentId`}
+        path={`${navigationData.edit}/:documentId`}
         element={
           <EditorContainer
             documents={documents}
@@ -91,7 +94,7 @@ const App = () => {
           />
 
       <Route
-        path={`${navigationData.markdown.path}/:documentId`}
+        path={`${navigationData.markdown}/:documentId`}
         element={
           <MarkdownContainer
             documents={documents}
