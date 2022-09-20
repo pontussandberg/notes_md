@@ -20,9 +20,10 @@
   --editor-header-height: 50px;
 
   --editor-bg: #2b2d38;
-  --editor-lighter: #383b49;
+  --editor-bg: rgb(40, 40, 50);
   --editor-light: rgba(108, 117, 172, 1);
-  --highlight:rgb(209, 209, 209);
+  --editor-lighter: #383b49;
+  --editor-lighter: rgb(50, 50, 50);
   --carret: #ffefb4;
 
   --primary-bg: #15161f;
@@ -33,6 +34,7 @@
   --menu-border: rgb(25, 25, 25);
   --menu-border-light: rgb(40, 40, 40);
   --menu-border-lighter: rgb(65, 65, 65);
+  --menu-highlight: rgb(220, 220, 220);
   --menu-bg: rgb(15, 15, 15);
   --menu-content-bg: rgb(25, 25, 25);
 

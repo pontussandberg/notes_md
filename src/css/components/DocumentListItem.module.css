@@ -5,15 +5,11 @@
   cursor: pointer;
 }
 
-.documentListItem:hover .documentListItem__icon {
-  background-color: #fff;
-}
-
 .documentListItem__icon {
   border-radius: 1px;
-  height: 18px;
-  background: var(--editor-light);
-  width: 13px;
+  height: 16px;
+  background: var(--menu-border-lighter);
+  width: 12px;
   margin-right: 16px;
   position: relative;
   overflow: hidden;
@@ -32,5 +28,10 @@
 }
 
 .documentListItem__title {
-  color: #fff;
+  color: var(--primary-text);
+  font-size: 16px;
+}
+
+.documentListItem:hover .documentListItem__icon {
+  background: var(--menu-highlight);
 }

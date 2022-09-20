@@ -64,7 +64,7 @@ const MenuDrawer = ({
       <div className={styles.menuDrawer__items}>
         {documents.map((doc, index) => (
           <Link
-            to={`${navigationResource}/${doc.id}`}
+            to={`${navigationData[navigationResource]}/${doc.id}`}
             key={index}
           >
             <div className={getMenuDrawerItemClasses(index)}>{doc.title || 'Empty doc'}</div>

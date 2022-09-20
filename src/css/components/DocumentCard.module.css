@@ -1,8 +1,9 @@
 
 .documentCardContainer {
-  --document-card-side: 100px;
+  --document-card-side-length: 85px;
+  --document-card-width: 100px;
   cursor: pointer;
-  width: var(--document-card-side);
+  width: var(--document-card-side-length);
 }
 
 
@@ -11,23 +12,21 @@
   white-space: nowrap;
   overflow: hidden;
   margin-top: 20px;
-  font-size: 16px;
-  line-height: 16px;
-  font-weight: 700;
-  color: var(--secondary-text);
+  font-size: 14px;
+  line-height: 14px;
+  color: var(--primary-text);
   text-align: center;
 }
 
 .documentCardContainer__documentCard {
-  width: var(--document-card-side);
+  margin: 0 auto;
+  width: var(--document-card-side-length);
   display: grid;
   grid-template-rows: 10% 90%;
-  height: var(--document-card-side);
+  height: var(--document-card-side-length);
   border-radius: 6px;
   border: 2px solid var(--menu-border-light);
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
   overflow: hidden;
   user-select: none;
   background: var(--menu-content-bg);
@@ -85,9 +84,6 @@
 }
 .documentCardContainer:hover .documentCard__header {
   border-bottom: 1px solid var(--menu-border-lighter)
-}
-.documentCardContainer:hover .documentCardContainer__title {
-  color: var(--primary-text);
 }
 
 
