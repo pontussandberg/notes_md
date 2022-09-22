@@ -123,7 +123,9 @@ const Editor = ({
   }, [documentContent])
 
   const getDocTitle = () => {
-    return getLines(documentContent)[0].slice(0, 32)
+    const firstIndexLineWithContent = getLines(documentContent).findIndex(line => line.length > 0)
+    const titleLineIndex = firstIndexLineWithContent >= 0 ? firstIndexLineWithContent : 0
+    return getLines(documentContent)[titleLineIndex].slice(0, 32)
   }
 
   const emitContentUpdate = () => {
@@ -339,7 +341,7 @@ const Editor = ({
   }
 
   /**
-   * Check if keyevent is a move key
+   * Check if key event is arrow key
    */
   const isArrowKey = (keyLower: string) => {
     if (
@@ -415,7 +417,7 @@ const Editor = ({
         key={shortid.generate()}
         style={{
           top: `${topPos}px`,
-          color: isCurrentLine ? '#fff' : 'var(--editor-light)'
+          color: isCurrentLine ? '#fff' : ''
         }}
       >
         {index + 1}

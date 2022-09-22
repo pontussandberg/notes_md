@@ -14,12 +14,14 @@ const DocumentCard = ({
   onClick = () => {},
 }: DocumentCardProps) => {
 
+  const rowsCap = 8
+
   /**
    * Render span elements - count equal to $rowsCount
    */
   const renderRows = () => {
     const elements = []
-    const rowsCountCapped = rowsCount <= 16 ? rowsCount : 16
+    const rowsCountCapped = rowsCount <= rowsCap ? rowsCount : rowsCap
 
     for (let i = 0; i < rowsCountCapped; i++) {
       elements.push(<span key={i}></span>)

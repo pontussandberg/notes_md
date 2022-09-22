@@ -41,7 +41,7 @@
   background: var(--menu-border-light);
 }
 .linkGroup__link:hover {
-  background: var(--menu-border-lighter);
+  background: var(--menu-border-light);
 }
 .navigation__title {
   height: calc(50px + var(--editor-padding-top));

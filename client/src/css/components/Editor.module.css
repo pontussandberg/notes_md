@@ -120,7 +120,8 @@
   height: var(--editor-line-height);
   width: 100%;
   left: 0;
-  background: var(--primary-bg);
+  background: var(--menu-bg);
+  opacity: 0.75;
 }
 
 .editorMargin {
