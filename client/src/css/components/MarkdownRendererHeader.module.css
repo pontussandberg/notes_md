@@ -1,12 +1,9 @@
-.editorHeader {
-  position: relative;
+.markdownRendererHeader {
+  background: var(--editor-bg);
   display: flex;
   align-items: center;
-  background: var(--editor-bg);
-
-  height: 100%;
-  user-select: none;
-  padding-right: var(--editor-padding-left)
+  justify-content: space-between;
+  padding-right: var(--editor-padding-left);
 }
 
 .drawerButton {
@@ -15,7 +12,7 @@
   justify-content: center;
   align-items: center;
   border: none;
-  border-right: 1px solid var(--editor-lighter);
+  border-right: 1px solid transparent;
   outline: none;
   height: 100%;
   border-radius: 0px;
@@ -32,15 +29,4 @@
 .drawerButton path,
 .drawerButton rect {
   fill: #fff;
-}
-
-.title {
-  margin-left: var(--editor-padding-left);
-  color: #e4e4e4;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.renderMarkdownButton {
-  margin-left: auto;
 }

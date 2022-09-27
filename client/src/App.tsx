@@ -100,6 +100,7 @@ const App = () => {
           <MarkdownContainer
             documents={documents}
             isMenuDrawerOpen={isMenuDrawerOpen}
+            setisMenuDrawerOpen={setisMenuDrawerOpen}
           />
         }
       />

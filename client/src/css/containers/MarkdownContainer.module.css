@@ -1,7 +1,7 @@
 .markdownContainer {
+  display: grid;
   width: 100vw;
-  height: 100vh;
-  position: relative;
+  grid-template-columns: var(--menuDrawerWidth) calc(100vw - var(--menuDrawerWidth));
 }
 
 .markdownContainer__editButtonContainer {
@@ -14,4 +14,9 @@
   height: 100%;
   display: grid;
   grid-template-columns: auto 1fr;
+}
+
+.markdownContainer__markdownRenderer {
+  display: grid;
+  grid-template-rows: var(--editor-header-height) calc(100vh - var(--editor-header-height));
 }
