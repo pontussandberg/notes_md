@@ -9,26 +9,23 @@
   --editor-line-height: 22px;
   --editor-font-size: 16px;
   --editor-letter-spacing: .78px;
-
   --menuDrawerWidth: var(--editor-margin-width);
   /* *** */
+
   --editor-header-height: 50px;
 
   --cta: rgb(61, 82, 216);
   --ctaSecondary: rgb(71, 81, 150);
   --ctaHover: rgb(67, 89, 235);
 
-
-  --editor-bg: rgb(40, 40, 50);
-  --editor-light: rgba(108, 117, 172, 1);
-  --editor-lighter: #383b49;
-  --editor-lighter: rgb(50, 50, 50);
+  --editor-bg: rgb(45, 48, 59);
+  --editor-subdued: rgba(246, 246, 248, .25);
+  --editor-lighter: rgb(54, 58, 71);
   --carret: #ffefb4;
 
   --primary-text: rgb(246, 246, 248);
   --secondary-text: rgba(246, 246, 248, 0.75);
 
-  /* Menu */
   --menu-border: rgb(25, 25, 25);
   --menu-border-light: rgb(40, 40, 40);
   --menu-border-lighter: rgb(65, 65, 65);
