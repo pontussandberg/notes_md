@@ -47,6 +47,7 @@ const Editor = ({
   const [currentLinesCount, setCurrentLinesCount] = useState(0)
   const [lineEnumerationEl, setLineEnumerationEl] = useState<null | ReactElement[]>(null)
   const [activeKeys, setActiveKeys] = useState<TActiveKeys>({})
+  const [textEdtiorHorizontalScrollbarXPos, setTextEdtiorHorizontalScrollbarXPos] = useState(0)
 
   /**
    * Set editor dimensions on mount.
@@ -107,6 +108,14 @@ const Editor = ({
       // ***
     }
   }, [activeKeys])
+
+  /**
+   * Setting fixed position of custom scrollbar X.
+   * This value changes when menuDrawerWidth css var is changing.
+   */
+  useEffect(() => {
+    setTextEdtiorHorizontalScrollbarXPos(getEditorCssVars().editorMarginWidth + getEditorCssVars().menuDrawerWidth)
+  })
 
 
   /*****************
@@ -462,6 +471,7 @@ const Editor = ({
       '--editor-padding-bottom',
       '--editor-padding-left',
       '--editor-margin-width',
+      '--menuDrawerWidth',
     ]
 
     return getCssVariables(cssVars)
@@ -574,7 +584,7 @@ const Editor = ({
             containerElementRef={editorWrapperRef}
             scrollElementRef={textareaRef}
             orientation={'horizontalBottom'}
-            positionFixedLeft={getEditorCssVars().editorMarginWidth}
+            positionFixedLeft={textEdtiorHorizontalScrollbarXPos}
             positionFixed={true}
             disableFadeOut={true}
             scrollbarThickness={10}

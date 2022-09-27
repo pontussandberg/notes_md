@@ -9,8 +9,7 @@
   position: relative;
   overflow-x: hidden;
   overflow-y: scroll;
-  display: grid;
-  grid-template-columns: var(--editor-margin-width) 1fr;
+  display: flex;
   align-items: stretch;
   justify-content: stretch;
   background: var(--editor-bg);
@@ -22,6 +21,7 @@
 .editorWrapper {
   position: relative;
   display: flex;
+  overflow: hidden;
 }
 
 .textInput {
@@ -129,6 +129,9 @@
   position: relative;
   background: var(--editor-bg);
   margin: 0;
+  flex-basis: var(--editor-margin-width);
+  flex-grow: 0;
+  flex-shrink: 0;
   z-index: 1;
   border-right: 1px solid var(--editor-lighter);
 }

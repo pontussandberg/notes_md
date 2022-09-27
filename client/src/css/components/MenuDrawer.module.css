@@ -1,6 +1,6 @@
 .menuDrawer {
   background: var(--menu-bg);
-  width: var(--menuDrawerWidth);
+  width: 100%;
   transition: width 0.1s, opacity 0.1s;
 }
 .menuDrawer__menuButton {
