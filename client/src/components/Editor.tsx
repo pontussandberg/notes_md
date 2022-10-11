@@ -89,6 +89,7 @@ const Editor = ({
   useEffect(() => {
     updateLineEnumerationEl()
     updateEditorViewLines(documentContent)
+    focusEditor()
   }, [])
 
   /**
@@ -302,7 +303,7 @@ const Editor = ({
 
 
     setTimeout(() => {
-      textareaEl.focus()
+      focusEditor()
       textareaEl.setSelectionRange(lineStart, lineEnd)
     })
   }
@@ -326,6 +327,16 @@ const Editor = ({
     } else {
       setHideCurrentLineHighlight(false)
     }
+  }
+
+  const focusEditor = () => {
+    const { current: textareaEl } = textareaRef
+
+    if (!textareaEl) {
+      return
+    }
+
+    textareaEl.focus()
   }
 
 
