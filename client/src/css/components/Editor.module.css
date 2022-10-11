@@ -110,7 +110,7 @@
   height: var(--editor-line-height);
   width: 100%;
   left: 0;
-  background: var(--menu-bg);
+  background: var(--current-line-highlight);
   opacity: 0.75;
 }
 

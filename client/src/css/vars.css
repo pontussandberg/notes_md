@@ -18,9 +18,10 @@
   --ctaSecondary: rgb(71, 81, 150);
   --ctaHover: rgb(67, 89, 235);
 
-  --editor-bg: rgb(45, 48, 59);
-  --editor-subdued: rgba(246, 246, 248, .25);
-  --editor-lighter: rgb(54, 58, 71);
+  --editor-bg: rgb(47, 47, 52);
+  --editor-subdued: rgba(255, 255, 255, .25);
+  --editor-lighter: rgb(50, 56, 67);
+  --current-line-highlight: rgb(22, 22, 24);
   --carret: #ffefb4;
 
   --primary-text: rgb(246, 246, 248);
