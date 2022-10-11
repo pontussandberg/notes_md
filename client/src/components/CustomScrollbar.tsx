@@ -145,7 +145,6 @@ const CustomScrollbar = (
   useEffect(() => {
     if (containerElementRef && containerElementRef.current) {
       const resizeObserver = new ResizeObserver(() => {
-        console.log('here')
         initValues()
       })
       resizeObserver.observe(containerElementRef.current)

@@ -5,6 +5,8 @@ import MenuDrawer from '../components/MenuDrawer'
 import styles from '../css/containers/EditorContainer.module.css'
 import { DocumentFile } from '../types'
 import navigationData from '../data/navigation.json'
+import { useEffect } from 'react'
+import { setLocalStorage } from '../localStorage'
 
 type EditorContainerProps = {
   documents: DocumentFile[]
@@ -21,6 +23,14 @@ const EditorContainer = ({
 }: EditorContainerProps) => {
   const { documentId } = useParams();
   const currentDocument = documents.find(doc => doc.id === documentId)
+
+  /**
+   * Set local storage with last document view option to "edit".
+   * This is used as default option when selecting document in menu.
+   */
+  useEffect(() => {
+    setLocalStorage('lastDocumentView', 'edit')
+  }, [])
 
   if (!documentId || !currentDocument) {
     return <Navigate to={navigationData['404']}/>

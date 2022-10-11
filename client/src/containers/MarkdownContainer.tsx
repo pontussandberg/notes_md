@@ -5,6 +5,8 @@ import { DocumentFile } from "../types"
 import navigationData from '../data/navigation.json'
 import MenuDrawer from '../components/MenuDrawer'
 import MarkdownRendererHeader from '../components/MarkdownRendererHeader'
+import { useEffect } from 'react'
+import { setLocalStorage } from '../localStorage'
 
 type MarkdownContainerProps = {
   documents: DocumentFile[]
@@ -19,6 +21,14 @@ const MarkdownContainer = ({
 }: MarkdownContainerProps) => {
   const { documentId } = useParams();
   const currentDocument = documents.find(doc => doc.id === documentId)
+
+  /**
+   * Set local storage with last document view option to "edit".
+   * This is used as default option when selecting document in menu.
+   */
+  useEffect(() => {
+    setLocalStorage('lastDocumentView', 'markdown')
+  }, [])
 
   if (!documentId || !currentDocument) {
     return <Navigate to={navigationData['404']}/>

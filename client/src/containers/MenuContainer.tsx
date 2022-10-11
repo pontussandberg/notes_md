@@ -9,6 +9,7 @@ import DocumentListItem from '../components/DocumentListItem'
 import navigationData from '../data/navigation.json'
 import styles from '../css/containers/MenuContainer.module.css'
 import { DocumentFile } from '../types'
+import { getLocalStorage } from '../localStorage'
 
 type ViewOption = 'list' | 'card'
 type MenuOption = 'documents' | 'settings'
@@ -25,12 +26,19 @@ const MenuContainer = ({
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [viewOption, setViewOption] = useState<ViewOption>('card')
 
+  const getDocumentLink = (documentId: string) => {
+    const resource = getLocalStorage('lastDocumentView') === 'markdown'
+      ? navigationData.markdown
+      : navigationData.edit
+
+    return `${resource}/${documentId}`
+  }
 
   const renderDocumentCards = () => {
     return documents.map((document) => {
       return (
         <Link
-          to={`${navigationData.edit}/${document.id}`}
+          to={getDocumentLink(document.id)}
           key={shortid.generate()}
         >
           <DocumentCard
@@ -46,7 +54,7 @@ const MenuContainer = ({
     return documents.map((document) => {
       return (
         <Link
-          to={`${navigationData.edit}/${document.id}`}
+          to={getDocumentLink(document.id)}
           key={shortid.generate()}
         >
           <DocumentListItem

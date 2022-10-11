@@ -6,6 +6,7 @@ import MenuContainer from "./containers/MenuContainer"
 import EditorContainer from "./containers/EditorContainer"
 import MarkdownContainer from "./containers/MarkdownContainer"
 import navigationData from './data/navigation.json'
+import { setLocalStorage, getLocalStorage } from "./localStorage"
 
 const App = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
@@ -15,13 +16,12 @@ const App = () => {
     console.log('documents -->', documents)
   })
 
-
   /**
-   * Whenever state variable documents is updated, store files in DB.
+   * Store document files in DB.
    */
   useEffect(() => {
     if (documents.length) {
-      localStorage.setItem('documentFiles', JSON.stringify(documents))
+      setLocalStorage('documentFiles', documents)
     }
   }, [documents])
 
@@ -29,9 +29,10 @@ const App = () => {
    * Get stored document files on mount
    */
   useEffect(() => {
-    const storedDocumentFiles = localStorage.getItem('documentFiles')
+    const storedDocumentFiles = getLocalStorage('documentFiles')
+
     if (storedDocumentFiles) {
-      setDocuments(JSON.parse(storedDocumentFiles))
+      setDocuments(storedDocumentFiles)
     }
   }, [])
 
