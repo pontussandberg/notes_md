@@ -4,6 +4,7 @@ type ButtonProps = {
   type?: 'primary' | 'secondary'
   title: string
   onClick?: () => void
+  fullWidth?: boolean
 }
 
 
@@ -11,6 +12,7 @@ const Button = ({
   title,
   onClick = () => {},
   type = 'primary',
+  fullWidth,
 }: ButtonProps) => {
 
   const getStyles = () => {
@@ -23,6 +25,10 @@ const Button = ({
       case 'secondary':
         classes.push(styles.secondary)
         break
+    }
+
+    if (fullWidth) {
+      classes.push(styles.fullWidth)
     }
 
     return classes.join(' ')

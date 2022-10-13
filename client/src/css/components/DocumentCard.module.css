@@ -4,8 +4,8 @@
   --document-card-width: 100px;
   cursor: pointer;
   width: var(--document-card-side-length);
-}
 
+}
 
 .documentCardContainer__title {
   text-overflow: ellipsis;
@@ -25,14 +25,16 @@
   grid-template-rows: 10% 90%;
   height: var(--document-card-side-length);
   border-radius: 6px;
-  border: 2px solid var(--menu-border-light);
+  border: 2px solid var(--menu-border-lighter);
   color: #fff;
   overflow: hidden;
   user-select: none;
   background: var(--menu-content-bg);
 }
 
+
 .documentCard__header {
+  transition: var(--basic-transition-timing);
   border-bottom: 1px solid var(--menu-border-light);
 }
 
@@ -42,6 +44,7 @@
 }
 
 .main__margin {
+  transition: var(--basic-transition-timing);
   border-right: 1px solid var(--menu-border-light);
   padding-top: 6px;
   display: flex;
@@ -55,6 +58,7 @@
 }
 
 .main__margin > span {
+  transition: var(--basic-transition-timing);
   display: block;
   background: var(--menu-border-light);
   opacity: .75;
@@ -64,6 +68,7 @@
   border-radius: 1px;
 }
 .main__rows > span {
+  transition: var(--basic-transition-timing);
   display: block;
   background: var(--menu-border-light);
   opacity: .75;

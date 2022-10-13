@@ -11,12 +11,16 @@ import { setLocalStorage } from '../localStorage'
 type MarkdownContainerProps = {
   documents: DocumentFile[]
   isMenuDrawerOpen: boolean
+  lastDocumentView: 'edit' | 'markdown'
+  setLastDocumentView: (value: 'edit' | 'markdown') => void
   setisMenuDrawerOpen: (state: boolean) => void
 }
 
 const MarkdownContainer = ({
   documents,
   isMenuDrawerOpen,
+  lastDocumentView,
+  setLastDocumentView,
   setisMenuDrawerOpen,
 }: MarkdownContainerProps) => {
   const { documentId } = useParams();
@@ -27,6 +31,7 @@ const MarkdownContainer = ({
    * This is used as default option when selecting document in menu.
    */
   useEffect(() => {
+    setLastDocumentView('markdown')
     setLocalStorage('lastDocumentView', 'markdown')
   }, [])
 
@@ -39,10 +44,12 @@ const MarkdownContainer = ({
   return (
     <div className={styles.markdownContainer}>
       <MenuDrawer
+        currentDocumentId={currentDocument.id}
         documents={documents}
         isOpen={isMenuDrawerOpen}
         currentDocumentIndex={currentDocumentIndex}
         navigationResource={'markdown'}
+        lastDocumentView={lastDocumentView}
       />
 
       <div className={styles.markdownContainer__markdownRenderer}>

@@ -9,25 +9,26 @@ import DocumentListItem from '../components/DocumentListItem'
 import navigationData from '../data/navigation.json'
 import styles from '../css/containers/MenuContainer.module.css'
 import { DocumentFile } from '../types'
-import { getLocalStorage } from '../localStorage'
 
 type ViewOption = 'list' | 'card'
 type MenuOption = 'documents' | 'settings'
 
 type MenuContainerProps = {
   documents: DocumentFile[]
+  lastDocumentView: 'edit' | 'markdown'
   onCreateNewDocument: () => void
 }
 
 const MenuContainer = ({
   onCreateNewDocument,
   documents,
+  lastDocumentView,
 }: MenuContainerProps) => {
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [viewOption, setViewOption] = useState<ViewOption>('card')
 
   const getDocumentLink = (documentId: string) => {
-    const resource = getLocalStorage('lastDocumentView') === 'markdown'
+    const resource = lastDocumentView === 'markdown'
       ? navigationData.markdown
       : navigationData.edit
 

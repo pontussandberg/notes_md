@@ -10,7 +10,8 @@ import { setLocalStorage, getLocalStorage } from "./localStorage"
 
 const App = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
-  const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(false)
+  const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(true)
+  const [lastDocumentView, setLastDocumentView] = useState<'edit' | 'markdown'>(getLocalStorage('lastDocumentView'))
 
   useEffect(() => {
     console.log('documents -->', documents)
@@ -77,6 +78,7 @@ const App = () => {
         path={`${navigationData.menu}`}
         element={
           <MenuContainer
+            lastDocumentView={lastDocumentView}
             documents={documents}
             onCreateNewDocument={createNewDocument}
           />
@@ -87,6 +89,8 @@ const App = () => {
         path={`${navigationData.edit}/:documentId`}
         element={
           <EditorContainer
+            setLastDocumentView={setLastDocumentView}
+            lastDocumentView={lastDocumentView}
             documents={documents}
             isMenuDrawerOpen={isMenuDrawerOpen}
             setisMenuDrawerOpen={setisMenuDrawerOpen}
@@ -99,6 +103,8 @@ const App = () => {
         path={`${navigationData.markdown}/:documentId`}
         element={
           <MarkdownContainer
+            setLastDocumentView={setLastDocumentView}
+            lastDocumentView={lastDocumentView}
             documents={documents}
             isMenuDrawerOpen={isMenuDrawerOpen}
             setisMenuDrawerOpen={setisMenuDrawerOpen}

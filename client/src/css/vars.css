@@ -9,8 +9,11 @@
   --editor-line-height: 22px;
   --editor-font-size: 16px;
   --editor-letter-spacing: .78px;
-  --menuDrawerWidth: var(--editor-margin-width);
+  --menuDrawerWidth: var(--menu-drawer-width--closed);
   /* *** */
+
+  --menu-drawer-width--open: 250px;
+  --menu-drawer-width--closed: 0px;
 
   --editor-header-height: 50px;
 
@@ -33,4 +36,6 @@
   --menu-highlight: rgb(220, 220, 220);
   --menu-bg: rgb(15, 15, 15);
   --menu-content-bg: rgb(25, 25, 25);
+
+  --basic-transition-timing: .3s ease;
 }

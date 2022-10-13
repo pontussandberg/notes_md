@@ -11,6 +11,8 @@ import { setLocalStorage } from '../localStorage'
 type EditorContainerProps = {
   documents: DocumentFile[]
   isMenuDrawerOpen: boolean
+  lastDocumentView: 'edit' | 'markdown'
+  setLastDocumentView: (value: 'edit' | 'markdown') => void
   setisMenuDrawerOpen: (state: boolean) => void
   onDocumentUpdate: (id: string, documentData: DocumentFile) => void
 }
@@ -18,6 +20,8 @@ type EditorContainerProps = {
 const EditorContainer = ({
   isMenuDrawerOpen,
   documents,
+  lastDocumentView,
+  setLastDocumentView,
   setisMenuDrawerOpen,
   onDocumentUpdate,
 }: EditorContainerProps) => {
@@ -29,6 +33,7 @@ const EditorContainer = ({
    * This is used as default option when selecting document in menu.
    */
   useEffect(() => {
+    setLastDocumentView('edit')
     setLocalStorage('lastDocumentView', 'edit')
   }, [])
 
@@ -43,10 +48,12 @@ const EditorContainer = ({
 
       {/* Menu drawer */}
       <MenuDrawer
+        currentDocumentId={currentDocument.id}
         isOpen={isMenuDrawerOpen}
         currentDocumentIndex={currentDocumentIndex}
         documents={documents}
         navigationResource={'edit'}
+        lastDocumentView={lastDocumentView}
       />
 
       {/* Editor */}

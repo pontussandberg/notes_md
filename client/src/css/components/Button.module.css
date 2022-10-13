@@ -6,6 +6,10 @@
   color: #fff;
 }
 
+.fullWidth {
+  width: 100%;
+}
+
 .primary {
   background: var(--cta);
 }

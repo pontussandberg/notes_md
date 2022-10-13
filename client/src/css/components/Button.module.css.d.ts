@@ -2,6 +2,7 @@
 // Please do not change this file!
 interface CssExports {
   'button': string;
+  'fullWidth': string;
   'primary': string;
   'secondary': string;
 }

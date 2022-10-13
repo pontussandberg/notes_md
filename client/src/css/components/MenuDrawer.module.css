@@ -10,10 +10,14 @@
   height: 50px;
   display:flex;
   align-items: center;
-  padding-left: 16px;
-  margin-bottom: var(--editor-padding-top);
   width: 100%;
+  justify-content: flex-start;
   cursor: pointer;
+  padding-left: 16px;
+  overflow: hidden;
+}
+.menuDrawer.closed .menuDrawer__menuButton {
+  opacity: 0;
 }
 .menuDrawer__items {
   background: var(--editor-bg);

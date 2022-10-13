@@ -1,5 +1,5 @@
 .markdownRenderer {
-  padding: var(--editor-padding-top) var(--editor-margin-width);
+  padding: var(--editor-padding-top) calc(var(--editor-margin-width) + 50px);
   height: 100%;
   width: 100%;
   background: var(--editor-bg);
@@ -31,7 +31,7 @@
 }
 
 .markdownRenderer h1 {
-  border-bottom: 1px solid var(--editor-lighter);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 6px;
   margin-bottom: 14px;
   margin-top: 20px;
