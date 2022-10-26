@@ -36,14 +36,16 @@ const EditorHeader = ({
 
       <div className={styles.title}>{title}</div>
 
-      <div className={styles.renderMarkdownButton}>
-        <Link to={`${navigationData.markdown}/${documentId}`}>
-          <Button
-            type='secondary'
-            title={'Render Markdown'}
-          />
-        </Link>
-      </div>
+      {!drawerOpen && (
+        <div className={styles.renderMarkdownButton}>
+          <Link to={`${navigationData.markdown}/${documentId}`}>
+            <Button
+              type='secondary'
+              title={'Render Markdown'}
+            />
+          </Link>
+        </div>
+      )}
     </header>
   )
 }
