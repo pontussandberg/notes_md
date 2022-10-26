@@ -8,7 +8,6 @@ import MarkdownContainer from "./containers/MarkdownContainer"
 import navigationData from './data/navigation.json'
 import { setLocalStorage, getLocalStorage } from "./localStorage"
 
-
 const App = () => {
   const [documents, setDocuments] = useState<DocumentFile[]>([])
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(true)

@@ -27,10 +27,20 @@ const MenuContainer = ({
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [viewOption, setViewOption] = useState<ViewOption>('card')
 
-  const getDocumentLink = (documentId: string) => {
-    const resource = lastDocumentView === 'markdown'
-      ? navigationData.markdown
-      : navigationData.edit
+  const getDocumentLink = (documentId: string): string => {
+    const currentDoc = documents.find(doc => doc.id === documentId)
+    console.log(currentDoc?.content)
+    console.log(currentDoc?.content.length)
+
+    // Should never run
+    if (!currentDoc) {
+      console.error('Something went wrong')
+      return ''
+    }
+
+    const resource = lastDocumentView === 'edit' || currentDoc.content.trim().length === 0
+      ? navigationData.edit
+      : navigationData.markdown
 
     return `${resource}/${documentId}`
   }
