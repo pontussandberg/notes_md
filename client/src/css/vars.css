@@ -31,11 +31,11 @@
   --secondary-text: rgba(246, 246, 248, 0.75);
 
   --menu-border: rgb(25, 25, 25);
-  --menu-border-light: rgb(40, 40, 40);
-  --menu-border-lighter: rgb(65, 65, 65);
+  --menu-border-light: rgb(49, 49, 49);
+  --menu-border-lighter: rgb(78, 78, 78);
   --menu-highlight: rgb(220, 220, 220);
   --menu-bg: rgb(15, 15, 15);
   --menu-content-bg: rgb(25, 25, 25);
 
-  --basic-transition-timing: .3s ease;
+  --basic-transition-timing: .2s ease;
 }
