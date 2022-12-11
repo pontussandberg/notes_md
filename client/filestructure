@@ -1,14 +1,18 @@
 ├── build                   # Compiled files.
 ├── src                     # Source code.
+│   ├── __generated__         # Apollo client codegen generated datatypes.
 │   ├── components            # React components.
 │   ├── containers            # React components that are used as wrappers for pages or views.
 │   ├── css                   # CSS Source code, global and module files.
+│   ├── data                  # Static data files.
+│   ├── gql                   # GraphQL queries and mutations.
 │   ├── prism_lib             # Source code for prism module - https://prismjs.com/.
 │   ├── App.tsx               # Entry react component.
 │   ├── helpers.ts            # Helper functions for application.
 │   ├── index.tsx             # React dom injecting.
 │   ├── index.html            # HTML template for webpack.
 │   ├── navigation.json       # Navigation settings.
+│   ├── localStorage.ts       # Custom local storage API wrapper.
 │   └── types.ts              # General types for application.
 ├── webpack                 # Webpack config files.
 │   ├── webpack.common.js     # Included in all compiles.

@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 import shortid from 'shortid'
+import { useMutation, useQuery } from '@apollo/client';
 
 import Button from '../components/Button'
 import DocumentCard from '../components/DocumentCard'
@@ -8,29 +9,38 @@ import DocumentListItem from '../components/DocumentListItem'
 
 import navigationData from '../data/navigation.json'
 import styles from '../css/containers/MenuContainer.module.css'
-import { DocumentFile } from '../types'
+import { GET_DOCUMENTS_MENU_QUERY } from '../gql/queries';
+import { CREATE_DOCUMENT_MUTATION } from '../gql/mutations';
+import { getLocalStorage } from '../localStorage';
 
 type ViewOption = 'list' | 'card'
 type MenuOption = 'documents' | 'settings'
 
-type MenuContainerProps = {
-  documents: DocumentFile[]
-  lastDocumentView: 'edit' | 'markdown'
-  onCreateNewDocument: () => void
-}
-
-const MenuContainer = ({
-  onCreateNewDocument,
-  documents,
-  lastDocumentView,
-}: MenuContainerProps) => {
+const MenuContainer = () => {
   const [currentMenu, setCurrentMenu] = useState<MenuOption>('documents')
   const [viewOption, setViewOption] = useState<ViewOption>('card')
 
+  const {loading, error, data} = useQuery(GET_DOCUMENTS_MENU_QUERY)
+
+  if (loading) return null
+  if (error || !data) return <Navigate to={navigationData['error']}/>
+
+  const { documents } = data
+
+  const handleCreateNewDocument = () => {
+    // useMutation(CREATE_DOCUMENT_MUTATION, {
+    //   variables: {
+    //     content: '',
+    //     fileExtension: '',
+    //     title: '',
+    //     listIndex: 0,
+    //     rowsCount: 0,
+    //   }
+    // })
+  }
+
   const getDocumentLink = (documentId: string): string => {
     const currentDoc = documents.find(doc => doc.id === documentId)
-    console.log(currentDoc?.content)
-    console.log(currentDoc?.content.length)
 
     // Should never run
     if (!currentDoc) {
@@ -38,9 +48,12 @@ const MenuContainer = ({
       return ''
     }
 
-    const resource = lastDocumentView === 'edit' || currentDoc.content.trim().length === 0
-      ? navigationData.edit
-      : navigationData.markdown
+    const lastViewWasMarkdown = getLocalStorage('lastDocumentView') === 'markdown'
+    const currentDocumentHasContent = currentDoc.content.trim().length > 0
+
+    const resource = lastViewWasMarkdown && currentDocumentHasContent 
+      ? navigationData.markdown
+      : navigationData.edit
 
     return `${resource}/${documentId}`
   }
@@ -87,7 +100,7 @@ const MenuContainer = ({
           <Button
             type='primary'
             title={'New document'}
-            onClick={onCreateNewDocument}
+            onClick={handleCreateNewDocument}
           />
           <div>
             <button onClick={() => setViewOption('card')} className={`${styles.showOptionBtn} ${showCards && styles.active}`}><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#D9D9D9"/><rect y="9" width="6" height="6" rx="1" fill="#D9D9D9"/></svg></button>
@@ -119,7 +132,6 @@ const MenuContainer = ({
         return renderMenuSettings()
     }
   }
-
 
   return (
     <div className={styles.menu}>

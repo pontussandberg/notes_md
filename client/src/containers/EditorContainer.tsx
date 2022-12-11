@@ -1,47 +1,66 @@
 import { useParams, Navigate } from 'react-router-dom'
 import Editor from '../components/Editor'
+import { useMutation, useQuery } from '@apollo/client'
+
 import EditorHeader from '../components/EditorHeader'
 import MenuDrawer from '../components/MenuDrawer'
-import styles from '../css/containers/EditorContainer.module.css'
-import { DocumentFile } from '../types'
+
 import navigationData from '../data/navigation.json'
 import { useEffect } from 'react'
 import { setLocalStorage } from '../localStorage'
+import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
+import styles from '../css/containers/EditorContainer.module.css'
+import { UPDATE_DOCUMENT_MUTATION } from '../gql/mutations'
+import { DocumentFile } from '../__generated__/graphql'
 
 type EditorContainerProps = {
-  documents: DocumentFile[]
   isMenuDrawerOpen: boolean
-  lastDocumentView: 'edit' | 'markdown'
-  setLastDocumentView: (value: 'edit' | 'markdown') => void
   setisMenuDrawerOpen: (state: boolean) => void
-  onDocumentUpdate: (id: string, documentData: DocumentFile) => void
 }
 
 const EditorContainer = ({
   isMenuDrawerOpen,
-  documents,
-  lastDocumentView,
-  setLastDocumentView,
   setisMenuDrawerOpen,
-  onDocumentUpdate,
 }: EditorContainerProps) => {
-  const { documentId } = useParams();
-  const currentDocument = documents.find(doc => doc.id === documentId)
-
   /**
    * Set local storage with last document view option to "edit".
    * This is used as default option when selecting document in menu.
    */
   useEffect(() => {
-    setLastDocumentView('edit')
     setLocalStorage('lastDocumentView', 'edit')
   }, [])
+
+  const handleDocumentUpdate = (doc: DocumentFile) => {
+    useMutation(UPDATE_DOCUMENT_MUTATION, {
+      variables: {
+        id: doc.id,
+        title: doc.title,
+        content: doc.content,
+      }
+    })
+  }
+
+  let { documentId } = useParams();
+  const {loading, data} = useQuery(
+    GET_DOCUMENT_RENDER_QUERY,
+    {
+      variables: {
+        id: documentId,
+      }
+    }
+  )
+
+  if (loading) {
+    return null
+  } else if (!data?.document) {
+    return <Navigate to={navigationData['404']}/>
+  }
+
+  const { document: currentDocument } = data
 
   if (!documentId || !currentDocument) {
     return <Navigate to={navigationData['404']}/>
   }
-
-  const currentDocumentIndex = documents.indexOf(currentDocument)
 
   return (
     <div className={styles.documentViewer}>
@@ -50,10 +69,8 @@ const EditorContainer = ({
       <MenuDrawer
         currentDocumentId={currentDocument.id}
         isOpen={isMenuDrawerOpen}
-        currentDocumentIndex={currentDocumentIndex}
-        documents={documents}
+        currentDocumentIndex={0} /* TODO */
         navigationResource={'edit'}
-        lastDocumentView={lastDocumentView}
       />
 
       {/* Editor */}
@@ -67,9 +84,8 @@ const EditorContainer = ({
 
         <Editor
           documentId={documentId}
-          key={currentDocumentIndex}
           content={currentDocument.content}
-          onDocumentUpdate={onDocumentUpdate}
+          onDocumentUpdate={handleDocumentUpdate}
         />
       </div>
     </div>

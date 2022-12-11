@@ -6,7 +6,8 @@ import {
   ReactElement,
 } from 'react'
 import styles from '../css/components/Editor.module.css'
-import { DocumentFile, TActiveKeys } from '../types'
+import { TActiveKeys } from '../types'
+import { DocumentFile } from '../__generated__/graphql'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'
 import shortid from 'shortid'
@@ -20,7 +21,7 @@ type EditorProps = {
   width?: number
   heightUnits?: string
   widthUnits?: string
-  onDocumentUpdate: (documentId: string, documentData: DocumentFile) => void
+  onDocumentUpdate: (documentData: DocumentFile) => void
 }
 
 const Editor = ({
@@ -139,9 +140,7 @@ const Editor = ({
   }
 
   const emitContentUpdate = () => {
-    onDocumentUpdate(
-      documentId,
-      {
+    onDocumentUpdate({
         id: documentId,
         rowsCount: getLines(documentContent).length,
         title: getDocTitle(),

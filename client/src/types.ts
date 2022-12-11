@@ -3,15 +3,6 @@ import navigationData from "./data/navigation.json"
 
 export type NavigationData = typeof navigationData
 
-export type DocumentFile = {
-  id: string
-  listIndex?: number
-  rowsCount: number
-  title: string
-  content: string
-  fileExtension: '.md'
-}
-
 // Hacky but thes props are handled by NextJS anyway
 export type AppProps = {
   Component: any

@@ -7,7 +7,9 @@
     "build": "webpack --config webpack/webpack.config.js --env env=prod",
     "lint": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx,json}\"",
     "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+
+    "codegen": "graphql-codegen",
+    "codegen-watch": "graphql-codegen -w"
   },
   "keywords": [
     "React",
@@ -19,7 +21,11 @@
   "author": "Vishwas",
   "license": "MIT",
   "dependencies": {
+    "@apollo/client": "^3.7.2",
+    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/client-preset": "^1.2.3",
     "css-modules-typescript-loader": "^4.0.1",
+    "graphql": "^16.6.0",
     "local-storage": "^2.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

@@ -5,26 +5,33 @@ import { DocumentFile, NavigationData } from '../types'
 import styles from '../css/components/MenuDrawer.module.css'
 import navigationData from '../data/navigation.json'
 import Button from './Button'
-import { getLocalStorage } from '../localStorage'
-
+import { gql } from '../__generated__/gql'
+import { useQuery } from '@apollo/client'
+import { GET_DOCUMENTS_MENU_DRAWER_QUERY } from '../gql/queries'
 
 type MenuDrawerProps = {
   isOpen: boolean
   currentDocumentIndex: number
-  documents: DocumentFile[]
   navigationResource: keyof NavigationData
   currentDocumentId: string
-  lastDocumentView: 'edit' | 'markdown'
 }
 
 const MenuDrawer = ({
   isOpen,
   currentDocumentIndex,
-  documents,
   navigationResource,
   currentDocumentId,
-  lastDocumentView,
 }: MenuDrawerProps) => {
+
+  /**
+   * Get data from api
+   */
+  const {loading, data} = useQuery(GET_DOCUMENTS_MENU_DRAWER_QUERY)
+  if (loading || !data?.documents) {
+    return null
+  }
+  
+  const { documents } = data
 
   /**
    * Open / closes menu drawer by setting a css variable value -
@@ -58,7 +65,7 @@ const MenuDrawer = ({
   }
 
   const renderViewToggleLink = () => {
-    const isEditView = lastDocumentView === 'edit'
+    const isEditView = navigationResource === 'edit'
     const text = isEditView ? 'Render Markown' : 'Edit'
     const changeToView = isEditView ? 'markdown' : 'edit'
 
