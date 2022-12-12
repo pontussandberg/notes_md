@@ -62,7 +62,7 @@ const resolvers: Resolvers = {
     },
 
     updateDocument: (_parent, {id, content, rowsCount, title, fileExtension, listIndex}) => {
-      
+
       console.log(id)
       console.log(content)
       console.log(rowsCount)
@@ -80,12 +80,14 @@ const resolvers: Resolvers = {
 
       docsDB[documentIndex] = {
         ...ref,
-        content: content             || ref.content, 
-        rowsCount: rowsCount         || ref.rowsCount, 
-        title: title                 || ref.title, 
-        fileExtension: fileExtension || ref.fileExtension, 
+        content: content             || ref.content,
+        rowsCount: rowsCount         || ref.rowsCount,
+        title: title                 || ref.title,
+        fileExtension: fileExtension || ref.fileExtension,
         listIndex: listIndex         || ref.listIndex,
       }
+
+      console.log(docsDB[documentIndex])
 
       return docsDB[documentIndex]
     },

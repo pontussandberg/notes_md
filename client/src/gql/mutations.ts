@@ -36,6 +36,11 @@ export const UPDATE_DOCUMENT_MUTATION = gql(/* GraphQL */ `
       title: $title,
     ) {
       id
+      content
+      fileExtension
+      title
+      listIndex
+      rowsCount
     }
   }
 `)

@@ -11,7 +11,6 @@ import { setLocalStorage } from '../localStorage'
 import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
 import styles from '../css/containers/EditorContainer.module.css'
 import { UPDATE_DOCUMENT_MUTATION } from '../gql/mutations'
-import { DocumentFile } from '../__generated__/graphql'
 
 type EditorContainerProps = {
   isMenuDrawerOpen: boolean
@@ -22,25 +21,9 @@ const EditorContainer = ({
   isMenuDrawerOpen,
   setisMenuDrawerOpen,
 }: EditorContainerProps) => {
-  /**
-   * Set local storage with last document view option to "edit".
-   * This is used as default option when selecting document in menu.
-   */
-  useEffect(() => {
-    setLocalStorage('lastDocumentView', 'edit')
-  }, [])
+  const { documentId } = useParams()
 
-  const handleDocumentUpdate = (doc: DocumentFile) => {
-    useMutation(UPDATE_DOCUMENT_MUTATION, {
-      variables: {
-        id: doc.id,
-        title: doc.title,
-        content: doc.content,
-      }
-    })
-  }
-
-  let { documentId } = useParams();
+  const [handleDocumentUpdate] = useMutation(UPDATE_DOCUMENT_MUTATION)
   const {loading, data} = useQuery(
     GET_DOCUMENT_RENDER_QUERY,
     {
@@ -49,6 +32,14 @@ const EditorContainer = ({
       }
     }
   )
+
+  /**
+   * Set local storage with last document view option to "edit".
+   * This is used as default option when selecting document in menu.
+   */
+  useEffect(() => {
+    setLocalStorage('lastDocumentView', 'edit')
+  }, [])
 
   if (loading) {
     return null
@@ -85,7 +76,13 @@ const EditorContainer = ({
         <Editor
           documentId={documentId}
           content={currentDocument.content}
-          onDocumentUpdate={handleDocumentUpdate}
+          onDocumentUpdate={doc => handleDocumentUpdate({
+            variables: {
+              id: doc.id,
+              title: doc.title,
+              content: doc.content,
+            }
+          })}
         />
       </div>
     </div>

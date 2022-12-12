@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
-import { DocumentFile, NavigationData } from '../types'
+import { NavigationData } from '../types'
 import styles from '../css/components/MenuDrawer.module.css'
 import navigationData from '../data/navigation.json'
 import Button from './Button'
-import { gql } from '../__generated__/gql'
 import { useQuery } from '@apollo/client'
 import { GET_DOCUMENTS_MENU_DRAWER_QUERY } from '../gql/queries'
 
@@ -27,11 +26,6 @@ const MenuDrawer = ({
    * Get data from api
    */
   const {loading, data} = useQuery(GET_DOCUMENTS_MENU_DRAWER_QUERY)
-  if (loading || !data?.documents) {
-    return null
-  }
-  
-  const { documents } = data
 
   /**
    * Open / closes menu drawer by setting a css variable value -
@@ -44,6 +38,11 @@ const MenuDrawer = ({
       setCssVariable('--menuDrawerWidth', isOpen ? open : closed)
   }, [isOpen])
 
+  if (loading || !data?.documents) {
+    return null
+  }
+
+  const { documents } = data
 
   const getMenuDrawerItemClasses = (index: number) => {
     const classes = [styles.items__item]
@@ -81,7 +80,6 @@ const MenuDrawer = ({
       </div>
     )
   }
-
 
   return (
     <div className={`${styles.menuDrawer} ${!isOpen && styles.closed}`}>

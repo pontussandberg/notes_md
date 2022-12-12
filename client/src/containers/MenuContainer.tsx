@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import shortid from 'shortid'
 import { useMutation, useQuery } from '@apollo/client';
@@ -22,22 +22,24 @@ const MenuContainer = () => {
 
   const {loading, error, data} = useQuery(GET_DOCUMENTS_MENU_QUERY)
 
+  const [handleCreateNewDocument] = useMutation(CREATE_DOCUMENT_MUTATION, {
+    variables: {
+      content: '',
+      fileExtension: '',
+      title: '',
+      listIndex: 0,
+      rowsCount: 0,
+    },
+    refetchQueries: [
+      { query: GET_DOCUMENTS_MENU_QUERY }
+    ]
+  })
+
   if (loading) return null
   if (error || !data) return <Navigate to={navigationData['error']}/>
 
   const { documents } = data
 
-  const handleCreateNewDocument = () => {
-    // useMutation(CREATE_DOCUMENT_MUTATION, {
-    //   variables: {
-    //     content: '',
-    //     fileExtension: '',
-    //     title: '',
-    //     listIndex: 0,
-    //     rowsCount: 0,
-    //   }
-    // })
-  }
 
   const getDocumentLink = (documentId: string): string => {
     const currentDoc = documents.find(doc => doc.id === documentId)
@@ -51,7 +53,7 @@ const MenuContainer = () => {
     const lastViewWasMarkdown = getLocalStorage('lastDocumentView') === 'markdown'
     const currentDocumentHasContent = currentDoc.content.trim().length > 0
 
-    const resource = lastViewWasMarkdown && currentDocumentHasContent 
+    const resource = lastViewWasMarkdown && currentDocumentHasContent
       ? navigationData.markdown
       : navigationData.edit
 

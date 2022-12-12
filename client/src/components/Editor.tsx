@@ -145,7 +145,8 @@ const Editor = ({
         rowsCount: getLines(documentContent).length,
         title: getDocTitle(),
         content: documentContent,
-        fileExtension: '.md'
+        fileExtension: '.md',
+        listIndex: 1,
       }
     )
   }
