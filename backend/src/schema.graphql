@@ -1,0 +1,36 @@
+# Special apollo symbols
+# ----------------------
+type Query {
+  documents: [DocumentFile!]!
+  document(id: String): DocumentFile
+}
+
+type Mutation {
+  createDocument(
+    content: String
+    fileExtension: String
+    title: String
+    listIndex: Int
+    rowsCount: Int
+  ): DocumentFile
+  updateDocument(
+    id: String
+    content: String
+    fileExtension: String
+    title: String
+    listIndex: Int
+    rowsCount: Int
+  ): DocumentFile
+}
+
+
+# Data types
+# ----------
+type DocumentFile {
+  id: String!
+  listIndex: Int!
+  rowsCount: Int!
+  title: String!
+  content: String!
+  fileExtension: String!
+}

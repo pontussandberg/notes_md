@@ -1,30 +1,25 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
-import { DocumentFile, NavigationData } from '../types'
+import { NavigationData } from '../types'
 import styles from '../css/components/MenuDrawer.module.css'
 import navigationData from '../data/navigation.json'
 import Button from './Button'
-import { getLocalStorage } from '../localStorage'
-
+import { useQuery } from '@apollo/client'
+import { GET_DOCUMENTS_MENU_DRAWER_QUERY } from '../gql/queries'
 
 type MenuDrawerProps = {
   isOpen: boolean
-  currentDocumentIndex: number
-  documents: DocumentFile[]
   navigationResource: keyof NavigationData
-  currentDocumentId: string
-  lastDocumentView: 'edit' | 'markdown'
 }
 
 const MenuDrawer = ({
   isOpen,
-  currentDocumentIndex,
-  documents,
   navigationResource,
-  currentDocumentId,
-  lastDocumentView,
 }: MenuDrawerProps) => {
+
+  const {loading, data} = useQuery(GET_DOCUMENTS_MENU_DRAWER_QUERY)
+  const { documentId } = useParams()
 
   /**
    * Open / closes menu drawer by setting a css variable value -
@@ -37,6 +32,12 @@ const MenuDrawer = ({
       setCssVariable('--menuDrawerWidth', isOpen ? open : closed)
   }, [isOpen])
 
+  if (loading || !data?.documents) {
+    return null
+  }
+
+  const { documents } = data
+  const currentDocumentIndex = documents.findIndex(doc => doc.id === documentId)
 
   const getMenuDrawerItemClasses = (index: number) => {
     const classes = [styles.items__item]
@@ -58,13 +59,13 @@ const MenuDrawer = ({
   }
 
   const renderViewToggleLink = () => {
-    const isEditView = lastDocumentView === 'edit'
+    const isEditView = navigationResource === 'edit'
     const text = isEditView ? 'Render Markown' : 'Edit'
     const changeToView = isEditView ? 'markdown' : 'edit'
 
     return (
       <div style={{margin: '16px'}}>
-        <Link to={`${navigationData[changeToView]}/${currentDocumentId}`}>
+        <Link to={`${navigationData[changeToView]}/${documentId}`}>
           <Button
             fullWidth
             type='primary'
@@ -74,7 +75,6 @@ const MenuDrawer = ({
       </div>
     )
   }
-
 
   return (
     <div className={`${styles.menuDrawer} ${!isOpen && styles.closed}`}>

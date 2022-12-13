@@ -5,32 +5,32 @@ import {
   ChangeEvent,
   ReactElement,
 } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
 import styles from '../css/components/Editor.module.css'
-import { DocumentFile, TActiveKeys } from '../types'
+import { TActiveKeys } from '../types'
+import { DocumentFile } from '../__generated__/graphql'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'
 import shortid from 'shortid'
+import { Navigate, useParams } from 'react-router-dom'
+import { UPDATE_DOCUMENT_MUTATION } from '../gql/mutations'
+import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
+import navigationData from '../data/navigation.json'
+
 
 type EditorProps = {
-  content: string
-  documentId: string
-
-  /* Default height and width are "100%" */
+  /* Default height and width is "100%" */
   height?: number
   width?: number
   heightUnits?: string
   widthUnits?: string
-  onDocumentUpdate: (documentId: string, documentData: DocumentFile) => void
 }
 
 const Editor = ({
-  documentId,
-  content,
   height = 100,
   width = 100,
   heightUnits = '%',
   widthUnits = '%',
-  onDocumentUpdate,
 }: EditorProps) => {
   const componentWrapperRef = useRef<HTMLDivElement>(null)
   const editorContainerRef = useRef<HTMLDivElement>(null)
@@ -40,7 +40,7 @@ const Editor = ({
   const currentLineHighlightRef = useRef<HTMLDivElement>(null)
   const editorLinesRef = useRef<HTMLDivElement>(null)
 
-  const [documentContent, setDocumentContent] = useState(content)
+  const [documentContent, setDocumentContent] = useState('')
   const [editorViewLines, setEditorViewLines] = useState('')
   const [currentLineNumber, setCurrentLineNumber] = useState(0)
   const [hideCurrentLineHighlight, setHideCurrentLineHighlight] = useState(false)
@@ -84,15 +84,6 @@ const Editor = ({
   }, [documentContent])
 
   /**
-   * Mounted
-   */
-  useEffect(() => {
-    updateLineEnumerationEl()
-    updateEditorViewLines(documentContent)
-    focusEditor()
-  }, [])
-
-  /**
    * Event listeners
    */
   useEffect(() => {
@@ -118,19 +109,35 @@ const Editor = ({
     setTextEdtiorHorizontalScrollbarXPos(getEditorCssVars().editorMarginWidth + getEditorCssVars().menuDrawerWidth)
   })
 
-
-  /*****************
-   * Misc effects  *
-   *****************/
-
   useEffect(() => {
     updateLineEnumerationEl()
   }, [currentLineNumber, documentContent])
 
   useEffect(() => {
     updateCurrentLineNumber()
-    emitContentUpdate()
+    saveDocument()
   }, [documentContent])
+
+  /**
+   * Get data
+   */
+  const { documentId } = useParams()
+  const { data } = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
+  const [ mutateDocument ] = useMutation(UPDATE_DOCUMENT_MUTATION)
+  
+  useEffect(() => {
+    if (data?.document) {
+      setDocumentContent(data.document.content)
+      updateEditorViewLines(data.document.content)
+      updateLineEnumerationEl()
+      focusEditor()
+    }
+  }, [data])
+
+  // TODO
+  // if (!loading && !data) {
+  //   return <Navigate to={navigationData['404']}/>
+  // } 
 
   const getDocTitle = () => {
     const firstIndexLineWithContent = getLines(documentContent).findIndex(line => line.length > 0)
@@ -138,18 +145,17 @@ const Editor = ({
     return getLines(documentContent)[titleLineIndex].slice(0, 32)
   }
 
-  const emitContentUpdate = () => {
-    onDocumentUpdate(
-      documentId,
-      {
+  const saveDocument = () => {
+    mutateDocument({
+      variables: {
         id: documentId,
-        rowsCount: getLines(documentContent).length,
         title: getDocTitle(),
         content: documentContent,
-        fileExtension: '.md'
+        rowsCount: getLines(documentContent).length,
       }
-    )
+    })
   }
+  
 
   /*****************
    *     </>       *
