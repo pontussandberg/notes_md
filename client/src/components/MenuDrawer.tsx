@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getRawCssVarianble, setCssVariable } from '../helpers'
 import { NavigationData } from '../types'
 import styles from '../css/components/MenuDrawer.module.css'
@@ -10,22 +10,16 @@ import { GET_DOCUMENTS_MENU_DRAWER_QUERY } from '../gql/queries'
 
 type MenuDrawerProps = {
   isOpen: boolean
-  currentDocumentIndex: number
   navigationResource: keyof NavigationData
-  currentDocumentId: string
 }
 
 const MenuDrawer = ({
   isOpen,
-  currentDocumentIndex,
   navigationResource,
-  currentDocumentId,
 }: MenuDrawerProps) => {
 
-  /**
-   * Get data from api
-   */
   const {loading, data} = useQuery(GET_DOCUMENTS_MENU_DRAWER_QUERY)
+  const { documentId } = useParams()
 
   /**
    * Open / closes menu drawer by setting a css variable value -
@@ -43,6 +37,7 @@ const MenuDrawer = ({
   }
 
   const { documents } = data
+  const currentDocumentIndex = documents.findIndex(doc => doc.id === documentId)
 
   const getMenuDrawerItemClasses = (index: number) => {
     const classes = [styles.items__item]
@@ -70,7 +65,7 @@ const MenuDrawer = ({
 
     return (
       <div style={{margin: '16px'}}>
-        <Link to={`${navigationData[changeToView]}/${currentDocumentId}`}>
+        <Link to={`${navigationData[changeToView]}/${documentId}`}>
           <Button
             fullWidth
             type='primary'

@@ -20,28 +20,10 @@ const MarkdownContainer = ({
   isMenuDrawerOpen,
   setisMenuDrawerOpen,
 }: MarkdownContainerProps) => {
+
+  // Get data
   const { documentId } = useParams();
-
-  if (!documentId) {
-    return <Navigate to={navigationData['menu']}/>
-  }
-
-  const {loading, data} = useQuery(
-    GET_DOCUMENT_RENDER_QUERY,
-    {
-      variables: {
-        id: documentId,
-      }
-    }
-  )
-
-  if (loading) {
-    return null
-  } else if (!data?.document) {
-    return <Navigate to={navigationData['404']}/>
-  }
-
-  const { document: currentDocument } = data
+  const {loading, data} = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
 
   /**
    * Set local storage with last document view option to "edit".
@@ -51,6 +33,14 @@ const MarkdownContainer = ({
     setLocalStorage('lastDocumentView', 'markdown')
   }, [])
 
+  if (loading) {
+    return null
+  } else if (!data?.document) {
+    return <Navigate to={navigationData['404']}/>
+  }
+
+  const { document: currentDocument } = data
+
   if (!documentId || !currentDocument) {
     return <Navigate to={navigationData['404']}/>
   }
@@ -58,22 +48,17 @@ const MarkdownContainer = ({
   return (
     <div className={styles.markdownContainer}>
       <MenuDrawer
-        currentDocumentId={currentDocument.id}
         isOpen={isMenuDrawerOpen}
-        currentDocumentIndex={0} /* TODO */
         navigationResource={'markdown'}
       />
 
       <div className={styles.markdownContainer__markdownRenderer}>
         <MarkdownRendererHeader
-          documentId={documentId}
           drawerOpen={isMenuDrawerOpen}
           onDrawerToggleClick={() => setisMenuDrawerOpen(!isMenuDrawerOpen)}
         />
 
-        <MarkdownRenderer
-          markdownText={currentDocument.content}
-        />
+        <MarkdownRenderer/>
       </div>
   </div>
   )

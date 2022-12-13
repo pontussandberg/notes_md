@@ -40,7 +40,6 @@ const MenuContainer = () => {
 
   const { documents } = data
 
-
   const getDocumentLink = (documentId: string): string => {
     const currentDoc = documents.find(doc => doc.id === documentId)
 

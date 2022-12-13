@@ -1,16 +1,24 @@
+import { useQuery } from '@apollo/client'
+import { useParams } from 'react-router-dom'
 import showdown from 'showdown'
 import styles from '../css/components/MarkdownRenderer.module.css'
+import { GET_DOCUMENT_MD_RENDER_QUERY } from '../gql/queries'
 
+const MarkdownRenderer = () => {
+  const { documentId } = useParams()
+  const {data} = useQuery(GET_DOCUMENT_MD_RENDER_QUERY, { variables: { id: documentId } })
 
-type MarkdownRendererProps = {
-  markdownText: string
-}
-
-const MarkdownRenderer = ({markdownText}: MarkdownRendererProps) => {
+  if (!data?.document?.content) {
+    return null
+  }
 
   const getMarkdownHtml = () => {
-    const converter = new showdown.Converter()
-    return converter.makeHtml(markdownText)
+    if (data.document?.content) {
+      const converter = new showdown.Converter()
+      return converter.makeHtml(data.document.content)
+    }
+
+    return ''
   }
 
   return (

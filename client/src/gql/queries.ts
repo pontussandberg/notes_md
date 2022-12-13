@@ -10,6 +10,15 @@ export const GET_DOCUMENT_RENDER_QUERY = gql(/* GraphQL */ `
   }
 `)
 
+export const GET_DOCUMENT_MD_RENDER_QUERY = gql(/* GraphQL */ `
+  query GetDocumentMdRenderQuery($id: String) {
+    document(id: $id) {
+      id
+      content
+    }
+  }
+`)
+
 export const GET_DOCUMENTS_MENU_QUERY = gql(/* GraphQL */ `
   query GetDocumentsMenuQuery {
     documents {

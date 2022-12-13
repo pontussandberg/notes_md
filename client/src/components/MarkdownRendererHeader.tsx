@@ -1,10 +1,9 @@
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import styles from '../css/components/MarkdownRendererHeader.module.css'
 import Button from './Button'
 import navigationData from '../data/navigation.json'
 
 type MarkdownRendererHeaderProps = {
-  documentId: string
   drawerOpen: boolean
   onDrawerToggleClick: () => void
 }
@@ -12,8 +11,8 @@ type MarkdownRendererHeaderProps = {
 const MarkdownRendererHeader = ({
   onDrawerToggleClick,
   drawerOpen,
-  documentId,
 }: MarkdownRendererHeaderProps) => {
+  const { documentId } = useParams()
 
   const getDrawerButtonStyles = () => {
     const classes = [styles.drawerButton]

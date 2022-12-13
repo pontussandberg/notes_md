@@ -20,16 +20,10 @@ const EditorContainer = ({
   isMenuDrawerOpen,
   setisMenuDrawerOpen,
 }: EditorContainerProps) => {
-  const { documentId } = useParams()
 
-  const {loading, data} = useQuery(
-    GET_DOCUMENT_RENDER_QUERY,
-    {
-      variables: {
-        id: documentId,
-      }
-    }
-  )
+  // Get data
+  const { documentId } = useParams()
+  const {loading, data} = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
 
   /**
    * Set local storage with last document view option to "edit".
@@ -39,36 +33,24 @@ const EditorContainer = ({
     setLocalStorage('lastDocumentView', 'edit')
   }, [])
 
-  if (loading) {
-    return null
-  } else if (!data?.document) {
-    return <Navigate to={navigationData['404']}/>
-  }
-
-  const { document: currentDocument } = data
-
-  if (!documentId || !currentDocument) {
+  // No document found
+  if (!loading && !data?.document) {
     return <Navigate to={navigationData['404']}/>
   }
 
   return (
     <div className={styles.documentViewer}>
-
       {/* Menu drawer */}
       <MenuDrawer
-        currentDocumentId={currentDocument.id}
         isOpen={isMenuDrawerOpen}
-        currentDocumentIndex={0} /* TODO */
         navigationResource={'edit'}
       />
 
       {/* Editor */}
       <div className={styles.documentViewer__editorContainer}>
         <EditorHeader
-          title={currentDocument.title}
           drawerOpen={isMenuDrawerOpen}
           onDrawerToggleClick={() => setisMenuDrawerOpen(!isMenuDrawerOpen)}
-          documentId={documentId}
         />
 
         <Editor/>
