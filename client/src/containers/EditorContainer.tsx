@@ -8,7 +8,7 @@ import MenuDrawer from '../components/MenuDrawer'
 import navigationData from '../data/navigation.json'
 import { useEffect } from 'react'
 import { setLocalStorage } from '../localStorage'
-import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
+import { GET_DOCUMENT_CONTAINER_QUERY } from '../gql/queries'
 import styles from '../css/containers/EditorContainer.module.css'
 
 type EditorContainerProps = {
@@ -23,7 +23,7 @@ const EditorContainer = ({
 
   // Get data
   const { documentId } = useParams()
-  const {loading, data} = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
+  const {loading, data} = useQuery(GET_DOCUMENT_CONTAINER_QUERY, { variables: { id: documentId } })
 
   /**
    * Set local storage with last document view option to "edit".

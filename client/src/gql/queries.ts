@@ -1,5 +1,13 @@
 import { gql } from "../__generated__/gql";
 
+export const GET_DOCUMENT_CONTAINER_QUERY = gql(/* GraphQL */ `
+  query GetDocumentContainerQuery($id: String) {
+    document(id: $id) {
+      id
+    }
+  }
+`)
+
 export const GET_DOCUMENT_RENDER_QUERY = gql(/* GraphQL */ `
   query GetDocumentRenderQuery($id: String) {
     document(id: $id) {

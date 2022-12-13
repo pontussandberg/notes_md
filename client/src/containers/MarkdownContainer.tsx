@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useQuery } from '@apollo/client';
 import { useParams, Navigate } from "react-router-dom"
-import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
+import { GET_DOCUMENT_CONTAINER_QUERY } from '../gql/queries'
 
 import { setLocalStorage } from '../localStorage'
 import styles from '../css/containers/MarkdownContainer.module.css'
@@ -23,7 +23,7 @@ const MarkdownContainer = ({
 
   // Get data
   const { documentId } = useParams();
-  const {loading, data} = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
+  const {loading, data} = useQuery(GET_DOCUMENT_CONTAINER_QUERY, { variables: { id: documentId } })
 
   /**
    * Set local storage with last document view option to "edit".
@@ -33,15 +33,8 @@ const MarkdownContainer = ({
     setLocalStorage('lastDocumentView', 'markdown')
   }, [])
 
-  if (loading) {
-    return null
-  } else if (!data?.document) {
-    return <Navigate to={navigationData['404']}/>
-  }
-
-  const { document: currentDocument } = data
-
-  if (!documentId || !currentDocument) {
+  // No document found
+  if (!loading && !data?.document) {
     return <Navigate to={navigationData['404']}/>
   }
 

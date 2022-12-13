@@ -17,6 +17,7 @@ const documents = {
     "\n  mutation UpdateDocumentMutation(\n    $id: String\n    $content: String,\n    $fileExtension: String,\n    $rowsCount: Int,\n    $title: String,\n  ) {\n    updateDocument(\n      id: $id,\n      content: $content,\n      fileExtension: $fileExtension,\n      rowsCount: $rowsCount,\n      title: $title,\n    ) {\n      id\n      content\n      fileExtension\n      title\n      listIndex\n      rowsCount\n    }\n  }\n": types.UpdateDocumentMutationDocument,
     "\n  query GetDocumentRenderQuery($id: String) {\n    document(id: $id) {\n      id\n      title\n      content\n    }\n  }\n": types.GetDocumentRenderQueryDocument,
     "\n  query GetDocumentMdRenderQuery($id: String) {\n    document(id: $id) {\n      id\n      content\n    }\n  }\n": types.GetDocumentMdRenderQueryDocument,
+    "\n  query GetDocumentContainerQuery($id: String) {\n    document(id: $id) {\n      id\n    }\n  }\n": types.GetDocumentContainerQueryDocument,
     "\n  query GetDocumentsMenuQuery {\n    documents {\n      id\n      title\n      content\n      rowsCount\n    }\n  }\n": types.GetDocumentsMenuQueryDocument,
     "\n  query GetDocumentsMenuDrawerQuery {\n    documents {\n      id\n      title\n      content\n    }\n  }\n": types.GetDocumentsMenuDrawerQueryDocument,
 };
@@ -37,6 +38,10 @@ export function gql(source: "\n  query GetDocumentRenderQuery($id: String) {\n  
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query GetDocumentMdRenderQuery($id: String) {\n    document(id: $id) {\n      id\n      content\n    }\n  }\n"): (typeof documents)["\n  query GetDocumentMdRenderQuery($id: String) {\n    document(id: $id) {\n      id\n      content\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetDocumentContainerQuery($id: String) {\n    document(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  query GetDocumentContainerQuery($id: String) {\n    document(id: $id) {\n      id\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
