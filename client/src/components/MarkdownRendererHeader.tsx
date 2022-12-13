@@ -42,5 +42,4 @@ const MarkdownRendererHeader = ({
   )
 }
 
-
 export default MarkdownRendererHeader
