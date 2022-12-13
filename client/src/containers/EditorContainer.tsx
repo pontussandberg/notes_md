@@ -10,7 +10,6 @@ import { useEffect } from 'react'
 import { setLocalStorage } from '../localStorage'
 import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
 import styles from '../css/containers/EditorContainer.module.css'
-import { UPDATE_DOCUMENT_MUTATION } from '../gql/mutations'
 
 type EditorContainerProps = {
   isMenuDrawerOpen: boolean
@@ -23,7 +22,6 @@ const EditorContainer = ({
 }: EditorContainerProps) => {
   const { documentId } = useParams()
 
-  const [handleDocumentUpdate] = useMutation(UPDATE_DOCUMENT_MUTATION)
   const {loading, data} = useQuery(
     GET_DOCUMENT_RENDER_QUERY,
     {
@@ -73,17 +71,7 @@ const EditorContainer = ({
           documentId={documentId}
         />
 
-        <Editor
-          documentId={documentId}
-          content={currentDocument.content}
-          onDocumentUpdate={doc => handleDocumentUpdate({
-            variables: {
-              id: doc.id,
-              title: doc.title,
-              content: doc.content,
-            }
-          })}
-        />
+        <Editor/>
       </div>
     </div>
   )

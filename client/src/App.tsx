@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Route, Routes } from 'react-router-dom'
-import shortid from 'shortid'
-import { DocumentFile } from "./types"
 import MenuContainer from "./containers/MenuContainer"
 import EditorContainer from "./containers/EditorContainer"
 import MarkdownContainer from "./containers/MarkdownContainer"
@@ -41,7 +39,6 @@ const App = () => {
           />
         }
       />
-
     </Routes>
   )
 }
