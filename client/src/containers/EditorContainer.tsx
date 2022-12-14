@@ -5,7 +5,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import EditorHeader from '../components/EditorHeader'
 import MenuDrawer from '../components/MenuDrawer'
 
-import navigationData from '../data/navigation.json'
+import navigationData from '../constants/navigation.json'
 import { useEffect } from 'react'
 import { setLocalStorage } from '../localStorage'
 import { GET_DOCUMENT_CONTAINER_QUERY } from '../gql/queries'

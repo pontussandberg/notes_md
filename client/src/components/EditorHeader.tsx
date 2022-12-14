@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import styles from '../css/components/EditorHeader.module.css'
 import Button from './Button'
-import navigationData from '../data/navigation.json'
+import navigationData from '../constants/navigation.json'
 import { useQuery } from '@apollo/client'
 import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
 

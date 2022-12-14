@@ -8,7 +8,7 @@ import styles from '../css/containers/MarkdownContainer.module.css'
 
 import MarkdownRendererHeader from '../components/MarkdownRendererHeader'
 import MarkdownRenderer from "../components/MarkdownRenderer"
-import navigationData from '../data/navigation.json'
+import navigationData from '../constants/navigation.json'
 import MenuDrawer from '../components/MenuDrawer'
 
 type MarkdownContainerProps = {

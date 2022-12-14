@@ -7,7 +7,7 @@ import Button from '../components/Button'
 import DocumentCard from '../components/DocumentCard'
 import DocumentListItem from '../components/DocumentListItem'
 
-import navigationData from '../data/navigation.json'
+import navigationData from '../constants/navigation.json'
 import styles from '../css/containers/MenuContainer.module.css'
 import { GET_DOCUMENTS_MENU_QUERY } from '../gql/queries';
 import { CREATE_DOCUMENT_MUTATION } from '../gql/mutations';

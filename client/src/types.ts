@@ -1,5 +1,5 @@
 import { MouseEventHandler } from "react"
-import navigationData from "./data/navigation.json"
+import navigationData from "./constants/navigation.json"
 
 export type NavigationData = typeof navigationData
 

@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import styles from '../css/components/MarkdownRendererHeader.module.css'
 import Button from './Button'
-import navigationData from '../data/navigation.json'
+import navigationData from '../constants/navigation.json'
 
 type MarkdownRendererHeaderProps = {
   drawerOpen: boolean

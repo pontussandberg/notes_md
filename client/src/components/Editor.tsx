@@ -8,14 +8,12 @@ import {
 import { useMutation, useQuery } from '@apollo/client'
 import styles from '../css/components/Editor.module.css'
 import { TActiveKeys } from '../types'
-import { DocumentFile } from '../__generated__/graphql'
 import { getCssVariables } from '../helpers'
 import CustomScrollbar from './CustomScrollbar'
 import shortid from 'shortid'
-import { Navigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { UPDATE_DOCUMENT_MUTATION } from '../gql/mutations'
 import { GET_DOCUMENT_RENDER_QUERY } from '../gql/queries'
-import navigationData from '../data/navigation.json'
 
 
 type EditorProps = {
