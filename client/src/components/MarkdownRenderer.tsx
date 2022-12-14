@@ -8,12 +8,8 @@ const MarkdownRenderer = () => {
   const { documentId } = useParams()
   const {data} = useQuery(GET_DOCUMENT_MD_RENDER_QUERY, { variables: { id: documentId } })
 
-  if (!data?.document?.content) {
-    return null
-  }
-
   const getMarkdownHtml = () => {
-    if (data.document?.content) {
+    if (data?.document?.content) {
       const converter = new showdown.Converter()
       return converter.makeHtml(data.document.content)
     }

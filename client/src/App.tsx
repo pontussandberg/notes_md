@@ -6,6 +6,7 @@ import MarkdownContainer from "./containers/MarkdownContainer"
 import navigationData from './constants/navigation.json'
 
 const App = () => {
+  // TODO - should be a context
   const [isMenuDrawerOpen, setisMenuDrawerOpen] = useState(true)
 
   /**
