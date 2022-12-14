@@ -1,106 +1,38 @@
 import { ApolloServer } from '@apollo/server'
-import { startStandaloneServer } from '@apollo/server/standalone'
+import { expressMiddleware } from '@apollo/server/express4'
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
+import express from 'express'
+import http from 'http'
+import cors from 'cors';
+
 import { readFileSync } from 'fs'
-import { Resolvers } from './generated/graphql';
-import shortid from 'shortid'
+import bodyParser from 'body-parser'
+
+import { resolvers } from './resolvers'
+
+const app = express()
+const httpServer = http.createServer(app)
 
 const typeDefs = readFileSync('src/schema.graphql', { encoding: 'utf-8' })
-
-const docsDB = [
-  {
-    "id": "1",
-    "listIndex": 0,
-    "rowsCount": 2,
-    "title": "my title",
-    "content": "Heloo world",
-    "fileExtension": ".md"
-  },
-  {
-    "id": "2",
-    "listIndex": 1,
-    "rowsCount": 2,
-    "title": "my title",
-    "content": "Heloo world",
-    "fileExtension": ".md"
-  },
-  {
-    "id": "3",
-    "listIndex": 2,
-    "rowsCount": 7,
-    "title": "best note",
-    "content": "best not hello world",
-    "fileExtension": ".md"
-  },
-  {
-    "id": "4",
-    "listIndex": 3,
-    "rowsCount": 12,
-    "title": "TODO",
-    "content": "TODO \n -do stuff",
-    "fileExtension": ".md"
-  }
-]
-
-const resolvers: Resolvers = {
-  Query: {
-    documents: () => docsDB,
-    document: (_parent, { id }) => docsDB.find(doc => doc.id === id) || null,
-  },
-  Mutation: {
-    createDocument: (_parent, {content, rowsCount, title, fileExtension, listIndex}) => {
-      const document = {
-        id: shortid.generate(),
-        content,
-        rowsCount,
-        title,
-        fileExtension,
-        listIndex,
-      }
-
-      docsDB.unshift(document)
-      return document
-    },
-
-    updateDocument: (_parent, {id, content, rowsCount, title, fileExtension, listIndex}) => {
-
-      console.log(id)
-      console.log(content)
-      console.log(rowsCount)
-      console.log(title)
-      console.log(fileExtension)
-      console.log(listIndex)
-
-      const documentIndex = docsDB.findIndex(doc => doc.id === id)
-
-      if (documentIndex === -1) {
-        return null
-      }
-
-      const ref = {...docsDB[documentIndex]}
-
-      docsDB[documentIndex] = {
-        ...ref,
-        content: content             || ref.content,
-        rowsCount: rowsCount         || ref.rowsCount,
-        title: title                 || ref.title,
-        fileExtension: fileExtension || ref.fileExtension,
-        listIndex: listIndex         || ref.listIndex,
-      }
-
-      console.log(docsDB[documentIndex])
-
-      return docsDB[documentIndex]
-    },
-  }
-}
-
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 })
 
-const { url } = await startStandaloneServer(server, {
-  listen: { port: 4000 },
-})
+await server.start()
 
-console.log(`🚀  Server ready at: ${url}`)
+const apiPath = '/api'
+app.use(
+  apiPath,
+  cors(),
+  bodyParser.json(),
+  expressMiddleware(server, {
+    context: async ({ req }) => ({ token: req.headers.token }),
+  }),
+)
+
+app.use(express.static('../client/build'))
+
+await new Promise<void>((resolve) => httpServer.listen({ port: 4000 }, resolve));
+console.log(`🚀 Server ready at http://localhost:4000${apiPath}`);
