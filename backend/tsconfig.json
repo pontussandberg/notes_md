@@ -2,12 +2,19 @@
   "compilerOptions": {
     "rootDirs": ["src"],
     "outDir": "dist",
-    "lib": ["es2020"],
-    "target": "es2020",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "target": "ES2021",
+    "module": "CommonJS",
+    "lib": ["ES2021"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "types": ["node"]
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "isolatedModules": true,
+    "useUnknownInCatchVariables": false,
+
+    "baseUrl": "./",
+    "sourceMap": true,
   }
 }
