@@ -1,0 +1,25 @@
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+.carret {
+  background: var(--carret);
+  width: 1px;
+  position: absolute;
+
+  animation: blink-animation 1.75s steps(2, start) infinite;
+  -webkit-animation: blink-animation 1.75s steps(2, start) infinite;
+  animation-delay: 1.75s;
+}
+
+.renderer {
+  background: var(--editor-bg);
+  color: #f6f6f6;
+}
+

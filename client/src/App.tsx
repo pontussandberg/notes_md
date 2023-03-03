@@ -4,6 +4,7 @@ import MenuContainer from "./containers/MenuContainer"
 import EditorContainer from "./containers/EditorContainer"
 import MarkdownContainer from "./containers/MarkdownContainer"
 import navigationData from './constants/navigation.json'
+import TestContainer from "./containers/TestContainer"
 
 const App = () => {
   // TODO - should be a context
@@ -22,6 +23,13 @@ const App = () => {
       />
 
       <Route
+        path={`/test`}
+        element={
+          <TestContainer/>
+        }
+      />
+
+      <Route
         path={`${navigationData.edit}/:documentId`}
         element={
           <EditorContainer
@@ -29,7 +37,7 @@ const App = () => {
             setisMenuDrawerOpen={setisMenuDrawerOpen}
             />
           }
-          />
+        />
 
       <Route
         path={`${navigationData.markdown}/:documentId`}
