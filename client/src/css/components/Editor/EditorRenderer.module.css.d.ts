@@ -4,6 +4,7 @@ interface CssExports {
   'blink-animation': string;
   'carret': string;
   'renderer': string;
+  'rowsContainer': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

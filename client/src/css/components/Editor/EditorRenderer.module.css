@@ -10,6 +10,7 @@
 }
 .carret {
   background: var(--carret);
+  background: red;
   width: 1px;
   position: absolute;
 
@@ -18,8 +19,13 @@
   animation-delay: 1.75s;
 }
 
+.rowsContainer {
+  position: relative;
+}
+
 .renderer {
   background: var(--editor-bg);
   color: #f6f6f6;
+  padding: 24px;
 }
 

@@ -196,33 +196,36 @@ const EditorRenderer = ({
         onClick={handleClick}
         ref={rendererRef}
         className={styles.renderer}
-        style={{ position: 'relative' }}
       >
 
-        { /* Render rows */
-          body.split('\n').map((row, i) =>
-            <div
-              style={{
-                letterSpacing: Settings.css.letterSpacing,
-                fontSize: Settings.css.fontSize,
-              }}
-              data-rowindex={`${i}`}
-              key={i}
-            >
-              {row || <div dangerouslySetInnerHTML={{ __html: '&nbsp;' }}></div>}
-            </div>
-          )
-        }
+        <div className={styles.rowsContainer}>
+          { /* Render rows */
+            body.split('\n').map((row, i) =>
+              <div
+                style={{
+                  letterSpacing: Settings.css.letterSpacing,
+                  fontSize: Settings.css.fontSize,
+                }}
+                data-rowindex={`${i}`}
+                key={i}
+              >
+                {row || <div dangerouslySetInnerHTML={{ __html: '&nbsp;' }}></div>}
+              </div>
+            )
+          }
 
-        {/* Carret */}
-        <div
-          className={styles.carret}
-          style={{
-            height: `${rowHeight}px`,
-            left: carretLeftPos,
-            top: carretTopPos,
-            display: selection.start === selection.end ? 'block' : 'none',
-          }}></div>
+          {/* Carret */}
+          <div
+            className={styles.carret}
+            style={{
+              height: `${rowHeight}px`,
+              left: carretLeftPos,
+              top: carretTopPos,
+              display: selection.start === selection.end ? 'block' : 'none',
+            }}>
+          </div>
+        </div>
+
       </div>
     </>
   );
