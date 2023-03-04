@@ -1,18 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import EditorInput from "./EditorInput";
 import EditorRenderer from "./EditorRenderer";
 
 const Editor = () => {
   const [editorContent, setEditorContent] = useState('');
   const [selection, setSelection] = useState({ start: 0, end: 0});
-
-  /**
-   * Current focus, input(textarea) or renderer(visual document)
-   */
-  const focus = useMemo((): 'input' | 'renderer' => {
-    return 'input'
-  }, [selection])
-
 
   // #############################################################################
   // # EditorRenderer

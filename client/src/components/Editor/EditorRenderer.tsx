@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Settings from './editorRendererSettings';
 import styles from '../../css/components/Editor/EditorRenderer.module.css'
 
@@ -20,6 +20,19 @@ const EditorRenderer = ({
   onSelectionChange,
 }: EditorRendererProps) => {
   const rendererRef = useRef<HTMLDivElement>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener('mouseup', () => {
+      setIsSelecting(false);
+    });
+
+    return () => {
+      window.removeEventListener('mouseup', () => {
+        setIsSelecting(false);
+      })
+    }
+  }, [setIsSelecting])
 
   /**
    * Document body as rows.
@@ -47,6 +60,25 @@ const EditorRenderer = ({
     return rowCharIndexes;
   }, [textRows]);
 
+  // Binary search, find row for selectionIndex.
+  const findRowIndex = useCallback((selectionIndex: number) => {
+    let curr = [...rowsLastSelectionIndex];
+
+    while (curr.length > 1) {
+      const half = Math.ceil(curr.length / 2);
+      const firstHalf = curr.slice(0, half)
+      const secondHalf = curr.slice(half)
+
+      if (firstHalf[firstHalf.length - 1] >= selectionIndex) {
+        curr = firstHalf;
+      } else {
+        curr = secondHalf;
+      }
+    }
+
+    return rowsLastSelectionIndex.indexOf(curr[0]);
+  }, [rowsLastSelectionIndex]);
+
   /**
    * Current row position that is focued, no selection.
    */
@@ -55,28 +87,31 @@ const EditorRenderer = ({
       return -1;
     }
 
-    // Binary search, find row for selectionIndex.
-    const findRowIndex = (selectionIndex: number) => {
-      let curr = [...rowsLastSelectionIndex];
-
-      while (curr.length > 1) {
-        const half = Math.ceil(curr.length / 2);
-        const firstHalf = curr.slice(0, half)
-        const secondHalf = curr.slice(half)
-
-        if (firstHalf[firstHalf.length - 1] >= selectionIndex) {
-          curr = firstHalf;
-        } else {
-          curr = secondHalf;
-        }
-      }
-
-      return rowsLastSelectionIndex.indexOf(curr[0]);
-    };
-
     const rowIndex = findRowIndex(selection.start);
     return rowIndex;
-  }, [selection, body, textRows]);
+  }, [selection, body, textRows, findRowIndex]);
+
+  const getTotalWidthOfCharactersInRef = useCallback((
+    containerEl: HTMLElement,
+    value: string
+  ): number => {
+
+    let width = 0;
+    for (const char of value.split('')) {
+      const el = document.createElement('span');
+
+      el.innerText = `${char}`;
+      el.style.visibility = 'hidden';
+      el.style.letterSpacing = Settings.css.letterSpacing + 'px';
+      el.style.fontSize = Settings.css.fontSize + 'px';
+
+      containerEl.appendChild(el);
+      width += el.getBoundingClientRect().width;
+      el.remove();
+    }
+
+    return width;
+  }, [])
 
   /**
    * Get row height, this is same for all document.
@@ -112,31 +147,18 @@ const EditorRenderer = ({
     }
 
     const currentRowText = textRows[currentRowIndex];
-    const rowCarretIndex = Math.abs(
-      rowsLastSelectionIndex[currentRowIndex] - currentRowText.length - selection.start
-    );
-
-    let left = 0;
-    for (const [i, char] of currentRowText.split('').entries()) {
-      if (i === rowCarretIndex) {
-        break;
-      }
-
-      const el = document.createElement('span');
-
-      // Using 2 chars to include letter spacing.
-      el.innerText = `${char}`;
-      el.style.visibility = 'hidden';
-      el.style.letterSpacing = Settings.css.letterSpacing + 'px';
-      el.style.fontSize = Settings.css.fontSize + 'px';
-
-      rendererEl.appendChild(el);
-      left += el.getBoundingClientRect().width;
-      el.remove();
-    }
+    const rowCarretIndex = Math.abs(rowsLastSelectionIndex[currentRowIndex] - currentRowText.length - selection.start);
+    const left = getTotalWidthOfCharactersInRef(rendererEl, currentRowText.slice(0, rowCarretIndex));
 
     return `${left - (Settings.css.letterSpacing / 2) - (Settings.css.carretWidth / 2)}px`;
-  }, [selection, rendererRef.current, textRows, currentRowIndex, Settings.css]);
+  }, [
+    selection,
+    rendererRef.current,
+    textRows,
+    currentRowIndex,
+    Settings.css,
+    getTotalWidthOfCharactersInRef
+  ]);
 
   /**
    * On click handler for Text Renderer.
@@ -164,9 +186,6 @@ const EditorRenderer = ({
           curr = curr.parentElement;
         }
       }
-
-      console.log(result)
-      console.log('end')
       return result;
     };
 
@@ -186,20 +205,147 @@ const EditorRenderer = ({
       const selectionStart = Math.max(0, rowsLastSelectionIndex[selectionStartRowIndex] - selectionStartElTextContentLength + selectionStartIndex);
       const selectionEnd = Math.max(0, rowsLastSelectionIndex[selectionEndRowIndex] - selectionEndElTextContentLength + selectionEndIndex);
 
-      onSelectionChange(selectionStart, selectionEnd);
+      const selectionStartFinal = Math.min(selectionStart, selectionEnd);
+      const selectionEndFinal = Math.max(selectionStart, selectionEnd);
+
+      onSelectionChange(selectionStartFinal, selectionEndFinal);
     }
   }, [onSelectionChange, rowsLastSelectionIndex])
+
+  /**
+   * Selection highlight element.
+   * TODO - refactor into seperate component
+   */
+  const SelectionHighlight = useMemo(() => {
+    if (isSelecting) {
+      return null
+    }
+
+    if (selection.start === selection.end) {
+      return null;
+    }
+
+    const rendererEl = rendererRef.current;
+    if (!rendererEl) {
+      return null;
+    }
+
+    const getRowSelectionIndexByBodySelectionIndex = (bodySelectionIndex: number, rowIndex: number) => {
+      const prevRowLastBodyIndex = rowsLastSelectionIndex[rowIndex - 1];
+
+      if (!prevRowLastBodyIndex) {
+        return bodySelectionIndex;
+      }
+
+      return bodySelectionIndex - prevRowLastBodyIndex - 1;
+    };
+
+    const selectionStartRowIndex = findRowIndex(selection.start);
+    const selectionEndRowIndex = findRowIndex(selection.end);
+    const selectionStartRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selection.start, selectionStartRowIndex);
+    const selectionEndRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selection.end, selectionEndRowIndex);
+    const rowsToCover = textRows.filter((_, i) => (i >= selectionStartRowIndex && i <= selectionEndRowIndex));
+
+    const selectionHighlightRowData = rowsToCover.map((row, i) => {
+      let rowFinal: string = row;
+      let left = 0;
+
+      const isFirst = i === 0;
+      const isLast = i === rowsToCover.length - 1;
+
+      if (isFirst && isLast) {
+        const strBeforeSelection = row.slice(0, selectionStartRowCharacterIndex);
+        left = getTotalWidthOfCharactersInRef(rendererEl, strBeforeSelection);
+
+        rowFinal = row.slice(selectionStartRowCharacterIndex, selectionEndRowCharacterIndex)
+      }
+      else if (isFirst) {
+        const strBeforeSelection = row.slice(0, selectionStartRowCharacterIndex);
+        left = getTotalWidthOfCharactersInRef(rendererEl, strBeforeSelection);
+
+        rowFinal = row.slice(selectionStartRowCharacterIndex, row.length);
+      }
+      else if (isLast) {
+        rowFinal = row.slice(0, selectionEndRowCharacterIndex);
+      }
+
+      // Filler for empty row.
+      if (rowFinal.length === 0) {
+        rowFinal = 'k';
+      }
+
+      return {
+        width: getTotalWidthOfCharactersInRef(rendererEl, rowFinal),
+        left,
+      };
+    })
+
+    return selectionHighlightRowData.map((data, i) => (
+      <div
+        key={i}
+        className={styles.selectionHighlight}
+        style={{
+          width: `${data.width}px`,
+          left: `${data.left}px`,
+          height: `${rowHeight}px`,
+          top: `${rowHeight * (selectionStartRowIndex + i)}px`,
+          position: 'absolute',
+        }}
+      ></div>)
+    );
+  }, [
+    selection,
+    rowsLastSelectionIndex,
+    textRows,
+    getTotalWidthOfCharactersInRef,
+    isSelecting,
+  ]);
+
+  /**
+   * Carret element.
+   * TODO - refactor into seperate component
+   */
+  const Carret = useMemo(() => {
+    if (isSelecting) {
+      return null;
+    }
+
+    return (
+      <div
+        // Key is used to trigger reset of css animation when selection changes.
+        key={selection.start}
+        className={styles.carret}
+        style={{
+          height: `${rowHeight}px`,
+          left: carretLeftPos,
+          top: carretTopPos,
+          display: selection.start === selection.end ? 'block' : 'none',
+        }}>
+      </div>
+    )
+  }, [
+    selection,
+    styles.carret,
+    rowHeight,
+    carretLeftPos,
+    carretTopPos,
+    isSelecting,
+  ]);
 
   return (
     <>
       <div
-        onClick={handleClick}
         ref={rendererRef}
+        onClick={handleClick}
         className={styles.renderer}
+
+        // Handling mouseup event on window on mount
+        onMouseDown={() => setIsSelecting(true)}
       >
 
         <div className={styles.rowsContainer}>
-          { /* Render rows */
+          { /* Render rows */ }
+          {
             body.split('\n').map((row, i) =>
               <div
                 style={{
@@ -214,16 +360,11 @@ const EditorRenderer = ({
             )
           }
 
+          {/* Text selection highlight */}
+          { SelectionHighlight }
+
           {/* Carret */}
-          <div
-            className={styles.carret}
-            style={{
-              height: `${rowHeight}px`,
-              left: carretLeftPos,
-              top: carretTopPos,
-              display: selection.start === selection.end ? 'block' : 'none',
-            }}>
-          </div>
+          { Carret }
         </div>
 
       </div>

@@ -122,7 +122,7 @@ const Editor = ({
   const { documentId } = useParams()
   const { data } = useQuery(GET_DOCUMENT_RENDER_QUERY, { variables: { id: documentId } })
   const [ mutateDocument ] = useMutation(UPDATE_DOCUMENT_MUTATION)
-  
+
   useEffect(() => {
     if (data?.document) {
       setDocumentContent(data.document.content)
@@ -135,7 +135,7 @@ const Editor = ({
   // TODO
   // if (!loading && !data) {
   //   return <Navigate to={navigationData['404']}/>
-  // } 
+  // }
 
   const getDocTitle = () => {
     const firstIndexLineWithContent = getLines(documentContent).findIndex(line => line.length > 0)
@@ -153,7 +153,6 @@ const Editor = ({
       }
     })
   }
-  
 
   /*****************
    *     </>       *

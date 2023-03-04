@@ -13,10 +13,8 @@
   background: red;
   width: 1px;
   position: absolute;
-
   animation: blink-animation 1.75s steps(2, start) infinite;
   -webkit-animation: blink-animation 1.75s steps(2, start) infinite;
-  animation-delay: 1.75s;
 }
 
 .rowsContainer {
@@ -27,5 +25,9 @@
   background: var(--editor-bg);
   color: #f6f6f6;
   padding: 24px;
+}
+
+.selectionHighlight {
+  background: rgba(255,255,255,.2);
 }
 

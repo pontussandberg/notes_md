@@ -5,6 +5,7 @@ interface CssExports {
   'carret': string;
   'renderer': string;
   'rowsContainer': string;
+  'selectionHighlight': string;
 }
 export const cssExports: CssExports;
 export default cssExports;
