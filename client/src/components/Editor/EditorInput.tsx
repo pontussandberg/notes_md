@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DocumentFile } from "./Editor.types";
 
 type EditorInputProps = {
+  documentFile: DocumentFile;
   body: string;
   selection: {
     start: number;
@@ -14,6 +16,7 @@ type EditorInputProps = {
 }
 
 const EditorInput = ({
+  documentFile,
   body,
   selection,
   onChange,
@@ -21,12 +24,29 @@ const EditorInput = ({
 }: EditorInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const getRowBySelectionIndex = useCallback((selectionIndex: number) => {
+
+  }, [])
+
+  const selectionIndexHasStyles = useCallback((selectionIndex: number) => {
+    documentFile
+  }, []);
+
   /**
    * Textarea OnChange event handler.
    */
-  const handleChange = useCallback(({ target: { value } }) => {
-    onChange(value);
-  }, [onChange]);
+  const handleChange = useCallback((
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+    selectionOnCapture: EditorInputProps['selection']
+  ) => {
+    console.log('selectionOnCapture',selectionOnCapture)
+
+    if (selectionOnCapture.start === selectionOnCapture.end) {
+
+    }
+
+    onChange(event.target.value);
+  }, [onChange, body]);
 
   /**
    * Textarea OnSelectionChange event handler.
@@ -62,7 +82,7 @@ const EditorInput = ({
   return (
     <textarea
       onSelect={handleSelectionChange}
-      onChange={handleChange}
+      onChange={(event) => handleChange(event, selection)}
       value={body}
       ref={textareaRef}
     ></textarea>

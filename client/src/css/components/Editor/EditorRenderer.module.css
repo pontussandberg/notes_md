@@ -19,6 +19,7 @@
 
 .rowsContainer {
   position: relative;
+  white-space: pre;
 }
 
 .renderer {

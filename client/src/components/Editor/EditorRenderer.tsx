@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Settings from './editorRendererSettings';
+import Settings from './EditorSettings';
 import styles from '../../css/components/Editor/EditorRenderer.module.css'
+import { DocumentFile } from "./Editor.types";
 
 type EditorRendererProps = {
+  documentFile: DocumentFile;
   body: string;
   selection: {
     start: number;
@@ -15,6 +17,7 @@ type EditorRendererProps = {
 };
 
 const EditorRenderer = ({
+  documentFile,
   body,
   selection,
   onSelectionChange,
@@ -100,10 +103,10 @@ const EditorRenderer = ({
     for (const char of value.split('')) {
       const el = document.createElement('span');
 
-      el.innerText = `${char}`;
+      el.innerHTML = `${char === ' ' ? '&nbsp;' : char}`;
       el.style.visibility = 'hidden';
-      el.style.letterSpacing = Settings.css.letterSpacing + 'px';
-      el.style.fontSize = Settings.css.fontSize + 'px';
+      el.style.letterSpacing = Settings.Renderer.css.letterSpacing + 'px';
+      el.style.fontSize = Settings.Renderer.css.fontSize + 'px';
 
       containerEl.appendChild(el);
       width += el.getBoundingClientRect().width;
@@ -125,15 +128,15 @@ const EditorRenderer = ({
     const el = document.createElement('span');
     el.innerText = 'a';
     el.style.visibility = 'hidden';
-    el.style.letterSpacing = Settings.css.letterSpacing + 'px';
-    el.style.fontSize = Settings.css.fontSize + 'px';
+    el.style.letterSpacing = Settings.Renderer.css.letterSpacing + 'px';
+    el.style.fontSize = Settings.Renderer.css.fontSize + 'px';
 
     rendererEl.appendChild(el);
     const { height } = el.getBoundingClientRect();
     el.remove();
 
     return height;
-  }, [rendererRef.current, Settings.css])
+  }, [rendererRef.current, Settings.Renderer.css])
 
   const carretTopPos = useMemo(() => {
     const top = rowHeight * currentRowIndex;
@@ -150,13 +153,13 @@ const EditorRenderer = ({
     const rowCarretIndex = Math.abs(rowsLastSelectionIndex[currentRowIndex] - currentRowText.length - selection.start);
     const left = getTotalWidthOfCharactersInRef(rendererEl, currentRowText.slice(0, rowCarretIndex));
 
-    return `${left - (Settings.css.letterSpacing / 2) - (Settings.css.carretWidth / 2)}px`;
+    return `${left - (Settings.Renderer.css.letterSpacing / 2) - (Settings.Renderer.css.carretWidth / 2)}px`;
   }, [
     selection,
     rendererRef.current,
     textRows,
     currentRowIndex,
-    Settings.css,
+    Settings.Renderer.css,
     getTotalWidthOfCharactersInRef
   ]);
 
@@ -271,7 +274,7 @@ const EditorRenderer = ({
 
       // Filler for empty row.
       if (rowFinal.length === 0) {
-        rowFinal = 'k';
+        rowFinal = ' ';
       }
 
       return {
@@ -332,6 +335,28 @@ const EditorRenderer = ({
     isSelecting,
   ]);
 
+  const Rows = useMemo(() => {
+    return documentFile.rows.map((rowSections, i) => {
+      const rowElems = rowSections.map((rowSection, i) => {
+        return (
+          <div
+            data-rowindex={`${i}`}
+            key={i}
+            style={{
+              fontSize: rowSection.fontSize,
+              fontFamily: rowSection.fontFamily,
+              fontStyle: rowSection.fontStyle,
+            }}
+          >
+            {rowSection.content}
+          </div>
+        )
+      });
+
+      return rowElems
+    })
+  }, [documentFile])
+
   return (
     <>
       <div
@@ -343,14 +368,18 @@ const EditorRenderer = ({
         onMouseDown={() => setIsSelecting(true)}
       >
 
+        {/* <div className={styles.rowsContainer} style={{border: '5px solid gray'}}>
+          {Rows}
+        </div> */}
+
         <div className={styles.rowsContainer}>
           { /* Render rows */ }
           {
             body.split('\n').map((row, i) =>
               <div
                 style={{
-                  letterSpacing: Settings.css.letterSpacing,
-                  fontSize: Settings.css.fontSize,
+                  letterSpacing: Settings.Renderer.css.letterSpacing,
+                  fontSize: Settings.Renderer.css.fontSize,
                 }}
                 data-rowindex={`${i}`}
                 key={i}
