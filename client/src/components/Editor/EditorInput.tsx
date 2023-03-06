@@ -93,47 +93,46 @@ const EditorInput = ({
     selectionOnCapture: EditorInputProps['selection']
   ) => {
     const texareaBody = event.target.value;
-    const firstChangedRowIndex = findRowIndex(selectionOnCapture.start)
-    const finalChangedRowIndex = findRowIndex(selectionOnCapture.end)
-    const selectionStartRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selectionOnCapture.start, firstChangedRowIndex);
-    const selectionEndRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selectionOnCapture.end, finalChangedRowIndex);
-
-
+    const selectionStartRowIndex = findRowIndex(selectionOnCapture.start)
+    const selectionEndRowIndex = findRowIndex(selectionOnCapture.end)
+    const selectionStartRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selectionOnCapture.start, selectionStartRowIndex);
+    const selectionEndRowCharacterIndex = getRowSelectionIndexByBodySelectionIndex(selectionOnCapture.end, selectionEndRowIndex);
 
     const selectedCount = selectionOnCapture.end - selectionOnCapture.start;
     const contentLengthDiff = texareaBody.length - textRows.join('\n').length;
     const newContentLength = selectedCount + contentLengthDiff;
     const newContent = texareaBody.slice(selectionOnCapture.start, selectionOnCapture.start + newContentLength);
 
-
     const rowsFinal = documentFile.rows.map((row, i) => {
       // Is not changed row.
       if (
-        i < firstChangedRowIndex
-        || i > finalChangedRowIndex
+        i < selectionStartRowIndex
+        || i > selectionEndRowIndex
       ) {
         return row;
       }
 
-      const isFirstRow = i === firstChangedRowIndex;
-      const isFinalRow = i === finalChangedRowIndex;
-
-      const rowSelectionEndIndex = isFinalRow ? selectionOnCapture.end : textRows[i].length;
       const rowContentLength = row.map(section => section.content).join('').length;
 
+      const rowSelectionStartIndex = i === selectionStartRowIndex
+        ? selectionStartRowCharacterIndex
+        : 0;
+
+      const rowSelectionEndIndex = i === selectionEndRowIndex
+        ? selectionEndRowCharacterIndex
+        : rowContentLength
 
       // Get row
       let prevSectionsTotalContentLength = 0;
       const rowSections: DocumentFileRowRenderData[] = [];
       for (const section of row) {
-        const selectionStartSectionOffsetIndex = selectionStartRowCharacterIndex - prevSectionsTotalContentLength;
-        const selectionEndSectionOffsetIndex = selectionEndRowCharacterIndex - prevSectionsTotalContentLength;
+        const sectionSelectionStartIndexOffset = rowSelectionStartIndex - prevSectionsTotalContentLength;
+        const sectionSelectionEndIndexOffset = rowSelectionEndIndex - prevSectionsTotalContentLength;
 
         const isEntireSectionSelected = (
-          selectionStartSectionOffsetIndex <= 0
-          && selectionEndSectionOffsetIndex >= section.content.length
+          sectionSelectionStartIndexOffset <= 0
+          && sectionSelectionEndIndexOffset >= section.content.length
         )
-
 
         if (isEntireSectionSelected) {
           // Section is removed.
@@ -143,7 +142,7 @@ const EditorInput = ({
         /**
          * The selected characters in current section
          */
-        const selectedCharactersInSection = section.content.slice(selectionStartSectionOffsetIndex, selectionEndSectionOffsetIndex);
+        const selectedCharactersInSection = section.content.slice(sectionSelectionStartIndexOffset, sectionSelectionEndIndexOffset);
 
         const removeStringRange = (value: string, fromIndex: number, toIndex: number) => {
           return value.substring(0, fromIndex) + value.substring(toIndex);
@@ -152,19 +151,17 @@ const EditorInput = ({
         /**
          * Remove selected content from current section.
          */
-        let updatedSectionContent = removeStringRange(section.content, selectionStartSectionOffsetIndex, selectionEndSectionOffsetIndex)
+        let updatedSectionContent = removeStringRange(section.content, rowSelectionStartIndex, rowSelectionEndIndex)
 
         const isSelectionStartWithinSection = (
-          selectionStartSectionOffsetIndex >= 0
-          && selectionStartSectionOffsetIndex <= section.content.length
+          i === selectionStartRowIndex
+          && sectionSelectionStartIndexOffset >= 0
+          && sectionSelectionStartIndexOffset <= section.content.length
         );
-
 
         if (isSelectionStartWithinSection) {
           const contentPart1 = updatedSectionContent.slice(0, selectionStartRowCharacterIndex);
           const contentPart2 = updatedSectionContent.slice(selectionStartRowCharacterIndex, updatedSectionContent.length);
-
-          console.log(newContent)
           updatedSectionContent = contentPart1 + newContent + contentPart2;
         }
 
