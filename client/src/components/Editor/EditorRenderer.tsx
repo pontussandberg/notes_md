@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Settings from './EditorSettings';
+import Settings from './editorSettings';
 import styles from '../../css/components/Editor/EditorRenderer.module.css'
 import { DocumentFile } from "./Editor.types";
 
@@ -38,11 +38,13 @@ const EditorRenderer = ({
   }, [setIsSelecting])
 
   /**
-   * Document body as rows.
+   * Document content as rows.
    */
   const textRows = useMemo(() => {
-    return body.split('\n');
-  }, [body])
+    return documentFile.rows.map(sections => {
+      return sections.reduce((acc2, section) => acc2 + section.content, '');
+    });
+  }, [documentFile.rows])
 
   /**
    * Get rows last index position - each row represents the last selection index of that row
@@ -92,7 +94,7 @@ const EditorRenderer = ({
 
     const rowIndex = findRowIndex(selection.start);
     return rowIndex;
-  }, [selection, body, textRows, findRowIndex]);
+  }, [selection, textRows, findRowIndex]);
 
   const getTotalWidthOfCharactersInRef = useCallback((
     containerEl: HTMLElement,
@@ -357,6 +359,7 @@ const EditorRenderer = ({
     })
   }, [documentFile])
 
+
   return (
     <>
       <div
@@ -368,9 +371,16 @@ const EditorRenderer = ({
         onMouseDown={() => setIsSelecting(true)}
       >
 
-        {/* <div className={styles.rowsContainer} style={{border: '5px solid gray'}}>
-          {Rows}
-        </div> */}
+        <div className={styles.rowsContainer} style={{border: '5px solid gray'}}>
+          {/* Content rows */}
+          { Rows }
+
+          {/* Text selection highlight */}
+          { SelectionHighlight }
+
+          {/* Carret */}
+          { Carret }
+        </div>
 
         <div className={styles.rowsContainer}>
           { /* Render rows */ }

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { DocumentFile, DocumentFileRowSectionStyles } from "./Editor.types";
 import EditorInput from "./EditorInput";
 import EditorRenderer from "./EditorRenderer";
-import Settings from './EditorSettings';
+import Settings from './editorSettings';
 
 const Editor = () => {
   const [currentStyles, setCurrentStyles] = useState<DocumentFileRowSectionStyles>(Settings.defaultStyles);
@@ -91,9 +91,15 @@ const Editor = () => {
   /**
    * Textarea OnChange event handler.
    */
-  const handleEditorInput = useCallback((value: string) => {
-    setEditorContent(value);
-  }, [setEditorContent]);
+  const handleEditorInput = useCallback((rows: DocumentFile['rows']) => {
+    console.log('documentFile',documentFile.rows[0])
+    console.log('documentFile',rows[0])
+    setDocumentFile({
+      ...documentFile,
+      rows,
+    });
+    // setEditorContent(value);
+  }, [documentFile]);
 
   /**
    * Textarea SelectionChange event handler.
@@ -108,6 +114,7 @@ const Editor = () => {
   return (
     <>
       <EditorInput
+        documentFile={documentFile}
         body={editorContent}
         selection={selection}
         onChange={handleEditorInput}
