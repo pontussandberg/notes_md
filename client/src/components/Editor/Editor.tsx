@@ -12,49 +12,67 @@ const Editor = () => {
     rows: [
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 24,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: 'abc',
         }
       ],
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 40,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: 'abcdefghiklm',
         }
       ],
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 24,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: '',
         }
       ],
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 24,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: 'abc d',
         }
       ],
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 24,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: '123 456 89',
         }
       ],
       [
         {
-          fontSize: 24,
-          fontFamily: 'arial',
-          fontStyle: 'normal',
+          style: {
+            fontSize: 24,
+            fontFamily: 'arial',
+            fontStyle: 'normal',
+            letterSpacing: 0.4,
+          },
           content: '123 45 6 77777',
         }
       ],

@@ -1,10 +1,13 @@
+
 export type DocumentFileRowSectionStyles = {
-  fontSize: number;
   fontFamily: string;
   fontStyle: 'normal' | 'bold' | 'italic';
+  fontSize: number;
+  letterSpacing: number;
 }
 
-export type DocumentFileRowRenderData = DocumentFileRowSectionStyles & {
+export type DocumentFileRowRenderData = {
+  style: DocumentFileRowSectionStyles;
   content: string;
 };
 
