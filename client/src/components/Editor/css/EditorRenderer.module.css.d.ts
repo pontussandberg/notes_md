@@ -3,6 +3,7 @@
 interface CssExports {
   'blink-animation': string;
   'carret': string;
+  'editorInput': string;
   'renderer': string;
   'rowsContainer': string;
   'selectionHighlight': string;

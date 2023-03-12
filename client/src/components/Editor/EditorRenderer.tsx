@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Settings from './editorSettings';
-import styles from '../../css/components/Editor/EditorRenderer.module.css'
+import styles from './css/EditorRenderer.module.css'
 import { DocumentFile, DocumentFileRowRenderData, DocumentFileRowSectionStyles } from "./Editor.types";
 
 type EditorRendererProps = {
@@ -18,7 +18,6 @@ type EditorRendererProps = {
 
 const EditorRenderer = ({
   documentFile,
-  body,
   selection,
   onSelectionChange,
 }: EditorRendererProps) => {
@@ -36,6 +35,104 @@ const EditorRenderer = ({
       })
     }
   }, [setIsSelecting])
+
+  /**
+   * Pass in string and render styles to get total width of that string in PX.
+   */
+  const simulateRenderStyledContent = useCallback((
+    value: string,
+    styles: DocumentFileRowSectionStyles,
+  ) => {
+    if (!rendererRef.current) {
+      return {
+        width: 0,
+        height: 0,
+      };
+    }
+
+    const el = document.createElement('span');
+
+    el.innerText = value;
+    el.style.whiteSpace = 'pre';
+    el.style.visibility = 'hidden';
+
+    el.style.letterSpacing = `${styles.letterSpacing}px`;
+    el.style.fontSize = `${styles.fontSize}px`;
+    el.style.fontStyle = styles.fontStyle;
+    el.style.fontFamily = styles.fontFamily;
+
+    rendererRef.current.appendChild(el);
+    const { width, height } = el.getBoundingClientRect();
+    el.remove();
+
+    return {
+      width,
+      height,
+    };
+  }, [rendererRef])
+
+  const getRowContentLenght = useCallback((row: DocumentFileRowRenderData[]) => {
+    return row.reduce((acc, section) => acc + section.content.length, 0)
+  }, []);
+
+  /**
+   * Get toltal px width of row between start and stop indexes.
+   */
+  const getRenderDimensionsForRow = useCallback((
+    row: DocumentFileRowRenderData[],
+    rowStartIndex?: number,
+    rowStopIndex?: number,
+  ) => {
+    /**
+     * Considering the following values, this is what happens in the loop:
+     *
+     * row = [{ content: '12' }, { content: 'qqq }, { content: 'abc }]
+     * rowStartIndex = 4
+     * rowEndIndex = 8
+     *
+     * // Iteration 1.
+     * sectionStartIndex = (4 - 0) = 4
+     * sectionEndIndex = (8 - 0) = 8
+     * relevantContent = ''
+     *
+     * // Iteration 2.
+     * sectionStartIndex = (4 - 2) = 2
+     * sectionEndIndex = (8 - 2) = 6
+     * relevantContent = 'q'
+     *
+     * // Iteration 3.
+     * sectionStartIndex = (4 - 5) = -1
+     * sectionEndIndex = (8 - 5) = 3
+     * relevantContent = 'abc'
+     *
+     */
+    let widthPx = 0;
+    let maxHeightPx = 0;
+    let prevSectionsCharCount = 0;
+
+    const rowStartIndexFinal = typeof rowStartIndex === 'number' ? rowStartIndex : 0;
+    const rowStopIndexFinal = typeof rowStopIndex === 'number' ? rowStopIndex : getRowContentLenght(row);
+
+    for (const section of row) {
+      const sectionStartIndex = Math.max(0, rowStartIndexFinal - prevSectionsCharCount);
+      const sectionEndIndex = Math.max(0, rowStopIndexFinal - prevSectionsCharCount)
+      const relevantContent = section.content.slice(sectionStartIndex, sectionEndIndex);
+      const { width, height } = simulateRenderStyledContent(relevantContent, section.style);
+      widthPx += width;
+
+      if (height > maxHeightPx) {
+        maxHeightPx = height;
+      }
+
+      prevSectionsCharCount += section.content.length;
+    }
+
+    return {
+      widthPx,
+      maxHeightPx,
+    };
+  }, [simulateRenderStyledContent, getRowContentLenght]);
+
 
   /**
    * Document content as rows.
@@ -116,46 +213,43 @@ const EditorRenderer = ({
     }
 
     return width;
-  }, [])
+  }, []);
 
-  /**
-   * Get row height, this is same for all document.
-   */
-  const rowHeight = useMemo(() => {
-    const { current: rendererEl } = rendererRef
-    if (!rendererEl) {
-      return 0
-    }
-
-    const el = document.createElement('span');
-    el.innerText = 'a';
-    el.style.visibility = 'hidden';
-    el.style.letterSpacing = Settings.Renderer.css.letterSpacing + 'px';
-    el.style.fontSize = Settings.Renderer.css.fontSize + 'px';
-
-    rendererEl.appendChild(el);
-    const { height } = el.getBoundingClientRect();
-    el.remove();
-
-    return height;
-  }, [rendererRef.current, Settings.Renderer.css])
 
   const carretTopPos = useMemo(() => {
-    const top = rowHeight * currentRowIndex;
-    return `${top}px`
-  }, [currentRowIndex, rowHeight])
+    let prevRowsHeight = 0;
 
-  const carretLeftPos = useMemo(() => {
+    for (const [i, row] of documentFile.rows.entries()) {
+      if (i < currentRowIndex) {
+        prevRowsHeight += getRenderDimensionsForRow(row).maxHeightPx;
+      }
+    }
+
+    const top = prevRowsHeight;
+    return `${top}px`
+  }, [
+    currentRowIndex,
+    documentFile.rows,
+    getRenderDimensionsForRow,
+  ]);
+
+  const carretLeftPos = useMemo((): number => {
     const { current: rendererEl } = rendererRef
     if (!rendererEl || selection.start !== selection.end) {
-      return
+      return 0;
+    }
+
+    const currentRow = documentFile.rows[currentRowIndex];
+
+    if (!currentRow) {
+      return 0;
     }
 
     const currentRowText = textRows[currentRowIndex];
     const rowCarretIndex = Math.abs(rowsLastSelectionIndex[currentRowIndex] - currentRowText.length - selection.start);
-    const left = getTotalWidthOfCharactersInRef(rendererEl, currentRowText.slice(0, rowCarretIndex));
+    const left = getRenderDimensionsForRow(currentRow, 0, rowCarretIndex).widthPx;
 
-    return `${left - (Settings.Renderer.css.letterSpacing / 2) - (Settings.Renderer.css.carretWidth / 2)}px`;
+    return left;
   }, [
     selection,
     rendererRef.current,
@@ -217,114 +311,6 @@ const EditorRenderer = ({
     }
   }, [onSelectionChange, rowsLastSelectionIndex])
 
-  /**
-   * Pass in string and render styles to get total width of that string in PX.
-   */
-  const simulateRenderStyledContent = useCallback((
-    value: string,
-    styles: DocumentFileRowSectionStyles,
-  ) => {
-    if (!rendererRef.current) {
-      return {
-        width: 0,
-        height: 0,
-      };
-    }
-
-    const el = document.createElement('span');
-
-    el.innerText = value;
-    el.style.whiteSpace = 'pre';
-    el.style.visibility = 'hidden';
-
-    el.style.letterSpacing = `${styles.letterSpacing}px`;
-    el.style.fontSize = `${styles.fontSize}px`;
-    el.style.fontStyle = styles.fontStyle;
-    el.style.fontFamily = styles.fontFamily;
-
-    rendererRef.current.appendChild(el);
-    const { width, height } = el.getBoundingClientRect();
-    el.remove();
-
-    return {
-      width,
-      height,
-    };
-  }, [rendererRef])
-
-  /**
-   * Get toltal px width of row between start and stop indexes.
-   */
-  const getRenderDimensionsFromRow = useCallback((
-    row: DocumentFileRowRenderData[],
-    rowStartIndex: number,
-    rowStopIndex: number,
-    str?: string,
-  ) => {
-    /**
-     * Considering the following values, this is what happens in the loop:
-     *
-     * row = [{ content: '12' }, { content: 'qqq }, { content: 'abc }]
-     * rowStartIndex = 4
-     * rowEndIndex = 8
-     *
-     * // Iteration 1.
-     * sectionStartIndex = (4 - 0) = 4
-     * sectionEndIndex = (8 - 0) = 8
-     * relevantContent = ''
-     *
-     * // Iteration 2.
-     * sectionStartIndex = (4 - 2) = 2
-     * sectionEndIndex = (8 - 2) = 6
-     * relevantContent = 'q'
-     *
-     * // Iteration 3.
-     * sectionStartIndex = (4 - 5) = -1
-     * sectionEndIndex = (8 - 5) = 3
-     * relevantContent = 'abc'
-     *
-     */
-    let widthPx = 0;
-    let maxHeightPx = 0;
-    let prevSectionsCharCount = 0;
-
-    console.log(str)
-
-    for (const section of row) {
-      const sectionStartIndex = Math.max(0, rowStartIndex - prevSectionsCharCount);
-      const sectionEndIndex = Math.max(0, rowStopIndex - prevSectionsCharCount)
-      const relevantContent = section.content.slice(sectionStartIndex, sectionEndIndex);
-      const { width, height } = simulateRenderStyledContent(relevantContent, section.style);
-      console.log('\n')
-      console.log('relevantContent',relevantContent)
-      console.log({width, height})
-      console.log('\n')
-      widthPx += width;
-
-      if (height > maxHeightPx) {
-        maxHeightPx = height;
-      }
-
-      prevSectionsCharCount += section.content.length;
-    }
-
-    console.log(str)
-
-    return {
-      widthPx,
-      maxHeightPx,
-    };
-  }, [simulateRenderStyledContent]);
-  // console.log('assert', getRenderDimensionsFromRow(
-  //   [
-  //     { content: '12', style: { fontSize: 24, fontFamily: 'arial', fontStyle: 'normal', letterSpacing: 0.4 } },
-  //     { content: 'qqq', style: { fontSize: 24, fontFamily: 'arial', fontStyle: 'normal', letterSpacing: 0.4 } },
-  //     { content: 'abc', style: { fontSize: 24, fontFamily: 'arial', fontStyle: 'normal', letterSpacing: 0.4 } },
-  //   ],
-  //   4,
-  //   8,
-  //   'test',
-  // ))
 
   /**
    * Selection highlight element.
@@ -367,7 +353,7 @@ const EditorRenderer = ({
         return {
           width: 0,
           left: 0,
-          rowMaxHeight: getRenderDimensionsFromRow(row, 0, row.length).maxHeightPx,
+          rowMaxHeight: getRenderDimensionsForRow(row, 0, row.length).maxHeightPx,
         };
       } else if (i > selectionEndRowIndex) {
         return null;
@@ -379,18 +365,13 @@ const EditorRenderer = ({
       const highlightStartIndex = isFirst ? selectionStartRowCharacterIndex : 0;
       const highlightEndIndex = isLast ? selectionEndRowCharacterIndex : textRows[i].length;
 
-      console.log('rowIndex', i)
-      console.log(isLast)
-      console.log('highlightStartIndex', highlightStartIndex)
-      console.log('highlightEndIndex', highlightEndIndex)
-
-      const highlightContentDimesions = getRenderDimensionsFromRow(
+      const highlightContentDimesions = getRenderDimensionsForRow(
         row,
         highlightStartIndex,
         highlightEndIndex,
       );
 
-      const beforeHighlightContentDimesions = getRenderDimensionsFromRow(
+      const beforeHighlightContentDimesions = getRenderDimensionsForRow(
         row,
         0,
         highlightStartIndex,
@@ -402,8 +383,6 @@ const EditorRenderer = ({
         rowMaxHeight: Math.max(beforeHighlightContentDimesions.maxHeightPx, highlightContentDimesions.maxHeightPx),
       };
     }).filter((renderData): renderData is {left: number, width: number, rowMaxHeight: number} => renderData !== null);
-
-    console.log('selectionHighlightRowData',selectionHighlightRowData)
 
     let prevRowsTotalHeight = 0;
     return selectionHighlightRowData.map((data, i) => {
@@ -443,13 +422,16 @@ const EditorRenderer = ({
       return null;
     }
 
+    const currentRow = documentFile.rows[currentRowIndex];
+    const currentRowHeight = currentRow ? getRenderDimensionsForRow(currentRow).maxHeightPx : 0;
+
     return (
       <div
         // Key is used to trigger reset of css animation when selection changes.
         key={selection.start}
         className={styles.carret}
         style={{
-          height: `${rowHeight}px`,
+          height: `${currentRowHeight}px`,
           left: carretLeftPos,
           top: carretTopPos,
           display: selection.start === selection.end ? 'block' : 'none',
@@ -459,33 +441,34 @@ const EditorRenderer = ({
   }, [
     selection,
     styles.carret,
-    rowHeight,
     carretLeftPos,
     carretTopPos,
     isSelecting,
+    documentFile.rows,
   ]);
 
   const Rows = useMemo(() => {
-    return documentFile.rows.map((rowSections, i) => {
-      const rowElems = rowSections.map((rowSection, i) => {
-        return (
-          <div
-            data-rowindex={`${i}`}
-            key={i}
-            style={{
-              fontSize: rowSection.style.fontSize,
-              fontFamily: rowSection.style.fontFamily,
-              fontStyle: rowSection.style.fontStyle,
-            }}
-          >
-            {rowSection.content}
-          </div>
-        )
-      });
-
-      return rowElems
-    })
-  }, [documentFile])
+    return documentFile.rows.map((rowSections, rowIndex) => (
+        <div
+        data-rowindex={`${rowIndex}`}
+        key={rowIndex}
+        >
+          {
+            rowSections.map((rowSection) => {
+              const { fontSize, fontFamily, fontStyle, letterSpacing } = rowSection.style;
+              const sectionStyle = {
+                fontSize,
+                fontFamily,
+                fontStyle,
+                letterSpacing,
+              };
+              return <span style={sectionStyle}>{rowSection.content}</span>;
+            })
+          }
+        </div>
+      )
+    );
+  }, [documentFile]);
 
 
   return (
@@ -499,7 +482,7 @@ const EditorRenderer = ({
         onMouseDown={() => setIsSelecting(true)}
       >
 
-        <div className={styles.rowsContainer} style={{border: '5px solid gray'}}>
+        <div className={styles.rowsContainer}>
           {/* Content rows */}
           { Rows }
 

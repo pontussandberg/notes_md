@@ -14,3 +14,8 @@ export type DocumentFileRowRenderData = {
 export type DocumentFile = {
   rows: DocumentFileRowRenderData[][];
 }
+
+export type SelectionIndexes = {
+  start: number;
+  end: number;
+}

@@ -1,3 +1,6 @@
+/* ######################
+ * # Carret
+ * #####################*/
 @keyframes blink-animation {
   to {
     visibility: hidden;
@@ -8,6 +11,7 @@
     visibility: hidden;
   }
 }
+
 .carret {
   background: var(--carret);
   background: red;
@@ -17,18 +21,32 @@
   -webkit-animation: blink-animation 1.75s steps(2, start) infinite;
 }
 
-.rowsContainer {
-  position: relative;
-  white-space: pre;
-}
-
+/* ######################
+ * # Editor Renderer
+ * #####################*/
 .renderer {
   background: var(--editor-bg);
   color: #f6f6f6;
   padding: 24px;
+  height: 100vh;
+}
+
+.rowsContainer {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  white-space: pre;
 }
 
 .selectionHighlight {
   background: rgba(255,255,255,.2);
+}
+
+/* ######################
+ * # Editor Input
+ * #####################*/
+.editorInput {
+  white-space: nowrap;
+  padding: 10px;
 }
 

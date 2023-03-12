@@ -23,6 +23,7 @@ const Settings: Settings = {
     fontFamily: 'arial',
     fontStyle: 'normal',
     fontSize: 20,
+    letterSpacing: 0.4,
   }
 }
 

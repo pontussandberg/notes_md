@@ -29,7 +29,16 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: 'abcdefghiklm',
+          content: '#section1 ',
+        },
+        {
+          style: {
+            fontSize: 20,
+            fontFamily: 'arial',
+            fontStyle: 'bold',
+            letterSpacing: 0.2,
+          },
+          content: ' #section2',
         }
       ],
       [
@@ -40,7 +49,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: '',
+          content: 's',
         }
       ],
       [
@@ -110,8 +119,8 @@ const Editor = () => {
    * Textarea OnChange event handler.
    */
   const handleEditorInput = useCallback((rows: DocumentFile['rows']) => {
-    console.log('documentFile',documentFile.rows[0])
-    console.log('documentFile',rows[0])
+    console.log('documentFile old',documentFile.rows)
+    console.log('documentFile new',rows)
     setDocumentFile({
       ...documentFile,
       rows,
