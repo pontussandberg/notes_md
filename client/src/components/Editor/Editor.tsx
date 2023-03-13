@@ -18,7 +18,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: 'abc',
+          content: '111',
         }
       ],
       [
@@ -29,7 +29,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: '#section1 ',
+          content: '2222',
         },
         {
           style: {
@@ -38,7 +38,7 @@ const Editor = () => {
             fontStyle: 'bold',
             letterSpacing: 0.2,
           },
-          content: ' #section2',
+          content: '333',
         }
       ],
       [
@@ -49,7 +49,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: 's',
+          content: '44',
         }
       ],
       [
@@ -60,7 +60,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: 'abc d',
+          content: '555555',
         }
       ],
       [
@@ -71,7 +71,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: '123 456 89',
+          content: '66666',
         }
       ],
       [
@@ -82,7 +82,7 @@ const Editor = () => {
             fontStyle: 'normal',
             letterSpacing: 0.4,
           },
-          content: '123 45 6 77777',
+          content: '777',
         }
       ],
     ],

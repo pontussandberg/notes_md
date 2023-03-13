@@ -237,7 +237,6 @@ const EditorInput = ({
       let rowsResult: DocumentFileRowRenderData[][] = [];
 
       for (const [rowIndex, row] of rows.entries()) {
-
         // If not start index row, push the unchanged row to result.
         if (rowIndex !== startRowIndex) {
           rowsResult.push(row);
@@ -255,7 +254,7 @@ const EditorInput = ({
 
         for (const [sectionIndex, section] of row.entries()) {
           const isSectionBeforeStart = prevSectionsContentLength + section.content.length < rowContentStartIndex;
-          const isSectionAfterStart = prevSectionsContentLength > rowContentStartIndex;
+          const isSectionAfterStart = prevSectionsContentLength >= rowContentStartIndex;
 
           // # Add unchanged section to startRow if it's before start index.
           if (isSectionBeforeStart) {
@@ -324,11 +323,12 @@ const EditorInput = ({
 
             // # Add updated section and trailing sections to start row.
             startRow = [...startRow, updatedSection, ...row.slice(sectionIndex + 1)];
-            rowsResult = [...rowsResult, startRow];
           };
 
           prevSectionsContentLength += section.content.length;
         };
+
+        rowsResult = [...rowsResult, startRow];
       };
 
       return rowsResult;
@@ -350,19 +350,36 @@ const EditorInput = ({
 
     // # Remove all content in between selection range.
     if (selectionOnCapture.start !== selectionOnCapture.end) {
+      const rowChangeIndex = findRowIndex(documentFile.rows, selectionOnCapture.start)
+
       for (const [rowIndex, row] of documentFile.rows.entries()) {
+        const rowContentIndexStart = getRowContentIndexByBodySelectionIndex(documentFile.rows, selectionOnCapture.start, rowIndex);
+        const rowContentIndexEnd = getRowContentIndexByBodySelectionIndex(documentFile.rows, selectionOnCapture.end, rowIndex);
+
         const rowFinal = removeContentFromRow(
           row,
-          getRowContentIndexByBodySelectionIndex(documentFile.rows, selectionOnCapture.start, rowIndex),
-          getRowContentIndexByBodySelectionIndex(documentFile.rows, selectionOnCapture.end, rowIndex),
+          rowContentIndexStart,
+          rowContentIndexEnd,
         );
-        console.log('rowFinal', rowFinal)
 
         const rowFinalContentLength = rowFinal.reduce((acc, section) => acc + section.content.length, 0);
-        if (rowFinalContentLength) {
-          rowsFinal.push(rowFinal);
+
+        // If row is selected and selection began before current row - add row sections to previous row.
+        if (
+          rowContentIndexStart < 0
+          && rowContentIndexEnd > 0
+          && rowFinalContentLength
+        ) {
+          rowsFinal[rowsFinal.length - 1] = [
+            ...rowsFinal[rowsFinal.length - 1],
+            ...rowFinal,
+          ];
         }
-      }
+        // # Add new row.
+        else if (rowFinalContentLength || rowIndex === rowChangeIndex) {
+          rowsFinal = [...rowsFinal, rowFinal];
+        };
+      };
     }
     // # Backspace input - remove one char from selection.
     else if (newContentLength === -1) {
@@ -393,6 +410,7 @@ const EditorInput = ({
     else {
       rowsFinal = [...documentFile.rows];
     }
+
 
     // Add new content.
     const updatedRows = addContentToDocument(rowsFinal, selectionOnCapture.start, newContent);
